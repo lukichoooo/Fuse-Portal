@@ -1,0 +1,26 @@
+
+{
+  "manifest_version": 3,
+  "name": "Fuse Portal",
+  "description": "Fuse Portal",
+  "version": "1.0",
+  "background": {
+    "service_worker": "serviceWorker.js"
+  },
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "Fuse Portal"
+  },
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "tabs"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "icons": {
+    "128": "fuse-portal-32.png"
+  }
+}
+

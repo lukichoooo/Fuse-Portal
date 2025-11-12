@@ -1,0 +1,126 @@
+.header {
+    width: 100%;
+    height: 100px;
+    padding: 0 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(40px);
+    color: var(--text-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* ---------- Logo ---------- */
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-decoration: none;
+    color: inherit;
+}
+
+.logo-box {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    background: none;
+    border-radius: 0;
+}
+
+.logo-text {
+    font-size: 1.6rem;
+    font-weight: 600;
+}
+
+/* ---------- Dropdown ---------- */
+.dropdown {
+    position: relative;
+}
+
+.dropdown-toggle {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 0.3rem 0.6rem;
+    transition: opacity var(--transition);
+}
+
+.dropdown-toggle:hover {
+    opacity: 0.8;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 110%;
+    right: 0;
+    background: var(--surface-color);
+    border-radius: 8px;
+    list-style: none;
+    padding: 0.5rem 0;
+    min-width: 150px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    animation: fadeIn 0.15s ease-out;
+}
+
+.dropdown-menu li {
+    padding: 0.6rem 1.2rem;
+    cursor: pointer;
+    transition: background var(--transition);
+}
+
+.dropdown-menu li:hover {
+    background: var(--border-color);
+}
+
+/* ---------- AI Chat ---------- */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.chat-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+    color: var(--text-color);
+    border: none;
+    border-radius: var(--radius);
+    padding: 0.6rem 1.2rem;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: background var(--transition), transform 0.1s ease;
+}
+
+.chat-btn:hover {
+    background: linear-gradient(135deg, var(--primary-hover), #9a8eff);
+    transform: scale(1.03);
+}
+
+.chat-icon {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+}
+
+/* ---------- Animations ---------- */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
