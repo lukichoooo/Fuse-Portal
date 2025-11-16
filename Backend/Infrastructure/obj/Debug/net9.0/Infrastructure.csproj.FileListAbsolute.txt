@@ -1,0 +1,36 @@
+/home/lukacho/Desktop/Homeworks/Training/DbTemp/Infrastructure/bin/Debug/net9.0/Infrastructure.deps.json
+/home/lukacho/Desktop/Homeworks/Training/DbTemp/Infrastructure/bin/Debug/net9.0/Infrastructure.dll
+/home/lukacho/Desktop/Homeworks/Training/DbTemp/Infrastructure/bin/Debug/net9.0/Infrastructure.pdb
+/home/lukacho/Desktop/Homeworks/Training/DbTemp/Infrastructure/bin/Debug/net9.0/Core.dll
+/home/lukacho/Desktop/Homeworks/Training/DbTemp/Infrastructure/bin/Debug/net9.0/Core.pdb
+/home/lukacho/Desktop/Homeworks/Training/DbTemp/Infrastructure/obj/Debug/net9.0/Infrastructure.csproj.AssemblyReference.cache
+/home/lukacho/Desktop/Homeworks/Training/DbTemp/Infrastructure/obj/Debug/net9.0/Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+/home/lukacho/Desktop/Homeworks/Training/DbTemp/Infrastructure/obj/Debug/net9.0/Infrastructure.AssemblyInfoInputs.cache
+/home/lukacho/Desktop/Homeworks/Training/DbTemp/Infrastructure/obj/Debug/net9.0/Infrastructure.AssemblyInfo.cs
+/home/lukacho/Desktop/Homeworks/Training/DbTemp/Infrastructure/obj/Debug/net9.0/Infrastructure.csproj.CoreCompileInputs.cache
+/home/lukacho/Desktop/Homeworks/Training/DbTemp/Infrastructure/obj/Debug/net9.0/Infrastructure.sourcelink.json
+/home/lukacho/Desktop/Homeworks/Training/DbTemp/Infrastructure/obj/Debug/net9.0/Infrastr.15EFFBFE.Up2Date
+/home/lukacho/Desktop/Homeworks/Training/DbTemp/Infrastructure/obj/Debug/net9.0/Infrastructure.dll
+/home/lukacho/Desktop/Homeworks/Training/DbTemp/Infrastructure/obj/Debug/net9.0/refint/Infrastructure.dll
+/home/lukacho/Desktop/Homeworks/Training/DbTemp/Infrastructure/obj/Debug/net9.0/Infrastructure.pdb
+/home/lukacho/Desktop/Homeworks/Training/DbTemp/Infrastructure/obj/Debug/net9.0/ref/Infrastructure.dll
+/home/lukacho/Desktop/Homeworks/Training/DbTemp/Infrastructure/bin/Debug/net9.0/Infrastructure.runtimeconfig.json
+/home/lukacho/Desktop/Homeworks/Training/DbTemp/Infrastructure/obj/Debug/net9.0/Infrastructure.genruntimeconfig.cache
+/home/lukacho/Desktop/AI HIGGS/Backend/Infrastructure/bin/Debug/net9.0/Infrastructure.deps.json
+/home/lukacho/Desktop/AI HIGGS/Backend/Infrastructure/bin/Debug/net9.0/Infrastructure.runtimeconfig.json
+/home/lukacho/Desktop/AI HIGGS/Backend/Infrastructure/bin/Debug/net9.0/Infrastructure.dll
+/home/lukacho/Desktop/AI HIGGS/Backend/Infrastructure/bin/Debug/net9.0/Infrastructure.pdb
+/home/lukacho/Desktop/AI HIGGS/Backend/Infrastructure/bin/Debug/net9.0/Core.dll
+/home/lukacho/Desktop/AI HIGGS/Backend/Infrastructure/bin/Debug/net9.0/Core.pdb
+/home/lukacho/Desktop/AI HIGGS/Backend/Infrastructure/obj/Debug/net9.0/Infrastructure.csproj.AssemblyReference.cache
+/home/lukacho/Desktop/AI HIGGS/Backend/Infrastructure/obj/Debug/net9.0/Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+/home/lukacho/Desktop/AI HIGGS/Backend/Infrastructure/obj/Debug/net9.0/Infrastructure.AssemblyInfoInputs.cache
+/home/lukacho/Desktop/AI HIGGS/Backend/Infrastructure/obj/Debug/net9.0/Infrastructure.AssemblyInfo.cs
+/home/lukacho/Desktop/AI HIGGS/Backend/Infrastructure/obj/Debug/net9.0/Infrastructure.csproj.CoreCompileInputs.cache
+/home/lukacho/Desktop/AI HIGGS/Backend/Infrastructure/obj/Debug/net9.0/Infrastructure.sourcelink.json
+/home/lukacho/Desktop/AI HIGGS/Backend/Infrastructure/obj/Debug/net9.0/Infrastr.15EFFBFE.Up2Date
+/home/lukacho/Desktop/AI HIGGS/Backend/Infrastructure/obj/Debug/net9.0/Infrastructure.dll
+/home/lukacho/Desktop/AI HIGGS/Backend/Infrastructure/obj/Debug/net9.0/refint/Infrastructure.dll
+/home/lukacho/Desktop/AI HIGGS/Backend/Infrastructure/obj/Debug/net9.0/Infrastructure.pdb
+/home/lukacho/Desktop/AI HIGGS/Backend/Infrastructure/obj/Debug/net9.0/Infrastructure.genruntimeconfig.cache
+/home/lukacho/Desktop/AI HIGGS/Backend/Infrastructure/obj/Debug/net9.0/ref/Infrastructure.dll
