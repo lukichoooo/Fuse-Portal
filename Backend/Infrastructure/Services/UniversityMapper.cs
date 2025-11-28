@@ -6,19 +6,35 @@ namespace Infrastructure.Services;
 
 public class UniversityMapper : IUniversityMapper
 {
-    public UniversityDto ToDto(University uni)
-        => new UniversityDto(uni.Name);
-
-    public UniversityDtoWithUsers ToDtoWithUsers(University uni)
-        => new UniversityDtoWithUsers(
-                    uni.Name,
-                    uni.Users.Select(u => new UserDto(u.Name)).ToList()
+    public UniDto ToDto(University uni)
+        => new(
+                Id: uni.Id,
+                Name: uni.Name
                 );
 
-    public University ToUniversity(UniversityDto universityDto)
-        => new University()
+    public UniDtoWIthUsers ToDtoWithUsers(University uni)
+        => new(
+                Id: uni.Id,
+                Name: uni.Name,
+                Users: uni.Users.ConvertAll(u => new UserDto(u.Id, u.Name))
+                );
+
+    public University ToUniversity(UniDto dto)
+        => new()
         {
-            Name = universityDto.Name,
-            Users = new List<User>()
+            Id = dto.Id,
+            Name = dto.Name,
+        };
+
+    public University ToUniversity(UniDtoWIthUsers dto)
+        => new()
+        {
+            Id = dto.Id,
+            Name = dto.Name,
+            Users = dto.Users.ConvertAll(d => new User
+            {
+                Id = d.Id,
+                Name = d.Name,
+            })
         };
 }

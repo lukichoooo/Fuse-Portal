@@ -1,35 +1,46 @@
+using Core.Dtos;
 using Core.Entities;
+using Core.Exceptions;
 using Core.Interfaces;
 
 namespace Infrastructure.Services;
 
-public class UniversityService : IUniversityService
+public class UniversityService(IUniversityRepo repo) : IUniversityService
 {
-    private readonly IUniversityRepo _uniRepo;
+    private readonly IUniversityRepo _repo = repo;
 
-    public UniversityService(IUniversityRepo uniRepo)
+    public Task<UniDto> CreateAsync(University uni)
     {
-        _uniRepo = uniRepo;
+        throw new NotImplementedException();
     }
 
-    public async Task<University> CreateAsync(University uni)
-        => await _uniRepo.CreateAsync(uni);
+    public Task<UniDto> DeleteByIdAsync(int id)
+    {
+        throw new NotImplementedException();
+    }
 
-    public async Task<University> DeleteAsync(int id)
-        => await _uniRepo.DeleteAsync(id);
+    public Task<List<University>> GetAllPageAsync(int lastId, int pageSize)
+    {
+        throw new NotImplementedException();
+    }
 
-    public async Task<IEnumerable<University>> GetAllAsync()
-        => await _uniRepo.GetAllAsync();
+    public Task<UniDto> GetAsync(int id)
+    {
+        throw new NotImplementedException();
+    }
 
-    public async Task<University> GetAsync(int id)
-        => await _uniRepo.GetAsync(id);
+    public Task<List<UserDto>> GetUsersAsync(int id)
+    {
+        throw new NotImplementedException();
+    }
 
-    public async Task<IEnumerable<User>> GetUsersAsync(int id)
-        => await _uniRepo.GetUsersAsync(id);
+    public Task<List<UniDto>> PageByNameAsync(string name)
+    {
+        throw new NotImplementedException();
+    }
 
-    public async Task<IEnumerable<University>> SearchAsync(string name)
-        => await _uniRepo.SearchAsync(name);
-
-    public async Task<University> UpdateAsync(University uni)
-        => await _uniRepo.UpdateAsync(uni);
+    public Task<UniDto> UpdateAsync(University uni)
+    {
+        throw new NotImplementedException();
+    }
 }

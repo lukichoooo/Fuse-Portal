@@ -6,13 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repos;
 
-public class UniversityRepo : IUniversityRepo
+public class UniversityRepo(MyContext context) : IUniversityRepo
 {
-    private readonly Context _context;
-    public UniversityRepo(Context context)
-    {
-        _context = context;
-    }
+    private readonly MyContext _context = context;
 
     public async Task<University> CreateAsync(University university)
     {
@@ -21,26 +17,32 @@ public class UniversityRepo : IUniversityRepo
         return university;
     }
 
-    public async Task<University> DeleteAsync(int id)
+    public async Task<University> DeleteByIdAsync(int id)
     {
-        var uni = await _context.Universities.FindAsync(id) ?? throw new UniversityNotFoundException($"University Not Found With Id {id}");
+        var uni = await _context.Universities.FindAsync(id)
+            ?? throw new UniversityNotFoundException($"University Not Found With Id {id}");
         _context.Universities.Remove(uni);
         await _context.SaveChangesAsync();
         return uni;
     }
 
-    public async Task<IEnumerable<University>> GetAllAsync() => await _context.Universities.ToListAsync();
+    public async Task<List<University>> GetPageAsync(int lastId = -1, int pageSize = 16)
+        => await _context.Universities
+            .OrderBy(uni => uni.Id)
+            .Where(uni => uni.Id > lastId)
+            .Take(pageSize)
+            .ToListAsync();
 
-    public async Task<University> GetAsync(int id) => await _context.Universities.FindAsync(id) ?? throw new UniversityNotFoundException($"University Not Found With Id {id}");
+    public async Task<University?> GetByIdAsync(int id)
+        => await _context.Universities.FindAsync(id);
 
-    public async Task<IEnumerable<User>> GetUsersAsync(int id)
-        => await (from uni in _context.Universities
-                  from user in uni.Users
-                  where uni.Id == id
-                  select user
-                  ).ToListAsync();
-
-    public async Task<IEnumerable<University>> SearchAsync(string name) => await _context.Universities.Where(u => u.Name.Contains(name)).ToListAsync();
+    public async Task<List<University>> PageByNameAsync(string name, int lastId = -1, int pageSize = 16)
+        => await _context.Universities
+        .Where(uni =>
+                uni.Id > lastId &&
+                EF.Functions.Like(uni.Name, $"%{name}%"))
+        .Take(pageSize)
+        .ToListAsync();
 
     public async Task<University> UpdateAsync(University university)
     {
@@ -49,4 +51,18 @@ public class UniversityRepo : IUniversityRepo
         await _context.SaveChangesAsync();
         return onDbUni;
     }
+
+    public async Task<List<User>> GetUsersPageAsync(int uniId, int lastUserId, int pageSize)
+    {
+        var exists = await _context.Universities.AnyAsync(u => u.Id == uniId);
+        if (!exists)
+            throw new UniversityNotFoundException($"University Not Found With Id={uniId}");
+
+        return await _context.Users
+            .Where(u => u.Universities.Any(uni => uni.Id == uniId) && u.Id > lastUserId)
+            .OrderBy(u => u.Id)
+            .Take(pageSize)
+            .ToListAsync();
+    }
+
 }

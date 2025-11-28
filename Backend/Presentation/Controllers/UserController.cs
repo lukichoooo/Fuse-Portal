@@ -7,28 +7,23 @@ namespace Presentation.Controllers;
 
 [Authorize]
 [Route("api/[controller]")]
-public class UserController : ControllerBase
+public class UserController(IUserService service) : ControllerBase
 {
-    private readonly IUserService _userService;
-
-    public UserController(IUserService userService)
-    {
-        _userService = userService;
-    }
+    private readonly IUserService _service = service;
 
     [HttpGet("all")]
-    public async Task<IActionResult> Get()
-        => Ok(await _userService.GetAllAsync());
+    public async Task<IActionResult> GetAllAsync()
+        => Ok(await _service.GetAllAsync());
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> Get(int id)
-        => Ok(await _userService.GetAsync(id));
+    public async Task<IActionResult> GetByIdAsync(int id)
+        => Ok(await _service.GetAsync(id));
 
     [HttpGet("search/{name}")]
-    public async Task<IActionResult> SearchAsync(string name)
-        => Ok(await _userService.SearchAsync(name));
+    public async Task<IActionResult> SearchByNameAsync(string name)
+        => Ok(await _service.SearchByNameAsync(name));
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteAsync(int id)
-        => Ok(await _userService.DeleteAsync(id));
+    public async Task<IActionResult> DeleteByIdAsync(int id)
+        => Ok(await _service.DeleteByIdAsync(id));
 }

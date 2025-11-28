@@ -339,3 +339,6 @@
 /home/lukacho/Desktop/AI HIGGS/Backend/Presentation/obj/Debug/net9.0/Presentation.genruntimeconfig.cache
 /home/lukacho/Desktop/AI HIGGS/Backend/Presentation/obj/Debug/net9.0/ref/Presentation.dll
 /home/lukacho/Desktop/AI HIGGS/Backend/Presentation/bin/Debug/net9.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll
+/home/lukacho/Desktop/AI HIGGS/Backend/Presentation/bin/Debug/net9.0/FluentValidation.dll
+/home/lukacho/Desktop/AI HIGGS/Backend/Presentation/bin/Debug/net9.0/FluentValidation.AspNetCore.dll
+/home/lukacho/Desktop/AI HIGGS/Backend/Presentation/bin/Debug/net9.0/FluentValidation.DependencyInjectionExtensions.dll

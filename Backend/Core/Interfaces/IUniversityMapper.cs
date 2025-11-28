@@ -5,7 +5,8 @@ namespace Core.Interfaces;
 
 public interface IUniversityMapper
 {
-    UniversityDto ToDto(University university);
-    University ToUniversity(UniversityDto universityDto);
-    UniversityDtoWithUsers ToDtoWithUsers(University university);
+    UniDto ToDto(University university);
+    UniDtoWIthUsers ToDtoWithUsers(University university);
+    University ToUniversity(UniDto dto);
+    University ToUniversity(UniDtoWIthUsers dto);
 }

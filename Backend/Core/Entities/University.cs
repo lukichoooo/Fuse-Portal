@@ -1,9 +1,14 @@
-namespace Core.Entities;
+using System.ComponentModel.DataAnnotations;
 
-public class University
+namespace Core.Entities
 {
-    public int Id { get; set; }
-    public string Name { get; set; }
+    public class University
+    {
+        [Key]
+        public int Id { get; set; }
+        public string Name { get; set; } = "";
 
-    public ICollection<User> Users { get; set; }
+        public List<User> Users { get; set; } = [];
+    }
 }
+

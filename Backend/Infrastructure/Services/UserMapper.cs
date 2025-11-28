@@ -2,38 +2,65 @@ using Core.Dtos;
 using Core.Entities;
 using Core.Interfaces;
 
-namespace Infrastructure.Services;
-
-public class UserMapper : IUserMapper
+namespace Infrastructure.Services
 {
-    public UserDto ToDto(User user)
-        => new UserDto(user.Name);
-
-    public UserDtoWithUniversity ToDtoWithUniversity(User user)
-        => new UserDtoWithUniversity(
-                        user.Name,
-                        user.Universities.Select(uni => new UniversityDto(uni.Name)).ToList()
+    public class UserMapper : IUserMapper
+    {
+        public UserDto ToDto(User user)
+            => new(
+                    Id: user.Id,
+                    Name: user.Name
                     );
 
-    public UserPrivateDto ToPrivateDto(User user)
-        => new UserPrivateDto(
-                    user.Name,
-                    user.Email,
-                    user.Password
-                );
+        public UserDetailsDto ToDetailsDto(User user)
+            => new(
+                        Id: user.Id,
+                        Name: user.Name,
+                        Universities: user.Universities
+                            .ConvertAll(uni => new UniDto(uni.Id, uni.Name)),
+                        Faculties: user.Faculties.ConvertAll(f => f.Name)
+                    );
 
-    public User ToUser(UserDto userDto)
-        => new User()
-        {
-            Name = userDto.Name,
-        };
+        public UserPrivateInfo ToPrivateInfo(User user)
+            => new(
+                        id: user.Id,
+                        name: user.Name,
+                        email: user.Email,
+                        password: user.Password
+                    );
 
-    public User ToUser(RegisterRequest request)
-        => new User()
-        {
-            Name = request.Name,
-            Email = request.Email,
-            Password = request.Password,
-            Role = "User" // TODO: Default Role
-        };
+        public User ToUser(UserDto userDto)
+            => new()
+            {
+                Id = userDto.Id,
+                Name = userDto.Name,
+            };
+
+        public User ToUser(RegisterRequest register)
+            => new()
+            {
+                Name = register.Name,
+                Email = register.Email,
+                Password = register.Password,
+                Faculties = register.Faculties
+                                .ConvertAll(x => new Faculty { Name = x })
+            };
+
+        public User ToUser(LoginRequest login)
+            => new()
+            {
+                Email = login.Email,
+                Password = login.Password
+            };
+
+        public User ToUser(UserPrivateInfo info)
+            => new()
+            {
+                Id = info.Id,
+                Name = info.Name,
+                Email = info.Email,
+                Password = info.Password
+            };
+    }
 }
+

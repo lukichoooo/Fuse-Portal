@@ -4,14 +4,14 @@ namespace Core.Interfaces;
 
 public interface IUserRepo
 {
-    Task<IEnumerable<User>> GetAllAsync();
-    Task<User> GetAsync(int id);
-    Task<User> GetAsync(string email);
-    Task<bool> ExistsAsync(string email);
+    Task<User?> GetUserDetailsAsync(int id);
+    Task<User?> GetAsync(int id);
+    Task<User?> GetByEmailAsync(string email);
     Task<User> CreateAsync(User user);
-    Task<User> UpdateAsync(User user);
-    Task<User> DeleteAsync(int id);
+    Task<User> UpdateUserCredentialsAsync(User user);
+    Task<User> DeleteByIdAsync(int id);
 
-    Task<IEnumerable<User>> SearchAsync(string name);
-    Task<University> GetUniversityAsync(int id);
+    Task<List<User>> GetAllPageAsync(int lastId, int pageSize);
+    Task<List<User>> PageByNameAsync(string name, int lastId, int pageSize);
+    Task<List<University>> GetUnisForUserAsync(int userId);
 }

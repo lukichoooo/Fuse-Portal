@@ -1,10 +1,12 @@
 namespace Core.Dtos;
 
-public record UniversityDto(
+public record UniDto(
+        int Id,
         string Name
         );
 
-public record UniversityDtoWithUsers(
+public record UniDtoWIthUsers(
+        int Id,
         string Name,
-        IEnumerable<UserDto> Users
+        List<UserDto> Users
     );

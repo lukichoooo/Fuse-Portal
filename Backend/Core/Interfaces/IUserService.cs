@@ -1,15 +1,15 @@
-using Core.Entities;
+using Core.Dtos;
 
 namespace Core.Interfaces;
 
 public interface IUserService
 {
-    Task<IEnumerable<User>> GetAllAsync();
-    Task<User> GetAsync(int id);
-    Task<User> CreateAsync(User user);
-    Task<User> UpdateAsync(User user);
-    Task<User> DeleteAsync(int id);
+    Task<List<UserDto>> GetAllPageAsync(int lastId, int pageSize);
+    Task<UserDto> GetAsync(int id);
+    Task<UserDetailsDto> GetUserDetailsAsync(int id);
+    Task<UserPrivateInfo> UpdateUserCredentialsAsync(UserPrivateInfo dto);
+    Task<UserPrivateInfo> DeleteByIdAsync(int id);
 
-    Task<IEnumerable<User>> SearchAsync(string name);
-    Task<University> GetUniversityAsync(int id);
+    Task<List<UserDto>> PageByNameAsync(string name, int lastId, int pageSize);
+    Task<UserPrivateInfo> GetPrivateDtoById(int id);
 }

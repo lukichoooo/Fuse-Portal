@@ -4,34 +4,29 @@ using System.Text;
 using Core.Dtos;
 using Core.Entities;
 using Core.Interfaces;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Infrastructure.Services;
 
-public class JwtTokenGenerator : IJwtTokenGenerator
+public class JwtTokenGenerator(IOptions<JwtSettings> options) : IJwtTokenGenerator
 {
-    private readonly JwtSettings _jwtSettings;
-
-    public JwtTokenGenerator(JwtSettings jwtSettings)
-    {
-        _jwtSettings = jwtSettings;
-    }
+    private readonly JwtSettings _jwtSettings = options.Value;
 
     public string GenerateToken(User user)
     {
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
             issuer: _jwtSettings.Issuer,
             audience: _jwtSettings.Audience,
-            claims: new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Name),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role)
-            },
+            claims:
+            [
+                new Claim("id", user.Id.ToString()),
+                new Claim("email", user.Email),
+                new Claim("role", user.Role.ToString())
+            ],
             expires: DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpiration),
             signingCredentials: credentials
         );

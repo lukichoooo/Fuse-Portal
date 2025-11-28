@@ -4,12 +4,12 @@ namespace Core.Interfaces;
 
 public interface IUniversityRepo
 {
-    Task<IEnumerable<University>> GetAllAsync();
-    Task<University> GetAsync(int id);
+    Task<University?> GetByIdAsync(int id);
     Task<University> CreateAsync(University university);
     Task<University> UpdateAsync(University university);
-    Task<University> DeleteAsync(int id);
+    Task<University> DeleteByIdAsync(int id);
 
-    Task<IEnumerable<University>> SearchAsync(string name);
-    Task<IEnumerable<User>> GetUsersAsync(int id);
+    Task<List<University>> GetPageAsync(int lastId, int pageSize);
+    Task<List<University>> PageByNameAsync(string name, int lastId = -1, int pageSize = 16);
+    Task<List<User>> GetUsersPageAsync(int id, int LastId, int pageSize);
 }

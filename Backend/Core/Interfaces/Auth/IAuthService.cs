@@ -4,6 +4,6 @@ namespace Core.Interfaces;
 
 public interface IAuthService
 {
-    Task<RegisterResponse> RegisterAsync(RegisterRequest userRegister);
-    Task<LoginResponse> LoginAsync(LoginRequest userLogin);
+    Task<AuthResponse> RegisterAsync(RegisterRequest userRegister);
+    Task<AuthResponse> LoginAsync(LoginRequest userLogin);
 }

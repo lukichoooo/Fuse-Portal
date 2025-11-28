@@ -1,12 +1,17 @@
-namespace Core.Entities;
+using Core.Enums;
 
-public class User
+namespace Core.Entities
 {
-    public int Id { get; set; }
-    public string Name { get; set; }
-    public string Email { get; set; }
-    public string Password { get; set; }
-    public string Role { get; set; }
+    public class User
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string Password { get; set; } = "";
+        public RoleType Role { get; set; } = RoleType.User;
 
-    public ICollection<University> Universities { get; set; }
+        public List<Faculty> Faculties { get; set; } = [];
+        public List<University> Universities { get; set; } = [];
+    }
 }
+
