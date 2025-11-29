@@ -28,19 +28,19 @@ public class UserService(IUserMapper mapper, IUniversityMapper uniMapper, IUserR
         return _mapper.ToDto(user);
     }
 
-    public async Task<UserPrivateInfo> GetPrivateDtoById(int id)
+    public async Task<UserRequestDto> GetPrivateDtoById(int id)
     {
         var user = await _repo.GetAsync(id)
             ?? throw new UserNotFoundException($"User not found with Id={id}");
-        return _mapper.ToPrivateInfo(user);
+        return _mapper.ToRequestDto(user);
     }
 
 
-    public async Task<UserPrivateInfo> UpdateUserCredentialsAsync(UserPrivateInfo info)
-        => _mapper.ToPrivateInfo(await _repo.UpdateUserCredentialsAsync(_mapper.ToUser(info)));
+    public async Task<UserRequestDto> UpdateUserCredentialsAsync(UserRequestDto info)
+        => _mapper.ToRequestDto(await _repo.UpdateUserCredentialsAsync(_mapper.ToUser(info)));
 
-    public async Task<UserPrivateInfo> DeleteByIdAsync(int id)
-        => _mapper.ToPrivateInfo(await _repo.DeleteByIdAsync(id));
+    public async Task<UserRequestDto> DeleteByIdAsync(int id)
+        => _mapper.ToRequestDto(await _repo.DeleteByIdAsync(id));
 
     public async Task<UserDetailsDto> GetUserDetailsAsync(int id)
     {

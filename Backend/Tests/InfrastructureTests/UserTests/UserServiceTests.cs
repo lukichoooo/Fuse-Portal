@@ -1,6 +1,8 @@
 using System.Linq.Expressions;
+using AutoFixture;
 using Core.Dtos;
 using Core.Entities;
+using Core.Enums;
 using Core.Exceptions;
 using Core.Interfaces;
 using Infrastructure.Services;
@@ -12,6 +14,7 @@ namespace InfrastructureTests.UserTests
     {
         private readonly IUserMapper _mapper = new UserMapper();
         private readonly IUniversityMapper _uniMapper = new UniversityMapper();
+        private static readonly Fixture _globalFixture = new();
 
         private UserService GetService<T>(
             Expression<Func<IUserRepo, Task<T>>> setupExpr,
@@ -28,13 +31,22 @@ namespace InfrastructureTests.UserTests
         private UserService GetService(IUserRepo repo)
             => new(_mapper, _uniMapper, repo);
 
+        private static User CreateUserById(int id)
+        {
+            return _globalFixture.Build<User>()
+                .With(u => u.Id, id)
+                .With(u => u.Universities, [])
+                .With(u => u.Faculties, [])
+                .Create();
+        }
+
 
         [TestCase(new int[] { })]
         [TestCase(new[] { 1, 3, 63 })]
         public async Task GetAllAsync_Success(int[] ids)
         {
             const int pageSize = 16;
-            var users = ids.Select(id => new User { Id = id }).ToList();
+            var users = ids.Select(id => CreateUserById(id)).ToList();
             var service = GetService(r => r.GetAllPageAsync(-1, pageSize), users);
 
             var res = await service.GetAllPageAsync(-1, pageSize);
@@ -50,7 +62,7 @@ namespace InfrastructureTests.UserTests
         {
             const int pageSize = 16;
             const string name = "masheri";
-            var users = ids.Select(id => new User { Id = id }).ToList();
+            var users = ids.Select(id => CreateUserById(id)).ToList();
             var service = GetService(r => r.PageByNameAsync(name, -1, pageSize), users);
 
             var res = await service.PageByNameAsync(name, -1, pageSize);
@@ -64,7 +76,7 @@ namespace InfrastructureTests.UserTests
         public async Task GetByIdAsync_Success()
         {
             const int id = 5;
-            var user = new User { Id = id };
+            var user = CreateUserById(id);
             var service = GetService(r => r.GetAsync(id), user);
 
             var res = await service.GetAsync(id);
@@ -78,7 +90,7 @@ namespace InfrastructureTests.UserTests
         public async Task GetByIdAsync_NotFound_Throws()
         {
             const int id = 5;
-            var user = new User { Id = id };
+            var user = CreateUserById(id);
             var service = GetService(r => r.GetAsync(id), null);
 
             Assert.ThrowsAsync<UserNotFoundException>(async () =>
@@ -91,7 +103,7 @@ namespace InfrastructureTests.UserTests
         public async Task GetPrivateDtoById_Success()
         {
             const int id = 5;
-            var user = new User { Id = id };
+            var user = CreateUserById(id);
             var service = GetService(r => r.GetAsync(id), user);
 
             var res = await service.GetPrivateDtoById(id);
@@ -105,23 +117,37 @@ namespace InfrastructureTests.UserTests
         public async Task GetPrivateDtoById_NotFound_Throws()
         {
             const int id = 5;
-            var user = new User { Id = id };
+            var user = CreateUserById(id);
             var service = GetService(r => r.GetAsync(id), null);
 
             Assert.ThrowsAsync<UserNotFoundException>(async () =>
                     await service.GetPrivateDtoById(id));
         }
 
+        private UserRequestDto CreateUserPrivateDto(int? id = null,
+                        string? name = null,
+                        string? email = null,
+                        string? password = null,
+                        Address? address = null
+                    )
+            => new()
+            {
+                Id = id ?? 1,
+                Name = name ?? string.Empty,
+                Email = email ?? string.Empty,
+                Password = password ?? string.Empty,
+                Address = address ?? new()
+                {
+                    City = "NY",
+                    CountryA3 = CountryCode.GEO
+                }
+            };
+
 
         [Test]
         public async Task UpdateUserCredentialsAsync_Success()
         {
-            var dto = new UserPrivateInfo(
-                    id: 1,
-                    name: "Pesho",
-                    email: "pesho@gmail.com",
-                    password: "123"
-                );
+            var dto = CreateUserPrivateDto();
             var user = _mapper.ToUser(dto);
             var service = GetService(r => r.UpdateUserCredentialsAsync(user), user);
 
@@ -135,7 +161,7 @@ namespace InfrastructureTests.UserTests
         public async Task UpdateUSerCredentialsAsync_NotFound_Throws()
         {
             const int id = 5;
-            var dto = new UserPrivateInfo { Id = id };
+            var dto = CreateUserPrivateDto(id: id);
             var mock = new Mock<IUserRepo>();
             mock.Setup(r => r.UpdateUserCredentialsAsync(It.IsAny<User>()))
                 .ThrowsAsync(new UserNotFoundException());
@@ -150,7 +176,7 @@ namespace InfrastructureTests.UserTests
         public async Task DeleteByIdAsync_Success()
         {
             const int id = 5;
-            var dto = new UserPrivateInfo { Id = id };
+            var dto = CreateUserPrivateDto(id: id);
             var user = _mapper.ToUser(dto);
             var service = GetService(r => r.DeleteByIdAsync(id), user);
 
@@ -165,7 +191,7 @@ namespace InfrastructureTests.UserTests
         public async Task DeleteByIdAsync_NotFound_THrows()
         {
             const int id = 5;
-            var dto = new UserPrivateInfo { Id = id };
+            var dto = CreateUserPrivateDto(id: id);
             var mock = new Mock<IUserRepo>();
             mock.Setup(r => r.DeleteByIdAsync(id))
                 .ThrowsAsync(new UserNotFoundException());
@@ -180,7 +206,7 @@ namespace InfrastructureTests.UserTests
         public async Task GetUserDetailsAsync_Success()
         {
             const int id = 5;
-            var dto = new UserPrivateInfo { Id = id };
+            var dto = CreateUserPrivateDto(id: id);
             var user = _mapper.ToUser(dto);
             var service = GetService(r => r.GetUserDetailsAsync(id), user);
 

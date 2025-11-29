@@ -4,6 +4,7 @@ using Core.Dtos;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
+[ApiController]
 [Route("api/[controller]")]
 public class AuthController(IAuthService authService) : ControllerBase
 {

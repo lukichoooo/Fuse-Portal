@@ -239,3 +239,5 @@
 /home/lukacho/Desktop/AI HIGGS/Backend/Tests/InfrastructureTests/obj/Debug/net9.0/InfrastructureTests.pdb
 /home/lukacho/Desktop/AI HIGGS/Backend/Tests/InfrastructureTests/obj/Debug/net9.0/InfrastructureTests.genruntimeconfig.cache
 /home/lukacho/Desktop/AI HIGGS/Backend/Tests/InfrastructureTests/obj/Debug/net9.0/ref/InfrastructureTests.dll
+/home/lukacho/Desktop/AI HIGGS/Backend/Tests/InfrastructureTests/bin/Debug/net9.0/AutoFixture.dll
+/home/lukacho/Desktop/AI HIGGS/Backend/Tests/InfrastructureTests/bin/Debug/net9.0/Fare.dll

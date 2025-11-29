@@ -9,7 +9,9 @@ namespace Core.Dtos
             string Name,
             string Email,
             string Password,
-            List<string> Faculties
+            AddressDto Address,
+            List<string> Faculties,
+            List<UniDto> Universities
             );
 
     public record AuthResponse(

@@ -13,10 +13,9 @@ public class AuthService(IUserRepo repo, IUserMapper mapper, IEncryptor encrypto
 
     public async Task<AuthResponse> LoginAsync(LoginRequest login)
     {
-        var user = await _repo.GetByEmailAsync(login.Email);
-        if (user is null)
-            throw new UserNotFoundException($"User not found with EMAIL={login.Email}");
-        if (login.Password != _encryptor.Decrypt(user.Password))
+        var user = await _repo.GetByEmailAsync(login.Email)
+            ?? throw new UserNotFoundException($"User not found with Email={login.Email}");
+        if (_encryptor.Encrypt(login.Password) != user.Password)
             throw new UserWrongCredentialsException($"Wrong Password={login.Password}");
         return new AuthResponse(_jwt.GenerateToken(user), null);
     }

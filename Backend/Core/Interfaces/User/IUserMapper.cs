@@ -6,10 +6,10 @@ namespace Core.Interfaces;
 public interface IUserMapper
 {
     UserDto ToDto(User user);
-    UserPrivateInfo ToPrivateInfo(User user);
+    UserRequestDto ToRequestDto(User user);
     UserDetailsDto ToDetailsDto(User user);
     User ToUser(UserDto dto);
-    User ToUser(UserPrivateInfo dto);
+    User ToUser(UserRequestDto dto);
     User ToUser(RegisterRequest register);
     User ToUser(LoginRequest login);
 }

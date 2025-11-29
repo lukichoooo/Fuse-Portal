@@ -33,10 +33,10 @@ public class UniversityRepo(MyContext context) : IUniversityRepo
             .Take(pageSize)
             .ToListAsync();
 
-    public async Task<University?> GetByIdAsync(int id)
+    public async Task<University?> GetAsync(int id)
         => await _context.Universities.FindAsync(id);
 
-    public async Task<List<University>> PageByNameAsync(string name, int lastId = -1, int pageSize = 16)
+    public async Task<List<University>> GetPageByNameAsync(string name, int lastId, int pageSize)
         => await _context.Universities
         .Where(uni =>
                 uni.Id > lastId &&
@@ -65,4 +65,7 @@ public class UniversityRepo(MyContext context) : IUniversityRepo
             .ToListAsync();
     }
 
+    public Task<University?> GetByNameAsync(string name)
+        => _context.Universities
+            .FirstOrDefaultAsync(uni => uni.Name == name);
 }

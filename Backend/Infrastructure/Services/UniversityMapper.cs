@@ -12,7 +12,7 @@ public class UniversityMapper : IUniversityMapper
                 Name: uni.Name
                 );
 
-    public UniDtoWIthUsers ToDtoWithUsers(University uni)
+    public UniDtoWithUsers ToDtoWithUsers(University uni)
         => new(
                 Id: uni.Id,
                 Name: uni.Name,
@@ -26,7 +26,7 @@ public class UniversityMapper : IUniversityMapper
             Name = dto.Name,
         };
 
-    public University ToUniversity(UniDtoWIthUsers dto)
+    public University ToUniversity(UniDtoWithUsers dto)
         => new()
         {
             Id = dto.Id,
@@ -36,5 +36,13 @@ public class UniversityMapper : IUniversityMapper
                 Id = d.Id,
                 Name = d.Name,
             })
+        };
+
+    public University ToUniversity(UniRequestDto info)
+        => new()
+        {
+            Id = info.Id,
+            Name = info.Name,
+            Address = info.Address
         };
 }

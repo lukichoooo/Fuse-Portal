@@ -5,42 +5,44 @@ using Core.Interfaces;
 
 namespace Infrastructure.Services;
 
-public class UniversityService(IUniversityRepo repo) : IUniversityService
+public class UniversityService(IUniversityRepo repo, IUniversityMapper mapper, IUserMapper userMapper) : IUniversityService
 {
     private readonly IUniversityRepo _repo = repo;
+    private readonly IUniversityMapper _mapper = mapper;
+    private readonly IUserMapper _userMapper = userMapper;
 
-    public Task<UniDto> CreateAsync(University uni)
+    public async Task<UniDto> GetAsync(int id)
     {
-        throw new NotImplementedException();
+        var uni = await _repo.GetAsync(id)
+            ?? throw new UniversityNotFoundException($"University Not Found with Id={id}");
+        return _mapper.ToDto(uni);
     }
 
-    public Task<UniDto> DeleteByIdAsync(int id)
+    public async Task<List<UserDto>> GetUsersPageAsync(int id, int lastId, int pageSize)
+        => (await _repo.GetUsersPageAsync(id, lastId, pageSize))
+        .ConvertAll(_userMapper.ToDto);
+
+    public async Task<List<UniDto>> GetPageByNameAsync(string name, int lastId, int pageSize)
+        => (await _repo.GetPageByNameAsync(name, lastId, pageSize))
+        .ConvertAll(_mapper.ToDto);
+
+    public async Task<UniDto> CreateAsync(UniRequestDto info)
     {
-        throw new NotImplementedException();
+        const int pageSize = 64;
+        var uni = _mapper.ToUniversity(info);
+        List<University> dbUnis = await _repo.GetPageByNameAsync(info.Name, int.MinValue, pageSize);
+        foreach (var dbUni in dbUnis)
+        {
+            if (dbUni.Equals(uni))
+                throw new UniversityAlreadyExists($"University Name={info.Name}, Address={info.Address} already exists");
+        }
+        return _mapper.ToDto(await _repo.CreateAsync(uni));
     }
 
-    public Task<List<University>> GetAllPageAsync(int lastId, int pageSize)
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<UniDto> UpdateAsync(UniRequestDto info)
+        => _mapper.ToDto(await _repo.UpdateAsync(_mapper.ToUniversity(info)));
 
-    public Task<UniDto> GetAsync(int id)
-    {
-        throw new NotImplementedException();
-    }
+    public async Task<UniDto> DeleteByIdAsync(int id)
+        => _mapper.ToDto(await _repo.DeleteByIdAsync(id));
 
-    public Task<List<UserDto>> GetUsersAsync(int id)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<List<UniDto>> PageByNameAsync(string name)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<UniDto> UpdateAsync(University uni)
-    {
-        throw new NotImplementedException();
-    }
 }

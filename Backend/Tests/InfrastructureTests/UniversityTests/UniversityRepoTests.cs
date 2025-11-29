@@ -1,3 +1,4 @@
+using AutoFixture;
 using Core.Dtos;
 using Core.Entities;
 using Core.Exceptions;
@@ -13,44 +14,56 @@ namespace InfrastructureTests
     {
         private IUniversityRepo _repo;
         private MyContext _context;
+        private static readonly Fixture _globalFixture = new();
 
-        [OneTimeSetUp]
-        public void BeforeAll()
+        [SetUp]
+        public void BeforeEach()
         {
             var options = new DbContextOptionsBuilder<MyContext>()
-                .UseInMemoryDatabase("MyInMem")
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .Options;
+
             _context = new MyContext(options);
             _repo = new UniversityRepo(_context);
         }
 
-        [OneTimeTearDown]
-        public async Task AfterAllAsync()
+        [TearDown]
+        public async Task AfterEach()
         {
             await _context.DisposeAsync();
         }
 
-        [SetUp]
-        public async Task BeforeEach()
+        private static University CreateUniWithId(int id)
         {
-            await _context.Database.EnsureCreatedAsync();
-
-            _context.Universities.RemoveRange(_context.Universities);
-            _context.Users.RemoveRange(_context.Users);
-
-            await _context.SaveChangesAsync();
+            return _globalFixture.Build<University>()
+                .With(uni => uni.Id, id)
+                .With(uni => uni.Users, [])
+                .With(uni => uni.Address, _globalFixture.Create<Address>())
+                .Create();
         }
 
-        [TestCase(new[] { 1, 3, 5, 6 })]
-        [TestCase(new int[] { })]
-        public async Task GetAllAsync_Success(int[] ids)
+        private static List<University> CreateUniList(int repeatCount)
+        {
+            _globalFixture.RepeatCount = repeatCount;
+            var res = _globalFixture.Build<University>()
+                .With(uni => uni.Users, [])
+                .With(uni => uni.Address, _globalFixture.Create<Address>())
+                .CreateMany()
+                .ToList();
+            _globalFixture.RepeatCount = 3;
+            return res;
+        }
+
+        [TestCase(0)]
+        [TestCase(3)]
+        public async Task GetAllAsync_Success(int repeatCount)
         {
             const int pageSize = 16;
-            var universities = ids.Select(id => new University { Id = id });
+            var universities = CreateUniList(repeatCount);
             await _context.Universities.AddRangeAsync(universities);
             await _context.SaveChangesAsync();
 
-            var res = await _repo.GetPageAsync(-1, pageSize);
+            var res = await _repo.GetPageAsync(int.MinValue, pageSize);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Select(u => u.Id).Order(),
@@ -63,10 +76,12 @@ namespace InfrastructureTests
         public async Task GetAllAsync_Paged_Success(int lastId)
         {
             const int pageSize = 16;
-            var unis = Enumerable.Range(1, 25)
+            var fixture = new Fixture();
+            List<University> unis = Enumerable.Range(1, 25)
                     .Reverse()
-                    .Select(id =>
-                    new University { Id = id }).ToList();
+                    .Select(id => CreateUniWithId(id)
+                    ).ToList();
+
             await _context.Universities.AddRangeAsync(unis);
             await _context.SaveChangesAsync();
 
@@ -81,11 +96,11 @@ namespace InfrastructureTests
         public async Task GetByIdAsync_Success()
         {
             const int id = 5;
-            var uni = new University { Id = 5 };
+            var uni = CreateUniWithId(id);
             await _context.Universities.AddAsync(uni);
             await _context.SaveChangesAsync();
 
-            var res = await _repo.GetByIdAsync(id);
+            var res = await _repo.GetAsync(id);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Id, Is.EqualTo(id));
@@ -96,9 +111,7 @@ namespace InfrastructureTests
         public async Task GetByIdAsync_NotFound_Null()
         {
             const int id = 5;
-
-            var res = await _repo.GetByIdAsync(id);
-
+            var res = await _repo.GetAsync(id);
             Assert.That(res, Is.Null);
         }
 
@@ -107,11 +120,11 @@ namespace InfrastructureTests
         public async Task CreateAsync_Success()
         {
             const int id = 5;
-            var uni = new University { Id = 5 };
+            var uni = CreateUniWithId(id);
 
             var rv = await _repo.CreateAsync(uni);
-            var res = await _context.Universities.FirstOrDefaultAsync(u =>
-                    u.Id == id);
+            var res = await _context.Universities
+                .FirstOrDefaultAsync(u => u.Id == id);
 
             Assert.Multiple(() =>
             {
@@ -126,8 +139,10 @@ namespace InfrastructureTests
         public async Task UpdateAsync_Success()
         {
             const int id = 5;
-            var uni = new University { Id = id, Name = "OldName" };
-            var newUni = new University { Id = id, Name = "NewName" };
+            var uni = CreateUniWithId(5);
+            uni.Name = "oldUni";
+            var newUni = CreateUniWithId(5);
+            newUni.Name = "newUni";
             await _context.Universities.AddAsync(uni);
             await _context.SaveChangesAsync();
 
@@ -152,7 +167,7 @@ namespace InfrastructureTests
         public async Task UpdateAsync_NotFound_Throws()
         {
             const int id = 5;
-            var newUni = new University { Id = id, Name = "NewName" };
+            var newUni = CreateUniWithId(id);
 
             Assert.ThrowsAsync<UniversityNotFoundException>(async () =>
                     await _repo.UpdateAsync(newUni));
@@ -163,7 +178,7 @@ namespace InfrastructureTests
         public async Task DeleteByIdAsyc_Success()
         {
             const int id = 5;
-            var uni = new University { Id = id, Name = "Namos" };
+            var uni = CreateUniWithId(id);
             await _context.Universities.AddAsync(uni);
             await _context.SaveChangesAsync();
 
@@ -191,73 +206,95 @@ namespace InfrastructureTests
 
         [TestCase("luka")]
         [TestCase("user")]
-        [TestCase("test")]
+        [TestCase("LUKAA")]
         [TestCase("")]
-        public async Task PageByNameAsync(string name)
+        public async Task GetPageByNameAsync_SearchName_Success(string name)
         {
-            var unis = new List<University>()
-            {
-                new (){ Name = "luka" },
-                new (){ Name = "user" },
-                new (){ Name = "test" },
-                new (){ Name = "lukaaa" },
-                new (){ Name = "iluka" },
-                new (){ Name = "ilika" },
-                new (){ Name = "LukA" },
-            };
-            await _context.Universities.AddRangeAsync(unis);
-            await _context.SaveChangesAsync();
-
-            var expected = await _context.Universities.Where(s =>
-                    s.Name.Contains(name, StringComparison.CurrentCultureIgnoreCase))
-                    .ToArrayAsync();
-            var res = await _repo.PageByNameAsync(name);
-
-            Assert.That(res, Is.Not.Null);
-            Assert.That(res, Is.EquivalentTo(expected));
-        }
-
-
-
-        [Test]
-        public async Task PageByName_Paged_Success()
-        {
-            const int pageSize = 16;
-            var unis = Enumerable.Range(1, 25)
-                .Reverse()
-                .Select(id => new University { Id = id, Name = "tsU" })
+            const int lastId = int.MinValue, pageSize = 16;
+            var fixture = new Fixture();
+            var unis = fixture.Build<University>()
+                .With(uni => uni.Users, [])
+                .With(uni => uni.Name, "luKa")
+                .With(uni => uni.Address, fixture.Create<Address>())
+                .CreateMany()
                 .ToList();
             await _context.Universities.AddRangeAsync(unis);
             await _context.SaveChangesAsync();
 
-            var res = await _repo.PageByNameAsync(
-                    name: "TSU",
-                    pageSize: pageSize);
+            var expected = await _context.Universities
+                .Where(u => u.Name.Contains(name, StringComparison.OrdinalIgnoreCase))
+                .ToListAsync();
+
+            var res = await _repo.GetPageByNameAsync(name, lastId, pageSize);
 
             Assert.That(res, Is.Not.Null);
-            Assert.That(res,
-                    Is.EquivalentTo(unis.OrderBy(u => u.Id)
+            Assert.That(res
+                    .ConvertAll(uni => uni.Name)
+                    .Order(),
+                    Is.EquivalentTo(expected
+                        .ConvertAll(uni => uni.Name)
+                        .Order()));
+        }
+
+
+
+
+        [TestCase(0)]
+        [TestCase(3)]
+        public async Task GetPageByName_Paged_Success(int repeatCount)
+        {
+            var fixture = new Fixture { RepeatCount = repeatCount };
+            var name = fixture.Create<string>();
+            const int lastId = int.MinValue, pageSize = 16;
+            var unis = Enumerable.Range(1, 25)
+                .Reverse()
+                .Select(id => fixture.Build<University>()
+                        .With(uni => uni.Name, name)
+                        .With(uni => uni.Users, [])
+                        .With(uni => uni.Address, fixture.Create<Address>())
+                        .With(uni => uni.Id, id)
+                        .Create())
+                .ToList();
+            await _context.Universities.AddRangeAsync(unis);
+            await _context.SaveChangesAsync();
+
+            var res = await _repo.GetPageByNameAsync(name, lastId, pageSize);
+
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res
+                    .ConvertAll(uni => uni.Name)
+                    .Order(),
+                    Is.EquivalentTo(unis
+                        .ConvertAll(uni => uni.Name)
+                        .Order()
                         .Take(pageSize)));
         }
 
 
 
-        [TestCase(new[] { 1, 2, 5 })]
-        [TestCase(new int[] { })]
-        public async Task GetUsersByUniversityIdAsync_Success(int[] ids)
+        [TestCase(0)]
+        [TestCase(3)]
+        public async Task GetUsersByUniversityIdAsync_Success(int repeatCount)
         {
-            var users = ids.Select(id => new User { Id = id }).ToList();
-            const int id = 1;
-            var uni = new University()
-            {
-                Id = id,
-                Name = "uniName",
-                Users = users
-            };
+            const int id = 1, lastId = int.MinValue, pageSize = 16;
+
+            var fixture = new Fixture() { RepeatCount = repeatCount };
+            var users = fixture.Build<User>()
+                .With(u => u.Universities, [])
+                .With(u => u.Faculties, [])
+                .With(uni => uni.Address, fixture.Create<Address>())
+                .CreateMany()
+                .ToList();
+            var uni = fixture.Build<University>()
+                .With(uni => uni.Id, id)
+                .With(uni => uni.Users, users)
+                .With(uni => uni.Address, fixture.Create<Address>())
+                .Create();
+
             await _context.Universities.AddAsync(uni);
             await _context.SaveChangesAsync();
 
-            var res = await _repo.GetUsersPageAsync(id, -1, 16);
+            var res = await _repo.GetUsersPageAsync(id, lastId, pageSize);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res, Is.EquivalentTo(users));
@@ -265,11 +302,41 @@ namespace InfrastructureTests
 
 
         [Test]
-        public async Task GetUsersByUniversityIdAsync_Success()
+        public async Task GetUsersByUniversityIdAsync_NotFound_Throws()
         {
-            const int id = 1;
+            const int id = 1, lastId = int.MinValue, pageSize = 16;
             Assert.ThrowsAsync<UniversityNotFoundException>(async () =>
-                    await _repo.GetUsersPageAsync(id, -1, 16));
+                    await _repo.GetUsersPageAsync(id, lastId, pageSize));
+        }
+
+        [Test]
+        public async Task GetByNameAsync_Success()
+        {
+            var fixture = new Fixture();
+            var name = fixture.Create<string>();
+            var uni = fixture.Build<University>()
+                .With(uni => uni.Users, [])
+                .With(uni => uni.Name, name)
+                .With(uni => uni.Address, fixture.Create<Address>())
+                .Create();
+            await _context.AddAsync(uni);
+            await _context.SaveChangesAsync();
+
+            var res = await _repo.GetByNameAsync(name);
+
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res.Name, Is.EqualTo(uni.Name));
+        }
+
+
+        [Test]
+        public async Task GetByNameAsync_NotThere_ReturnNull()
+        {
+            var fixture = new Fixture();
+            var name = fixture.Create<string>();
+            var res = await _repo.GetByNameAsync(name);
+
+            Assert.That(res, Is.Null);
         }
     }
 }

@@ -1,3 +1,4 @@
+using AutoFixture;
 using Core.Dtos;
 using Core.Entities;
 using Core.Interfaces;
@@ -9,50 +10,33 @@ namespace InfrastructureTests
     public class UniversityMapperTests
     {
         private readonly IUniversityMapper _mapper = new UniversityMapper();
+        private readonly Fixture _fixture = new();
 
-        private void AssertCommonPropsByName<A, B>(A a, B b)
-        {
-            var propsA = typeof(A).GetProperties()
-                .Select(p => p.Name);
-            var propsB = typeof(B).GetProperties()
-                .Select(p => p.Name);
-            foreach (var propName in propsA.Intersect(propsB))
-            {
-                var valA = typeof(A).GetProperty(propName)!.GetValue(a);
-                var valB = typeof(B).GetProperty(propName)!.GetValue(b);
-                Assert.That(valA, Is.EqualTo(valB));
-            }
-        }
 
         [Test]
         public void ToDto_From_University()
         {
-            University uni = new()
-            {
-                Id = 1,
-                Name = "Uni",
-            };
+            var uni = _fixture.Build<University>()
+                .With(uni => uni.Users, [])
+                .Create();
 
             var res = _mapper.ToDto(uni);
 
             Assert.That(res, Is.Not.Null);
-            AssertCommonPropsByName(res, uni);
+            MapperTestHelper.AssertCommonPropsByName(res, uni);
         }
 
 
         [Test]
         public void ToDtoWithUsers_From_University()
         {
-            University uni = new()
-            {
-                Id = 1,
-                Name = "Uni",
-                Users = [..
-                    new[] {
-                    new User() { Id = 1},
-                    new User() { Id = 2},
-                } ]
-            };
+            var uni = _fixture.Build<University>()
+                .With(uni => uni.Users, _fixture.Build<User>()
+                        .With(u => u.Universities, [])
+                        .With(u => u.Faculties, [])
+                        .CreateMany()
+                        .ToList())
+                .Create();
 
             var res = _mapper.ToDtoWithUsers(uni);
 
@@ -69,26 +53,20 @@ namespace InfrastructureTests
         [Test]
         public void ToUniversity_From_Dto()
         {
-            UniDto dto = new(
-                    Id: 1,
-                    Name: "Uni"
-                    );
+            var dto = _fixture.Create<UniDto>();
 
             var res = _mapper.ToUniversity(dto);
 
             Assert.That(res, Is.Not.Null);
-            AssertCommonPropsByName(res, dto);
+            MapperTestHelper.AssertCommonPropsByName(res, dto);
         }
 
         [Test]
         public void ToUniversity_From_DtoWithUsers()
         {
-            UniDtoWIthUsers dto = new(
-                    Id: 1,
-                    Name: "Uni",
-                    Users: Enumerable.Range(1, 5).Select(x =>
-                        new UserDto(x, "name")).ToList()
-                    );
+            UniDtoWithUsers dto = _fixture.Build<UniDtoWithUsers>()
+                .With(d => d.Users, _fixture.CreateMany<UserDto>().ToList())
+                .Create();
 
             var res = _mapper.ToUniversity(dto);
 

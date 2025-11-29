@@ -1,5 +1,6 @@
 using Core.Dtos;
 using Core.Entities;
+using Core.Enums;
 using Core.Interfaces;
 
 namespace Infrastructure.Services
@@ -21,12 +22,13 @@ namespace Infrastructure.Services
                         Faculties: user.Faculties.ConvertAll(f => f.Name)
                     );
 
-        public UserPrivateInfo ToPrivateInfo(User user)
+        public UserRequestDto ToRequestDto(User user)
             => new(
                         id: user.Id,
                         name: user.Name,
                         email: user.Email,
-                        password: user.Password
+                        password: user.Password,
+                        address: user.Address
                     );
 
         public User ToUser(UserDto userDto)
@@ -42,8 +44,15 @@ namespace Infrastructure.Services
                 Name = register.Name,
                 Email = register.Email,
                 Password = register.Password,
+                Address = new()
+                {
+                    City = register.Address.City,
+                    CountryA3 = register.Address.CountryA3
+                },
                 Faculties = register.Faculties
-                                .ConvertAll(x => new Faculty { Name = x })
+                                .ConvertAll(x => new Faculty { Name = x }),
+                Universities = register.Universities
+                    .ConvertAll(u => new University { Id = u.Id }),
             };
 
         public User ToUser(LoginRequest login)
@@ -53,13 +62,14 @@ namespace Infrastructure.Services
                 Password = login.Password
             };
 
-        public User ToUser(UserPrivateInfo info)
+        public User ToUser(UserRequestDto info)
             => new()
             {
                 Id = info.Id,
                 Name = info.Name,
                 Email = info.Email,
-                Password = info.Password
+                Password = info.Password,
+                Address = info.Address
             };
     }
 }

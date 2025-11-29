@@ -1,3 +1,4 @@
+using AutoFixture;
 using Core.Entities;
 using Core.Exceptions;
 using Core.Interfaces;
@@ -12,50 +13,53 @@ namespace InfrastructureTests.UserTests
     {
         private IUserRepo _repo;
         private MyContext _context;
+        private static readonly Fixture _globalFixture = new();
 
-        [OneTimeSetUp]
+        [SetUp]
         public void BeforeAll()
         {
             var options = new DbContextOptionsBuilder<MyContext>()
-                .UseInMemoryDatabase("MyInMem")
+                .UseInMemoryDatabase(Guid.NewGuid().ToString()) // random Id
                 .Options;
             _context = new MyContext(options);
             _repo = new UserRepo(_context);
         }
 
-        [OneTimeTearDown]
+        [TearDown]
         public async Task AfterAllAsync()
         {
             await _context.DisposeAsync();
         }
 
-        [SetUp]
-        public async Task BeforeEach()
-        {
-            await _context.Database.EnsureCreatedAsync();
 
-            _context.Users.RemoveRange(_context.Users);
-            _context.Universities.RemoveRange(_context.Universities);
+        private static User CreateUserById(int id)
+            => _globalFixture.Build<User>()
+            .With(u => u.Universities, [])
+            .With(u => u.Faculties, [])
+            .With(u => u.Id, id)
+            .Create();
 
-            await _context.SaveChangesAsync();
-        }
-
+        private static University CreateUniById(int id)
+            => _globalFixture.Build<University>()
+                .With(uni => uni.Id, id)
+                .With(uni => uni.Users, [])
+                .With(uni => uni.Address, _globalFixture.Create<Address>())
+                .Create();
 
         [TestCase(new int[] { })]
         [TestCase(new[] { 1, 2, 5, 6, 7 })]
         public async Task GetAllAsync_Success(int[] ids)
         {
             const int pageSize = 16;
-            var users = ids.Select(id =>
-                    new User { Id = id }).ToList();
+            var users = ids.Select(id => CreateUserById(id)).ToList();
             await _context.AddRangeAsync(users);
             await _context.SaveChangesAsync();
 
-            var res = await _repo.GetAllPageAsync(-1, pageSize);
+            var res = await _repo.GetAllPageAsync(int.MinValue, pageSize);
 
             Assert.That(res, Is.Not.Null);
-            Assert.That(res.OrderBy(u => u.Id),
-                    Is.EquivalentTo(users.OrderBy(u => u.Id)));
+            Assert.That(res.Select(u => u.Name).Order(),
+                    Is.EquivalentTo(users.Select(u => u.Name).Order()));
         }
 
 
@@ -65,8 +69,8 @@ namespace InfrastructureTests.UserTests
             const int pageSize = 16;
             var users = Enumerable.Range(1, 25)
                     .Reverse()
-                    .Select(id =>
-                    new User { Id = id }).ToList();
+                    .Select(id => CreateUserById(id))
+                    .ToList();
             await _context.AddRangeAsync(users);
             await _context.SaveChangesAsync();
 
@@ -85,7 +89,7 @@ namespace InfrastructureTests.UserTests
             const int pageSize = 16;
             var users = Enumerable.Range(1, 25)
                     .Reverse()
-                    .Select(id => new User { Id = id })
+                    .Select(id => CreateUserById(id))
                     .ToList();
             await _context.AddRangeAsync(users);
             await _context.SaveChangesAsync();
@@ -100,19 +104,26 @@ namespace InfrastructureTests.UserTests
         [Test]
         public async Task SearchByName_Paged_Success()
         {
+            const string name = "luka";
             const int pageSize = 16;
             var users = Enumerable.Range(1, 25)
                 .Reverse()
-                .Select(id => new User { Id = id, Name = "lukA" })
+                .Select(id =>
+                {
+                    var user = CreateUserById(id);
+                    user.Name = name.ToUpper() + id.ToString();
+                    return user;
+                })
                 .ToList();
             await _context.AddRangeAsync(users);
             await _context.SaveChangesAsync();
 
-            var res = await _repo.PageByNameAsync("luka", -1, pageSize);
+            var res = await _repo.PageByNameAsync(name, -1, pageSize);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res,
-                    Is.EquivalentTo(users.OrderBy(u => u.Id)
+                    Is.EquivalentTo(users
+                        .OrderBy(u => u.Id)
                         .Take(pageSize)));
         }
 
@@ -122,7 +133,7 @@ namespace InfrastructureTests.UserTests
         public async Task GetByIdAsync_Found()
         {
             const int id = 5;
-            var user = new User { Id = id };
+            var user = CreateUserById(id);
             await _context.AddAsync(user);
             await _context.SaveChangesAsync();
 
@@ -147,7 +158,8 @@ namespace InfrastructureTests.UserTests
         public async Task GetByEmail_Found()
         {
             const string email = "myemial@explam.co";
-            var user = new User { Email = email };
+            var user = CreateUserById(0);
+            user.Email = email;
             await _context.AddAsync(user);
             await _context.SaveChangesAsync();
 
@@ -170,11 +182,7 @@ namespace InfrastructureTests.UserTests
         public async Task CreateAsync_Success()
         {
             const int id = 2;
-            var user = new User()
-            {
-                Id = id,
-                Email = "my@ema.com",
-            };
+            var user = CreateUserById(id);
 
             var rv = await _repo.CreateAsync(user);
             var res = await _context.Users.FindAsync(id);
@@ -189,8 +197,10 @@ namespace InfrastructureTests.UserTests
         public async Task UpdateUserCredentialsAsync_Success()
         {
             const int id = 2;
-            var user = new User() { Id = id, Email = "my@ema.com", };
-            var newUser = new User() { Id = id, Email = "myNew@ema.com", };
+            var user = CreateUserById(id);
+            user.Email = "oldEmail@gmail.com";
+            var newUser = CreateUserById(id);
+            user.Email = "newEmail@gmai.com";
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
 
@@ -208,7 +218,7 @@ namespace InfrastructureTests.UserTests
         public async Task UpdateUserCredentialsAsync_NotFound_Throws()
         {
             const int id = 2;
-            var newUser = new User() { Id = id, Email = "myNew@ema.com", };
+            var newUser = CreateUserById(id);
             Assert.ThrowsAsync<UserNotFoundException>(async () =>
                     await _repo.UpdateUserCredentialsAsync(newUser));
         }
@@ -218,12 +228,15 @@ namespace InfrastructureTests.UserTests
         public async Task GetUniversitiesForUserAsync_Success(int[] uniIds)
         {
             const int id = 5;
-            var unis = uniIds.Select(id => new University { Id = id }).ToList();
-            var user = new User
-            {
-                Id = id,
-                Universities = unis
-            };
+            var fixture = new Fixture();
+            var unis = uniIds
+                .Select(id => CreateUniById(id))
+                .ToList();
+            var user = fixture.Build<User>()
+                .With(u => u.Universities, unis)
+                .With(u => u.Faculties, [])
+                .With(u => u.Id, id)
+                .Create();
             await _context.Universities.AddRangeAsync(unis);
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
@@ -247,14 +260,22 @@ namespace InfrastructureTests.UserTests
         public async Task GetFullById_Success(int[] ids)
         {
             const int id = 5;
-            var unis = ids.Select(id => new University { Id = id }).ToList();
-            var faculties = ids.Select(id => new Faculty { Name = id.ToString() }).ToList();
-            User user = new()
-            {
-                Id = id,
-                Faculties = faculties,
-                Universities = unis
-            };
+            var unis = ids
+                .Select(id => CreateUniById(id))
+                .ToList();
+            var fixture = new Fixture();
+            var faculties = ids
+                .Select(id => fixture.Build<Faculty>()
+                        .With(f => f.Users, [])
+                        .With(f => f.Id, id)
+                        .Create())
+                .ToList();
+            var user = fixture.Build<User>()
+                .With(u => u.Id, id)
+                .With(u => u.Universities, unis)
+                .With(u => u.Faculties, faculties)
+                .Create();
+
             await _context.Universities.AddRangeAsync(unis);
             await _context.Faculties.AddRangeAsync(faculties);
             await _context.Users.AddAsync(user);

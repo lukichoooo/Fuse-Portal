@@ -1,3 +1,4 @@
+using AutoFixture;
 using Core.Dtos;
 using Core.Entities;
 using Core.Interfaces;
@@ -9,70 +10,50 @@ namespace InfrastructureTests
     public class UserMapperTests
     {
         private readonly IUserMapper _mapper = new UserMapper();
+        private readonly Fixture _fixture = new();
 
-        private void AssertCommonPropsByName<A, B>(A a, B b)
-        {
-            var propsA = typeof(A).GetProperties()
-                .Select(p => p.Name);
-            var propsB = typeof(B).GetProperties()
-                .Select(p => p.Name);
-            foreach (var propName in propsA.Intersect(propsB))
-            {
-                var valA = typeof(A).GetProperty(propName)!.GetValue(a);
-                var valB = typeof(B).GetProperty(propName)!.GetValue(b);
-                Assert.That(valA, Is.EqualTo(valB));
-            }
-        }
-
+        [OneTimeSetUp]
+        public void BeforeAll()
+        { }
         [Test]
         public void ToDto_From_User()
         {
-            User user = new()
-            {
-                Id = 1,
-                Name = "namee",
-            };
+            var user = _fixture.Build<User>()
+                .With(u => u.Universities, [])
+                .With(u => u.Faculties, [])
+                .Create();
 
             var res = _mapper.ToDto(user);
 
             Assert.That(res, Is.Not.Null);
-            AssertCommonPropsByName(user, res);
+            MapperTestHelper.AssertCommonPropsByName(user, res);
         }
 
 
         [Test]
-        public void ToPrivateInfo_From_User()
+        public void ToRequestDto_From_User()
         {
-            User user = new()
-            {
-                Id = 1,
-                Name = "namee",
-                Email = "exampl@email.cm",
-                Password = "myPAss222"
-            };
+            var user = _fixture.Build<User>()
+                .With(u => u.Universities, [])
+                .With(u => u.Faculties, [])
+                .Create();
 
-            var res = _mapper.ToPrivateInfo(user);
+            var res = _mapper.ToRequestDto(user);
 
 
             Assert.That(res, Is.Not.Null);
-            AssertCommonPropsByName(res, user);
+            MapperTestHelper.AssertCommonPropsByName(res, user);
         }
 
 
         [Test]
         public void ToDetailsDto_From_User()
         {
-            User user = new()
-            {
-                Id = 1,
-                Name = "namee",
-                Universities = Enumerable.Range(1, 5)
-                    .Select(x => new University { Id = x })
-                    .ToList(),
-                Faculties = Enumerable.Range(0, 26)
-                    .Select(i => new Faculty { Name = ((char)('a' + i)).ToString() })
-                    .ToList()
-            };
+            var user = _fixture.Build<User>()
+                .With(u => u.Universities, _fixture.Build<University>().OmitAutoProperties().CreateMany().ToList())
+                .With(u => u.Faculties, _fixture.Build<Faculty>().OmitAutoProperties().CreateMany().ToList())
+                .With(u => u.Address, _fixture.Create<Address>())
+                .Create();
 
             var res = _mapper.ToDetailsDto(user);
 
