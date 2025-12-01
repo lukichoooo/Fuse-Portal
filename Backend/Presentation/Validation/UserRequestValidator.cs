@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace Presentation.Validation
 {
-    public class UserRequestValidator : AbstractValidator<UserRequestDto>
+    public class UserRequestValidator : AbstractValidator<UserPrivateDto>
     {
         public UserRequestValidator(IOptions<ValidatorSettings> options)
         {

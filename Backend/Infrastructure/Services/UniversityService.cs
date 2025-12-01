@@ -11,7 +11,7 @@ public class UniversityService(IUniversityRepo repo, IUniversityMapper mapper, I
     private readonly IUniversityMapper _mapper = mapper;
     private readonly IUserMapper _userMapper = userMapper;
 
-    public async Task<UniDto> GetAsync(int id)
+    public async Task<UniDto> GetByIdAsync(int id)
     {
         var uni = await _repo.GetAsync(id)
             ?? throw new UniversityNotFoundException($"University Not Found with Id={id}");
@@ -22,7 +22,7 @@ public class UniversityService(IUniversityRepo repo, IUniversityMapper mapper, I
         => (await _repo.GetUsersPageAsync(id, lastId, pageSize))
         .ConvertAll(_userMapper.ToDto);
 
-    public async Task<List<UniDto>> GetPageByNameAsync(string name, int lastId, int pageSize)
+    public async Task<List<UniDto>> GetPageByNameLikeAsync(string name, int lastId, int pageSize)
         => (await _repo.GetPageByNameAsync(name, lastId, pageSize))
         .ConvertAll(_mapper.ToDto);
 

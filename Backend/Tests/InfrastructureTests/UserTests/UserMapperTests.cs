@@ -38,7 +38,7 @@ namespace InfrastructureTests
                 .With(u => u.Faculties, [])
                 .Create();
 
-            var res = _mapper.ToRequestDto(user);
+            var res = _mapper.ToPrivateDto(user);
 
 
             Assert.That(res, Is.Not.Null);

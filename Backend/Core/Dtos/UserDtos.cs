@@ -13,7 +13,7 @@ public record UserDetailsDto(
             List<string> Faculties
         );
 
-public class UserRequestDto
+public class UserPrivateDto
 {
     public int Id { get; set; }
     public string Name { get; set; }
@@ -21,9 +21,9 @@ public class UserRequestDto
     public string Password { get; set; }
     public AddressDto Address { get; set; }
 
-    public UserRequestDto() { }
+    public UserPrivateDto() { }
 
-    public UserRequestDto(int id, string name, string email, string password, AddressDto address)
+    public UserPrivateDto(int id, string name, string email, string password, AddressDto address)
     {
         Id = id;
         Name = name;

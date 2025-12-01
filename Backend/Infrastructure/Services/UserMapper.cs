@@ -22,7 +22,7 @@ namespace Infrastructure.Services
                         Faculties: user.Faculties.ConvertAll(f => f.Name)
                     );
 
-        public UserRequestDto ToRequestDto(User user)
+        public UserPrivateDto ToPrivateDto(User user)
             => new(
                         id: user.Id,
                         name: user.Name,
@@ -62,7 +62,7 @@ namespace Infrastructure.Services
                 Password = login.Password
             };
 
-        public User ToUser(UserRequestDto info)
+        public User ToUser(UserPrivateDto info)
             => new()
             {
                 Id = info.Id,

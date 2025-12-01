@@ -1,11 +1,13 @@
 using System.Linq.Expressions;
 using AutoFixture;
 using Core.Dtos;
+using Core.Dtos.Settings;
 using Core.Entities;
 using Core.Enums;
 using Core.Exceptions;
 using Core.Interfaces;
 using Infrastructure.Services;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace InfrastructureTests.UserTests
@@ -13,23 +15,33 @@ namespace InfrastructureTests.UserTests
     public class UserServiceTests
     {
         private readonly IUserMapper _mapper = new UserMapper();
-        private readonly IUniversityMapper _uniMapper = new UniversityMapper();
         private static readonly Fixture _globalFixture = new();
 
+        private readonly EncryptorSettings _settings = new()
+        {
+            Key = Convert.FromBase64String("MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY="),
+            IV = Convert.FromBase64String("bXlJbml1VmVjdG9yMTIzNA==")
+        };
         private UserService GetService<T>(
             Expression<Func<IUserRepo, Task<T>>> setupExpr,
             T returnValue)
         {
             var mock = new Mock<IUserRepo>();
+            var options = Options.Create(_settings);
+            var _encryptor = new Encryptor(options);
 
             mock.Setup(setupExpr)
                 .ReturnsAsync(returnValue);
 
-            return new UserService(_mapper, _uniMapper, mock.Object);
+            return new UserService(_mapper, _encryptor, mock.Object);
         }
 
         private UserService GetService(IUserRepo repo)
-            => new(_mapper, _uniMapper, repo);
+        {
+            var options = Options.Create(_settings);
+            var _encryptor = new Encryptor(options);
+            return new(_mapper, _encryptor, repo);
+        }
 
         private static User CreateUserById(int id)
         {
@@ -65,7 +77,7 @@ namespace InfrastructureTests.UserTests
             var users = ids.Select(id => CreateUserById(id)).ToList();
             var service = GetService(r => r.PageByNameAsync(name, -1, pageSize), users);
 
-            var res = await service.PageByNameAsync(name, -1, pageSize);
+            var res = await service.GetPageByNameAsync(name, -1, pageSize);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Select(u => u.Id),
@@ -79,7 +91,7 @@ namespace InfrastructureTests.UserTests
             var user = CreateUserById(id);
             var service = GetService(r => r.GetAsync(id), user);
 
-            var res = await service.GetAsync(id);
+            var res = await service.GetByIdAsync(id);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Id, Is.EqualTo(id));
@@ -94,7 +106,7 @@ namespace InfrastructureTests.UserTests
             var service = GetService(r => r.GetAsync(id), null);
 
             Assert.ThrowsAsync<UserNotFoundException>(async () =>
-                    await service.GetAsync(id));
+                    await service.GetByIdAsync(id));
         }
 
 
@@ -124,7 +136,7 @@ namespace InfrastructureTests.UserTests
                     await service.GetPrivateDtoById(id));
         }
 
-        private UserRequestDto CreateUserPrivateDto(int? id = null,
+        private UserPrivateDto CreateUserPrivateDto(int? id = null,
                         string? name = null,
                         string? email = null,
                         string? password = null,

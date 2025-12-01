@@ -5,42 +5,47 @@ using Core.Interfaces;
 
 namespace Infrastructure.Services;
 
-public class UserService(IUserMapper mapper, IUniversityMapper uniMapper, IUserRepo userRepo) : IUserService
+public class UserService(IUserMapper mapper, IEncryptor encryptor, IUserRepo userRepo) : IUserService
 {
     private readonly IUserRepo _repo = userRepo;
     private readonly IUserMapper _mapper = mapper;
-    private readonly IUniversityMapper _uniMapper = uniMapper;
+    private readonly IEncryptor _encryptor = encryptor;
 
     public async Task<List<UserDto>> GetAllPageAsync(int lastId, int pageSize)
         => (await _repo.GetAllPageAsync(lastId, pageSize))
         .ConvertAll(_mapper.ToDto)
         .ToList();
 
-    public async Task<List<UserDto>> PageByNameAsync(string name, int lastId, int pageSize)
+    public async Task<List<UserDto>> GetPageByNameAsync(string name, int lastId, int pageSize)
         => (await _repo.PageByNameAsync(name, lastId, pageSize))
         .ConvertAll(_mapper.ToDto)
         .ToList();
 
-    public async Task<UserDto> GetAsync(int id)
+    public async Task<UserDto> GetByIdAsync(int id)
     {
         var user = await _repo.GetAsync(id)
             ?? throw new UserNotFoundException($"User not found with Id={id}");
         return _mapper.ToDto(user);
     }
 
-    public async Task<UserRequestDto> GetPrivateDtoById(int id)
+    public async Task<UserPrivateDto> GetPrivateDtoById(int id)
     {
         var user = await _repo.GetAsync(id)
             ?? throw new UserNotFoundException($"User not found with Id={id}");
-        return _mapper.ToRequestDto(user);
+        user.Password = _encryptor.Encrypt(user.Password);
+        return _mapper.ToPrivateDto(user);
     }
 
 
-    public async Task<UserRequestDto> UpdateUserCredentialsAsync(UserRequestDto info)
-        => _mapper.ToRequestDto(await _repo.UpdateUserCredentialsAsync(_mapper.ToUser(info)));
+    public async Task<UserPrivateDto> UpdateUserCredentialsAsync(UserPrivateDto info)
+    {
+        var user = _mapper.ToUser(info);
+        user.Password = _encryptor.Encrypt(user.Password);
+        return _mapper.ToPrivateDto(await _repo.UpdateUserCredentialsAsync(user));
+    }
 
-    public async Task<UserRequestDto> DeleteByIdAsync(int id)
-        => _mapper.ToRequestDto(await _repo.DeleteByIdAsync(id));
+    public async Task<UserDetailsDto> DeleteByIdAsync(int id)
+        => _mapper.ToDetailsDto(await _repo.DeleteByIdAsync(id));
 
     public async Task<UserDetailsDto> GetUserDetailsAsync(int id)
     {

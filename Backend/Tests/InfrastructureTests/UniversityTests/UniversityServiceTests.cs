@@ -51,7 +51,7 @@ namespace InfrastructureTests.UniversityTests
             var uni = CreateUniversityById(id);
             var service = CreateServiceReturns(r => r.GetAsync(id), uni);
 
-            var res = await service.GetAsync(id);
+            var res = await service.GetByIdAsync(id);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Id, Is.EqualTo(id));
@@ -65,7 +65,7 @@ namespace InfrastructureTests.UniversityTests
             var service = CreateServiceReturns(r => r.GetAsync(id), null);
 
             Assert.ThrowsAsync<UniversityNotFoundException>(async () =>
-                    await service.GetAsync(id));
+                    await service.GetByIdAsync(id));
         }
 
         [TestCase(new int[] { })]
@@ -97,7 +97,7 @@ namespace InfrastructureTests.UniversityTests
             const string name = "luka";
             var service = CreateServiceReturns(r => r.GetPageByNameAsync(name, lastId, pageSize), unis);
 
-            var res = await service.GetPageByNameAsync(name, lastId, pageSize);
+            var res = await service.GetPageByNameLikeAsync(name, lastId, pageSize);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.ConvertAll(uni => uni.Name).Order(),

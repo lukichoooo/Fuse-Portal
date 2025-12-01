@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text;
 using Core.Dtos;
 using Core.Dtos.Settings;
+using Core.Settings;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Infrastructure;
@@ -10,6 +11,7 @@ using Infrastructure.Contexts;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Presentation.Filters;
 using Presentation.Validator;
 
 var builder = WebApplication.CreateBuilder(args);
