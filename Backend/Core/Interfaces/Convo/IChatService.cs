@@ -1,8 +1,8 @@
 using Core.Dtos;
 
-namespace Core.Interfaces
+namespace Core.Interfaces.Convo
 {
-    public interface ICommunicationService
+    public interface IChatService
     {
         Task<List<ChatDto>> GetAllChatsPageAsync(int lastId, int pageSize);
 

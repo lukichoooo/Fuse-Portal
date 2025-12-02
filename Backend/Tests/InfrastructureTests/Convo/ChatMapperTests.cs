@@ -1,15 +1,15 @@
-using Core.Interfaces.Communication;
-using Infrastructure.Services;
 using AutoFixture;
 using Core.Dtos;
-using Core.Entities;
+using Core.Interfaces.Convo;
+using Core.Entities.Convo;
+using Infrastructure.Services;
 
 namespace InfrastructureTests.LLM
 {
     [TestFixture]
     public class CommunicationMapperTests
     {
-        private readonly ICommunicationMapper _mapper = new CommunicationMapper();
+        private readonly IChatMapper _mapper = new ChatMapper();
         private readonly Fixture _fixture = new();
 
         private Message CreateMessageNoFiles()

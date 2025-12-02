@@ -7,9 +7,9 @@ namespace Presentation.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]
-    public class AICommunicationController(ICommunicationService service) : ControllerBase
+    public class AIChatController(IChatService service) : ControllerBase
     {
-        private readonly ICommunicationService _service = service;
+        private readonly IChatService _service = service;
 
         [HttpGet]
         public async Task<ActionResult<List<ChatDto>>> GetAllChatsPageAsync(
@@ -38,10 +38,10 @@ namespace Presentation.Controllers
                 IFormFileCollection files
                 )
         {
-            foreach (var f in files)
-            {
-                f.CopyToAsync()
-            }
+            // foreach (var f in files)
+            // {
+            //     f.CopyToAsync()
+            // }
             return Ok(await _service.SendMessageWithFileAsync(message));
         }
 

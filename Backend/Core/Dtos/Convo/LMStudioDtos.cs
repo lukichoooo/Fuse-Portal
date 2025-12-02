@@ -38,6 +38,6 @@ public record LMStudioResponse(
 public record LMStudioRequest(
     string Model,
     string Input,
-    string PreviousResponseId
+    string? PreviousResponseId
 );
 

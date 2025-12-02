@@ -1,13 +1,12 @@
 using Core.Dtos;
-using Core.Interfaces;
-using Core.Interfaces.Communication;
+using Core.Interfaces.Convo;
 
 namespace Infrastructure.Services
 {
-    public class CommunicationService(ICommunicationRepo repo, ICommunicationMapper mapper) : ICommunicationService
+    public class ChatService(IChatRepo repo, IChatMapper mapper) : IChatService
     {
-        private readonly ICommunicationRepo _repo = repo;
-        private readonly ICommunicationMapper _mapper = mapper;
+        private readonly IChatRepo _repo = repo;
+        private readonly IChatMapper _mapper = mapper;
 
         public async Task<List<ChatDto>> GetAllChatsPageAsync(int lastId, int pageSize)
             => (await _repo.GetAllChatsPageAsync(lastId, pageSize))

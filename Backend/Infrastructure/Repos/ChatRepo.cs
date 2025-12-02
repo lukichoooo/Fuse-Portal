@@ -1,12 +1,12 @@
-using Core.Entities;
+using Core.Entities.Convo;
 using Core.Exceptions;
-using Core.Interfaces;
+using Core.Interfaces.Convo;
 using Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repos
 {
-    public class CommunicationRepo(MyContext context) : ICommunicationRepo
+    public class ChatRepo(MyContext context) : IChatRepo
     {
         private readonly MyContext _context = context;
 

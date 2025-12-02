@@ -1,8 +1,9 @@
 using Core.Entities;
+using Core.Entities.Convo;
 
-namespace Core.Interfaces
+namespace Core.Interfaces.Convo
 {
-    public interface ICommunicationRepo
+    public interface IChatRepo
     {
         ValueTask<Chat?> GetChatAsync(int chatId);
         Task<List<Chat>> GetAllChatsPageAsync(int lastId, int pageSize);

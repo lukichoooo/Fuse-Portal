@@ -1,6 +1,6 @@
 using Core.Dtos;
 
-namespace Core.Interfaces
+namespace Core.Interfaces.LLM
 {
     public interface ILLMService
     {

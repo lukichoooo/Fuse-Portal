@@ -1,10 +1,11 @@
 using Core.Dtos;
 using Core.Entities;
-using Core.Interfaces.Communication;
+using Core.Entities.Convo;
+using Core.Interfaces.Convo;
 
 namespace Infrastructure.Services
 {
-    public class CommunicationMapper : ICommunicationMapper
+    public class ChatMapper : IChatMapper
     {
         public Chat ToChat(ChatDto dto)
             => new()

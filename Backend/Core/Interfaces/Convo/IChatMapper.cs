@@ -1,9 +1,10 @@
 using Core.Dtos;
 using Core.Entities;
+using Core.Entities.Convo;
 
-namespace Core.Interfaces.Communication
+namespace Core.Interfaces.Convo
 {
-    public interface ICommunicationMapper
+    public interface IChatMapper
     {
         ChatDto ToChatDto(Chat chat);
         Chat ToChat(ChatDto dto);

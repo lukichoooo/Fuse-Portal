@@ -4,7 +4,7 @@ using Core.Dtos;
 using Core.Dtos.Settings;
 using Microsoft.Extensions.Options;
 
-namespace Infrastructure.Services
+namespace Infrastructure.Services.LLM.LMStudio
 {
     public class LMStudioApi
     {

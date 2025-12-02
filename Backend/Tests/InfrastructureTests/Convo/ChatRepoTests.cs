@@ -1,17 +1,17 @@
 using AutoFixture;
-using Core.Entities;
+using Core.Entities.Convo;
 using Core.Exceptions;
-using Core.Interfaces;
+using Core.Interfaces.Convo;
 using Infrastructure.Contexts;
 using Infrastructure.Repos;
 using Microsoft.EntityFrameworkCore;
 
-namespace InfrastructureTests.Communication
+namespace InfrastructureTests.Convo
 {
     [TestFixture]
-    public class CommunicationRepoTests
+    public class ChatRepoTests
     {
-        private ICommunicationRepo _repo;
+        private IChatRepo _repo;
         private MyContext _context;
         private static readonly Fixture _globalFixture = new();
 
@@ -22,7 +22,7 @@ namespace InfrastructureTests.Communication
                 .UseInMemoryDatabase(Guid.NewGuid().ToString()) // random Id
                 .Options;
             _context = new MyContext(options);
-            _repo = new CommunicationRepo(_context);
+            _repo = new ChatRepo(_context);
         }
 
         [TearDown]

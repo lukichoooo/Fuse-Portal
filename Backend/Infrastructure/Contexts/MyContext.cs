@@ -1,4 +1,5 @@
 using Core.Entities;
+using Core.Entities.Convo;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Contexts;
