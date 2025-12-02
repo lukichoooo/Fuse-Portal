@@ -39,7 +39,8 @@ namespace PresentationTests
             var controller = CreateControllerReturn(
                     s => s.GetByIdAsync(uni.Id), uni);
 
-            var res = await controller.GetByIdAsync(uni.Id) as OkObjectResult;
+            var rv = await controller.GetByIdAsync(uni.Id);
+            var res = rv.Result as OkObjectResult;
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Value, Is.EqualTo(uni));
@@ -70,7 +71,8 @@ namespace PresentationTests
                     s => s.GetPageByNameLikeAsync(name, It.IsAny<int>(), It.IsAny<int>()),
                         unis);
 
-            var res = await controller.GetPageByNameLikeAsync(name) as OkObjectResult;
+            var rv = await controller.GetPageByNameLikeAsync(name);
+            var res = rv.Result as OkObjectResult;
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Value, Is.EqualTo(unis));
@@ -89,7 +91,8 @@ namespace PresentationTests
                     s => s.GetUsersPageAsync(uniId, It.IsAny<int>(), It.IsAny<int>()),
                         users);
 
-            var res = await controller.GetUsersPageAsync(uniId) as OkObjectResult;
+            var rv = await controller.GetUsersPageAsync(uniId);
+            var res = rv.Result as OkObjectResult;
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Value, Is.EqualTo(users));
@@ -120,7 +123,8 @@ namespace PresentationTests
             var controller = CreateControllerReturn(
                     s => s.DeleteByIdAsync(uni.Id), uni);
 
-            var res = await controller.DeleteByIdAsync(uni.Id) as OkObjectResult;
+            var rv = await controller.DeleteByIdAsync(uni.Id);
+            var res = rv.Result as OkObjectResult;
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Value, Is.EqualTo(uni));
@@ -149,7 +153,8 @@ namespace PresentationTests
             var controller = CreateControllerReturn(
                     s => s.UpdateAsync(uniRequest), uniDto);
 
-            var res = await controller.UpdateAsync(uniRequest) as OkObjectResult;
+            var rv = await controller.UpdateAsync(uniRequest);
+            var res = rv.Result as OkObjectResult;
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Value, Is.EqualTo(uniDto));
@@ -179,7 +184,8 @@ namespace PresentationTests
             var controller = CreateControllerReturn(
                     s => s.CreateAsync(uniRequest), uniDto);
 
-            var res = await controller.CreateAsync(uniRequest) as OkObjectResult;
+            var rv = await controller.CreateAsync(uniRequest);
+            var res = rv.Result as OkObjectResult;
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Value, Is.EqualTo(uniDto));

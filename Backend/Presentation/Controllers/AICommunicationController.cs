@@ -27,15 +27,23 @@ namespace Presentation.Controllers
 
 
         [HttpPost("messages/text")]
-        public async Task<ActionResult<MessageDto>> SendMessageAsync(
+        public async Task<ActionResult<MessageDto>> SendMessageAsync( // TODO: Add cencelation Token
             [FromBody] MessageDto message)
             => Ok(await _service.SendMessageAsync(message));
 
 
         [HttpPost("messages/file")]
-        public async Task<ActionResult<MessageDto>> SendMessageWithFileAsync(
-                [FromBody] MessageWithFileDto dto)
-            => Ok(await _service.SendMessageWithFileAsync(dto));
+        public async Task<ActionResult<MessageDto>> SendMessageWithFileAsync( // TODO: Add cencelation Token
+                [FromBody] MessageDto message,
+                IFormFileCollection files
+                )
+        {
+            foreach (var f in files)
+            {
+                f.CopyToAsync()
+            }
+            return Ok(await _service.SendMessageWithFileAsync(message));
+        }
 
 
         [HttpDelete("messages/{msgId}")]

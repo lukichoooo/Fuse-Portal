@@ -36,6 +36,22 @@ namespace InfrastructureTests.UserTests
             return new UserService(_mapper, _encryptor, mock.Object);
         }
 
+        private UserService GetService<T>(
+            Expression<Func<IUserRepo, ValueTask<T>>> setupExpr,
+            T returnValue)
+        {
+            var mock = new Mock<IUserRepo>();
+            var options = Options.Create(_settings);
+            var _encryptor = new Encryptor(options);
+
+            mock.Setup(setupExpr)
+                .ReturnsAsync(returnValue);
+
+            return new UserService(_mapper, _encryptor, mock.Object);
+        }
+
+
+
         private UserService GetService(IUserRepo repo)
         {
             var options = Options.Create(_settings);
@@ -89,7 +105,7 @@ namespace InfrastructureTests.UserTests
         {
             const int id = 5;
             var user = CreateUserById(id);
-            var service = GetService(r => r.GetAsync(id), user);
+            var service = GetService(r => r.GetByIdAsync(id), user);
 
             var res = await service.GetByIdAsync(id);
 
@@ -103,7 +119,7 @@ namespace InfrastructureTests.UserTests
         {
             const int id = 5;
             var user = CreateUserById(id);
-            var service = GetService(r => r.GetAsync(id), null);
+            var service = GetService(r => r.GetByIdAsync(id), null);
 
             Assert.ThrowsAsync<UserNotFoundException>(async () =>
                     await service.GetByIdAsync(id));
@@ -116,7 +132,7 @@ namespace InfrastructureTests.UserTests
         {
             const int id = 5;
             var user = CreateUserById(id);
-            var service = GetService(r => r.GetAsync(id), user);
+            var service = GetService(r => r.GetByIdAsync(id), user);
 
             var res = await service.GetPrivateDtoById(id);
 
@@ -130,7 +146,7 @@ namespace InfrastructureTests.UserTests
         {
             const int id = 5;
             var user = CreateUserById(id);
-            var service = GetService(r => r.GetAsync(id), null);
+            var service = GetService(r => r.GetByIdAsync(id), null);
 
             Assert.ThrowsAsync<UserNotFoundException>(async () =>
                     await service.GetPrivateDtoById(id));

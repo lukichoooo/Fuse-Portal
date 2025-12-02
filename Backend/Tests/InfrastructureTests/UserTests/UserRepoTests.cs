@@ -137,7 +137,7 @@ namespace InfrastructureTests.UserTests
             await _context.AddAsync(user);
             await _context.SaveChangesAsync();
 
-            var res = await _repo.GetAsync(id);
+            var res = await _repo.GetByIdAsync(id);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Id, Is.EqualTo(id));
@@ -149,7 +149,7 @@ namespace InfrastructureTests.UserTests
         public async Task GetByIdAsync_NotThere_Null()
         {
             const int id = 5;
-            var res = await _repo.GetAsync(id);
+            var res = await _repo.GetByIdAsync(id);
             Assert.That(res, Is.Null);
         }
 

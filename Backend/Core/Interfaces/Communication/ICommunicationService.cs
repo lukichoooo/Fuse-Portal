@@ -8,8 +8,7 @@ namespace Core.Interfaces
 
         Task<ChatFullDto> GetFullChatPageAsync(int chatId, int lastId, int pageSize);
 
-        Task<MessageDto> SendMessageAsync(MessageDto msgDto);
-        Task<MessageDto> SendMessageWithFileAsync(MessageWithFileDto msgDto);
+        Task<MessageDto> SendMessageAsync(MessageDto msg);
         Task<MessageDto> RemoveMessageByIdAsync(int msgId);
     }
 }

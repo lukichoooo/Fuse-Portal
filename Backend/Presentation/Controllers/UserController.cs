@@ -12,7 +12,7 @@ public class UserController(IUserService service) : ControllerBase
     private readonly IUserService _service = service;
 
     [HttpGet("all")]
-    public async Task<ActionResult<UserDto>> GetAllPageAsync(
+    public async Task<ActionResult<List<UserDto>>> GetAllPageAsync(
             [FromQuery] int lastId = int.MinValue,
             [FromQuery] int pageSize = 16
             )
@@ -23,7 +23,7 @@ public class UserController(IUserService service) : ControllerBase
         => Ok(await _service.GetByIdAsync(id));
 
     [HttpGet("search/{name}")]
-    public async Task<ActionResult<UserDto>> GetPageByNameAsync(
+    public async Task<ActionResult<List<UserDto>>> GetPageByNameAsync(
             string name,
             [FromQuery] int lastId = int.MinValue,
             [FromQuery] int pageSize = 16
@@ -38,7 +38,7 @@ public class UserController(IUserService service) : ControllerBase
     }
 
     [HttpDelete("me")]
-    public async Task<ActionResult<UserPrivateDto>> DeleteCurrentUser()
+    public async Task<ActionResult<UserDetailsDto>> DeleteCurrentUser()
     {
         int id = int.Parse(HttpContext.User.FindFirst("id")!.Value);
         return Ok(await _service.DeleteByIdAsync(id));
@@ -46,6 +46,6 @@ public class UserController(IUserService service) : ControllerBase
 
     [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
-    public async Task<ActionResult<UserDto>> DeleteByIdAsync(int id)
+    public async Task<ActionResult<UserDetailsDto>> DeleteByIdAsync(int id)
         => Ok(await _service.DeleteByIdAsync(id));
 }

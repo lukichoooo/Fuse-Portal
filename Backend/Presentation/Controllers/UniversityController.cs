@@ -12,11 +12,11 @@ public class UniversityController(IUniversityService service) : ControllerBase
     private readonly IUniversityService _service = service;
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetByIdAsync([FromRoute] int id)
+    public async Task<ActionResult<UniDto>> GetByIdAsync([FromRoute] int id)
         => Ok(await _service.GetByIdAsync(id));
 
     [HttpGet("search/{name}")]
-    public async Task<IActionResult> GetPageByNameLikeAsync(
+    public async Task<ActionResult<List<UniDto>>> GetPageByNameLikeAsync(
             [FromRoute] string name,
             [FromQuery] int lastId = int.MinValue,
             [FromQuery] int pageSize = 16
@@ -24,7 +24,7 @@ public class UniversityController(IUniversityService service) : ControllerBase
         => Ok(await _service.GetPageByNameLikeAsync(name, lastId, pageSize));
 
     [HttpGet("{uniId:int}/users")]
-    public async Task<IActionResult> GetUsersPageAsync(
+    public async Task<ActionResult<List<UserDto>>> GetUsersPageAsync(
             [FromRoute] int uniId,
             [FromQuery] int lastId = int.MinValue,
             [FromQuery] int pageSize = 16
@@ -33,16 +33,16 @@ public class UniversityController(IUniversityService service) : ControllerBase
 
     [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteByIdAsync(int id)
+    public async Task<ActionResult<UniDto>> DeleteByIdAsync(int id)
         => Ok(await _service.DeleteByIdAsync(id));
 
     [Authorize(Roles = "Admin")]
     [HttpPut]
-    public async Task<IActionResult> UpdateAsync([FromBody] UniRequestDto uni)
+    public async Task<ActionResult<UniDto>> UpdateAsync([FromBody] UniRequestDto uni)
         => Ok(await _service.UpdateAsync(uni));
 
     [Authorize(Roles = "Admin")]
     [HttpPost]
-    public async Task<IActionResult> CreateAsync([FromBody] UniRequestDto uni)
+    public async Task<ActionResult<UniDto>> CreateAsync([FromBody] UniRequestDto uni)
         => Ok(await _service.CreateAsync(uni));
 }

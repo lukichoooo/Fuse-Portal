@@ -10,6 +10,8 @@ namespace Core.Entities
         [Required]
         public string Name { get; set; } = null!;
 
+        public string? LastResponseId { get; set; }
+
         public List<Message> Messages { get; set; } = [];
     }
 }

@@ -6,19 +6,13 @@ public record ChatDto(
         );
 
 public record MessageDto(
-        int Id,
-        string Text,
-        DateTime CreatedAt,
-        int ChatId
-        );
+    int Id,
+    string Text,
+    DateTime CreatedAt,
+    int ChatId,
+    Dictionary<string, string>? FileToContent = null
+);
 
-public record MessageWithFileDto(
-        int Id,
-        string Text,
-        DateTime CreatedAt,
-        object File, // TODO give type
-        int ChatId
-        );
 
 public record ChatFullDto(
         int Id,

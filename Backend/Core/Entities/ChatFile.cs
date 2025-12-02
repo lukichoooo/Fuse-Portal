@@ -7,9 +7,11 @@ namespace Core.Entities
         [Key]
         public int Id { get; set; }
 
-        public string FileName { get; set; } = null!;
+        [Required]
+        public string Name { get; set; } = null!;
 
-        public string FilePath { get; set; } = null!;
+        [Required]
+        public string Text { get; set; } = null!;
 
         [Required]
         public int MessageId { get; set; }

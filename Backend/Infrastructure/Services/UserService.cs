@@ -23,14 +23,14 @@ public class UserService(IUserMapper mapper, IEncryptor encryptor, IUserRepo use
 
     public async Task<UserDto> GetByIdAsync(int id)
     {
-        var user = await _repo.GetAsync(id)
+        var user = await _repo.GetByIdAsync(id)
             ?? throw new UserNotFoundException($"User not found with Id={id}");
         return _mapper.ToDto(user);
     }
 
     public async Task<UserPrivateDto> GetPrivateDtoById(int id)
     {
-        var user = await _repo.GetAsync(id)
+        var user = await _repo.GetByIdAsync(id)
             ?? throw new UserNotFoundException($"User not found with Id={id}");
         user.Password = _encryptor.Encrypt(user.Password);
         return _mapper.ToPrivateDto(user);

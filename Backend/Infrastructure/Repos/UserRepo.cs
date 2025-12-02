@@ -10,13 +10,13 @@ public class UserRepo(MyContext context) : IUserRepo
 {
     private readonly MyContext _context = context;
 
-    public async Task<User?> GetAsync(int id)
-        => await _context.Users.FindAsync(id);
+    public ValueTask<User?> GetByIdAsync(int id)
+        => _context.Users.FindAsync(id);
 
-    public async Task<User?> GetByEmailAsync(string email)
-        => await _context.Users.FirstOrDefaultAsync(x => x.Email == email);
+    public Task<User?> GetByEmailAsync(string email)
+        => _context.Users.FirstOrDefaultAsync(x => x.Email == email);
 
-    public async Task<bool> ExistsAsync(string email) => await _context.Users.AnyAsync(x => x.Email == email);
+    public Task<bool> ExistsAsync(string email) => _context.Users.AnyAsync(x => x.Email == email);
 
     public async Task<User> CreateAsync(User user)
     {
@@ -25,8 +25,8 @@ public class UserRepo(MyContext context) : IUserRepo
         return user;
     }
 
-    public async Task<List<User>> GetAllPageAsync(int lastId = -1, int pageSize = 16)
-        => await _context.Users
+    public Task<List<User>> GetAllPageAsync(int lastId = -1, int pageSize = 16)
+        => _context.Users
             .OrderBy(u => u.Id)
             .Where(u => u.Id > lastId)
             .Take(pageSize)
@@ -41,8 +41,8 @@ public class UserRepo(MyContext context) : IUserRepo
         return user.Universities.ToList();
     }
 
-    public async Task<List<User>> PageByNameAsync(string name, int lastId = -1, int pageSize = 16)
-        => await _context.Users
+    public Task<List<User>> PageByNameAsync(string name, int lastId = -1, int pageSize = 16)
+        => _context.Users
         .OrderBy(u => u.Id)
         .Where(u =>
                 u.Id > lastId &&

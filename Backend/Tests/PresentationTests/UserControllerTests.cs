@@ -62,10 +62,11 @@ namespace PresentationTests
                     s.GetAllPageAsync(It.IsAny<int>(), It.IsAny<int>()),
                     users);
 
-            var res = await controller.GetAllPageAsync() as OkObjectResult;
+            var rv = await controller.GetAllPageAsync();
+            var res = rv.Result as OkObjectResult;
 
             Assert.That(res, Is.Not.Null);
-            Assert.That(res.Value, Is.EqualTo(users));
+            Assert.That(res.Value, Is.EquivalentTo(users));
         }
 
 
@@ -77,7 +78,8 @@ namespace PresentationTests
             var controller = CreateControllerReturn(s =>
                     s.GetByIdAsync(It.IsAny<int>()), user);
 
-            var res = await controller.GetByIdAsync(user.Id) as OkObjectResult;
+            var rv = await controller.GetByIdAsync(user.Id);
+            var res = rv.Result as OkObjectResult;
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Value, Is.EqualTo(user));
@@ -108,10 +110,11 @@ namespace PresentationTests
                     s.GetPageByNameAsync(name, It.IsAny<int>(), It.IsAny<int>()),
                     users);
 
-            var res = await controller.GetPageByNameAsync(name) as OkObjectResult;
+            var rv = await controller.GetPageByNameAsync(name);
+            var res = rv.Result as OkObjectResult;
 
             Assert.That(res, Is.Not.Null);
-            Assert.That(res.Value, Is.EqualTo(users));
+            Assert.That(res.Value, Is.EquivalentTo(users));
         }
 
 
@@ -120,11 +123,12 @@ namespace PresentationTests
         {
             var fixture = new Fixture();
             var id = fixture.Create<int>();
-            var user = fixture.Create<UserPrivateDto>();
+            var user = fixture.Create<UserDetailsDto>();
             var controller = CreateControllerReturn(s =>
                     s.DeleteByIdAsync(id), user);
 
-            var res = await controller.DeleteByIdAsync(id) as OkObjectResult;
+            var rv = await controller.DeleteByIdAsync(id);
+            var res = rv.Result as OkObjectResult;
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Value, Is.EqualTo(user));
@@ -137,7 +141,6 @@ namespace PresentationTests
         {
             var fixture = new Fixture();
             var id = fixture.Create<int>();
-            var user = fixture.Create<UserPrivateDto>();
             var controller = CreateControllerThrows(s =>
                     s.DeleteByIdAsync(id), new UserNotFoundException());
 
@@ -150,11 +153,12 @@ namespace PresentationTests
         {
             var fixture = new Fixture();
             var id = fixture.Create<int>();
-            var user = fixture.Create<UserPrivateDto>();
+            var user = fixture.Create<UserDetailsDto>();
             var controller = CreateControllerWithContext(s =>
                     s.DeleteByIdAsync(id), user, id);
 
-            var res = await controller.DeleteCurrentUser() as OkObjectResult;
+            var rv = await controller.DeleteCurrentUser();
+            var res = rv.Result as OkObjectResult;
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Value, Is.EqualTo(user));
@@ -170,7 +174,8 @@ namespace PresentationTests
             var controller = CreateControllerWithContext(s =>
                     s.GetPrivateDtoById(id), user, id);
 
-            var res = await controller.GetCurrentUserPrivateDto() as OkObjectResult;
+            var rv = await controller.GetCurrentUserPrivateDto();
+            var res = rv.Result as OkObjectResult;
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Value, Is.EqualTo(user));
