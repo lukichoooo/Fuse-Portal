@@ -186,5 +186,37 @@ namespace InfrastructureTests.Convo
                     .Order()));
         }
 
+        [Test]
+        public async Task UpdateChatAsync_Success()
+        {
+            const int chatId = 5;
+            var oldVal = _globalFixture.Create<string>();
+            var newVal = _globalFixture.Create<string>();
+            var chat = _globalFixture.Build<Chat>()
+                .With(c => c.Messages, [])
+                .With(c => c.Id, chatId)
+                .With(c => c.LastResponseId, oldVal)
+                .Create();
+            await _context.Chats.AddAsync(chat);
+            await _context.SaveChangesAsync();
+
+            var res = await _repo.UpdateChatLastResponseIdAsync(chatId, newVal);
+
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res.LastResponseId, Is.EqualTo(newVal));
+            Assert.That(res.LastResponseId, Is.Not.EqualTo(oldVal));
+        }
+
+
+        [Test]
+        public async Task UpdateChatAsync_NotFound_Throws()
+        {
+            const int chatId = 5;
+            var newVal = _globalFixture.Create<string>();
+            await _context.SaveChangesAsync();
+
+            Assert.ThrowsAsync<ChatNotFoundException>(async () =>
+                    await _repo.UpdateChatLastResponseIdAsync(chatId, newVal));
+        }
     }
 }

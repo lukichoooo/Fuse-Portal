@@ -22,6 +22,7 @@ namespace Infrastructure.Repos
             var msg = await _context.Messages.FindAsync(msgId)
                 ?? throw new MessageNotFoundException($" No message found with Id={msgId}");
             _context.Remove(msg);
+
             await _context.SaveChangesAsync();
             return msg;
         }
@@ -44,5 +45,14 @@ namespace Infrastructure.Repos
                     .Take(pageSize)
                     .ToListAsync();
 
+        public async ValueTask<Chat> UpdateChatLastResponseIdAsync(int chatId, string newLastResponseId)
+        {
+            var chat = await _context.Chats.FindAsync(chatId)
+                ?? throw new ChatNotFoundException($" No Chat found with Id={chatId}");
+            chat.LastResponseId = newLastResponseId;
+
+            await _context.SaveChangesAsync();
+            return chat;
+        }
     }
 }

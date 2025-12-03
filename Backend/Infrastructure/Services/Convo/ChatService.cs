@@ -34,11 +34,16 @@ namespace Infrastructure.Services
         public async Task<MessageDto> DeleteMessageByIdAsync(int msgId)
             => _mapper.ToMessageDto(await _repo.DeleteMessageByIdAsync(msgId));
 
+        // TODO: ADD file handling
+        // TODO: Make Concurrent (maybe add fire & forget)
         public async Task<MessageDto> SendMessageAsync(ClientMessage cm)
         {
-            _ = _repo.AddMessageAsync(_mapper.ToMessage(cm));
-            // TODO: ADD file handling
-            return await _LLMService.SendMessageAsync(_mapper.ToMessageDto(cm));
+            await _repo.AddMessageAsync(_mapper.ToMessage(cm));
+            MessageDto response = await _LLMService.SendMessageAsync(_mapper.ToMessageDto(cm));
+            await _repo.AddMessageAsync(_mapper.ToMessage(response));
+
+            return response;
         }
+
     }
 }

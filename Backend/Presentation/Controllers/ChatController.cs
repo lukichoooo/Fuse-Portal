@@ -32,13 +32,14 @@ namespace Presentation.Controllers
             => Ok(await _service.SendMessageAsync(message));
 
 
+        // TODO: implement
         [HttpPost("messages/file")]
-        public async Task<ActionResult<MessageDto>> SendMessageWithFileAsync( // TODO: Add cencelation Token
+        public async Task<ActionResult<MessageDto>> SendMessageWithFileAsync(
                 [FromBody] ClientMessage message,
                 IFormFileCollection files
                 )
         {
-            return Ok(await _service.SendMessageAsync(message));
+            throw new NotImplementedException();
         }
 
 

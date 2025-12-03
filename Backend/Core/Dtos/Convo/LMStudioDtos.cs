@@ -35,9 +35,10 @@ public record LMStudioResponse(
     string PreviousResponseId
 );
 
-public record LMStudioRequest(
-    string Model,
-    string Input,
-    string? PreviousResponseId
-);
+public record LMStudioRequest
+{
+    public string Model { get; init; } = null!;
+    public string Input { get; init; } = null!;
+    public string? PreviousResponseId { get; set; }
+}
 

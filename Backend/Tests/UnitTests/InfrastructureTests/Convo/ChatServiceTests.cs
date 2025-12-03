@@ -156,10 +156,9 @@ namespace InfrastructureTests.Convo
                 .ReturnsAsync(response);
 
             int msgId = _globalFixture.Create<int>();
-            var msg = _mapper.ToMessage(cm);
             var repoMock = new Mock<IChatRepo>();
             repoMock.Setup(r => r.AddMessageAsync(It.IsAny<Message>()))
-                .ReturnsAsync(msg);
+                .ReturnsAsync((Message msg) => msg);
 
             var service = CreateService(repoMock.Object, LLMServiceMock.Object);
 
@@ -168,7 +167,7 @@ namespace InfrastructureTests.Convo
             Assert.That(res, Is.Not.Null);
             Assert.That(res, Is.EqualTo(response));
             LLMServiceMock.Verify(s => s.SendMessageAsync(It.IsAny<MessageDto>()), Times.Once());
-            // repoMock.Verify(r => r.AddMessageAsync(msg), Times.Once());
+            repoMock.Verify(r => r.AddMessageAsync(It.IsAny<Message>()), Times.Exactly(2));
         }
     }
 }

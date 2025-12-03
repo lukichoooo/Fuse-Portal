@@ -26,11 +26,12 @@ namespace Infrastructure.Services.LLM.LMStudio
 
         public LMStudioRequest ToRequest(MessageDto msg, string? previousResponseId = null)
         {
-            return new(
-                    Model: _settings.Model,
-                    Input: _requestGenerator.GenerateInput(msg, _settings.Rules),
-                    PreviousResponseId: previousResponseId
-                  );
+            return new()
+            {
+                Model = _settings.Model,
+                Input = _requestGenerator.GenerateInput(msg, _settings.Rules),
+                PreviousResponseId = previousResponseId
+            };
         }
     }
 }

@@ -2,6 +2,7 @@ using AutoFixture;
 using Core.Dtos;
 using Core.Dtos.Settings;
 using Core.Interfaces.LLM;
+using Core.Interfaces.LLM.Cache;
 using Core.Interfaces.LLM.LMStudio;
 using Infrastructure.Services.LLM.LMStudio;
 using Microsoft.Extensions.Options;
@@ -38,8 +39,8 @@ namespace InfrastructureTests.LLM.LMStudio
             _mapper = new LMStudioMapper(options, mock.Object);
         }
 
-        private ILLMService CreateService(ILMStudioApi api)
-            => new LMStudioLLMService(api, _mapper);
+        private ILLMService CreateService(ILMStudioApi api, IChatMetadataService metadataService)
+            => new LMStudioLLMService(api, _mapper, metadataService);
 
         [Test]
         public async Task SendMessageAsync_Success()
@@ -47,16 +48,62 @@ namespace InfrastructureTests.LLM.LMStudio
             var msg = _globalFixture.Create<MessageDto>();
             var request = _globalFixture.Create<LMStudioRequest>();
             var response = _globalFixture.Create<LMStudioResponse>();
+
             var apiMock = new Mock<ILMStudioApi>();
             apiMock.Setup(a => a.SendMessageAsync(It.IsAny<LMStudioRequest>()))
                 .ReturnsAsync(response);
-            var service = CreateService(apiMock.Object);
+
+            var dataServiceMock = new Mock<IChatMetadataService>();
+            dataServiceMock.Setup(a => a.GetLastResponseIdAsync(It.IsAny<int>()))
+                .ReturnsAsync("id");
+            dataServiceMock.Setup(a => a.SetLastResponseIdAsync(
+                        It.IsAny<int>(), It.IsAny<string>()));
+
+            var service = CreateService(apiMock.Object, dataServiceMock.Object);
 
             var res = await service.SendMessageAsync(msg);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.ChatId, Is.EqualTo(msg.ChatId));
             apiMock.Verify(a => a.SendMessageAsync(It.IsAny<LMStudioRequest>()),
+                        Times.Once());
+            dataServiceMock.Verify(a => a.GetLastResponseIdAsync(It.IsAny<int>()),
+                        Times.Once());
+            dataServiceMock.Verify(a => a.SetLastResponseIdAsync(
+                        It.IsAny<int>(), It.IsAny<string>()),
+                        Times.Once());
+        }
+
+
+        [Test]
+        public async Task SendMessageAsync_NullLastResponseId_Success()
+        {
+            var msg = _globalFixture.Create<MessageDto>();
+            var request = _globalFixture.Create<LMStudioRequest>();
+            var response = _globalFixture.Create<LMStudioResponse>();
+
+            var apiMock = new Mock<ILMStudioApi>();
+            apiMock.Setup(a => a.SendMessageAsync(It.IsAny<LMStudioRequest>()))
+                .ReturnsAsync(response);
+
+            var dataServiceMock = new Mock<IChatMetadataService>();
+            dataServiceMock.Setup(a => a.GetLastResponseIdAsync(It.IsAny<int>()))
+                .ReturnsAsync(() => null);
+            dataServiceMock.Setup(a => a.SetLastResponseIdAsync(
+                        It.IsAny<int>(), It.IsAny<string>()));
+
+            var service = CreateService(apiMock.Object, dataServiceMock.Object);
+
+            var res = await service.SendMessageAsync(msg);
+
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res.ChatId, Is.EqualTo(msg.ChatId));
+            apiMock.Verify(a => a.SendMessageAsync(It.IsAny<LMStudioRequest>()),
+                        Times.Once());
+            dataServiceMock.Verify(a => a.GetLastResponseIdAsync(It.IsAny<int>()),
+                        Times.Once());
+            dataServiceMock.Verify(a => a.SetLastResponseIdAsync(
+                        It.IsAny<int>(), It.IsAny<string>()),
                         Times.Once());
         }
     }
