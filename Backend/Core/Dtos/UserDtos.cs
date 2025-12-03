@@ -13,23 +13,12 @@ public record UserDetailsDto(
             List<string> Faculties
         );
 
-public class UserPrivateDto
+public record UserPrivateDto
 {
     public int Id { get; set; }
-    public string Name { get; set; }
-    public string Email { get; set; }
-    public string Password { get; set; }
-    public AddressDto Address { get; set; }
-
-    public UserPrivateDto() { }
-
-    public UserPrivateDto(int id, string name, string email, string password, AddressDto address)
-    {
-        Id = id;
-        Name = name;
-        Email = email;
-        Password = password;
-        Address = address;
-    }
+    public required string Name { get; init; }
+    public required string Email { get; init; }
+    public required string Password { get; init; }
+    public required AddressDto Address { get; init; }
 }
 

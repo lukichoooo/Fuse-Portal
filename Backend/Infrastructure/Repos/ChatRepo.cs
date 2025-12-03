@@ -26,7 +26,7 @@ namespace Infrastructure.Repos
             return msg;
         }
 
-        public ValueTask<Chat?> GetChatAsync(int chatId)
+        public ValueTask<Chat?> GetChatByIdAsync(int chatId)
             => _context.Chats.FindAsync(chatId);
 
         public Task<List<Chat>> GetAllChatsPageAsync(int lastId, int pageSize)

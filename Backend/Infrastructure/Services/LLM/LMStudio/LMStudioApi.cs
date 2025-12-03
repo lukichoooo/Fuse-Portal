@@ -2,11 +2,12 @@ using System.Text;
 using System.Text.Json;
 using Core.Dtos;
 using Core.Dtos.Settings;
+using Core.Interfaces.LLM.LMStudio;
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Services.LLM.LMStudio
 {
-    public class LMStudioApi
+    public class LMStudioApi : ILMStudioApi
     {
         private readonly LMStudioSettings _settings;
         private readonly HttpClient _client;

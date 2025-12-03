@@ -8,7 +8,7 @@ namespace Core.Interfaces.Convo
 
         Task<ChatFullDto> GetFullChatPageAsync(int chatId, int lastId, int pageSize);
 
-        Task<MessageDto> SendMessageAsync(MessageDto msg);
-        Task<MessageDto> RemoveMessageByIdAsync(int msgId);
+        Task<MessageDto> SendMessageAsync(ClientMessage cm);
+        Task<MessageDto> DeleteMessageByIdAsync(int msgId);
     }
 }

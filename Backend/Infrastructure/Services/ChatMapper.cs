@@ -1,5 +1,4 @@
 using Core.Dtos;
-using Core.Entities;
 using Core.Entities.Convo;
 using Core.Interfaces.Convo;
 
@@ -12,7 +11,6 @@ namespace Infrastructure.Services
             {
                 Id = dto.Id,
                 Name = dto.Name,
-
             };
 
         public ChatDto ToChatDto(Chat chat)
@@ -25,8 +23,7 @@ namespace Infrastructure.Services
             => new(
                     Id: chat.Id,
                     Name: chat.Name,
-                    Messages: chat.Messages
-                        .ConvertAll(ToMessageDto)
+                    Messages: chat.Messages.ConvertAll(ToMessageDto)
                   );
 
         public Message ToMessage(MessageDto dto)
@@ -36,26 +33,41 @@ namespace Infrastructure.Services
                 Text = dto.Text,
                 CreatedAt = dto.CreatedAt,
                 ChatId = dto.ChatId,
-                Files = dto.FileToContent?
-                    .Select(x => new ChatFile
-                    {
-                        Name = x.Key,
-                        Text = x.Value
-                    }).ToList() ?? []
+                Files = dto.Files.ConvertAll(x => new ChatFile
+                {
+                    Name = x.Name,
+                    Text = x.Text,
+                    MessageId = dto.Id
+                })
+            };
+
+        public Message ToMessage(ClientMessage cm)
+            => new()
+            {
+                Id = cm.Id,
+                Text = cm.Text,
+                CreatedAt = cm.CreatedAt,
+                ChatId = cm.ChatId,
             };
 
         public MessageDto ToMessageDto(Message msg)
-            => new(
-                        Id: msg.Id,
-                        Text: msg.Text,
-                        CreatedAt: msg.CreatedAt,
-                        ChatId: msg.ChatId,
-                        FileToContent:
-                            msg.Files.Count != 0 ?
-                                msg.Files.ToDictionary(f => f.Name, f => f.Text)
-                                :
-                                null
-                      );
+            => new()
+            {
+                Id = msg.Id,
+                Text = msg.Text,
+                CreatedAt = msg.CreatedAt,
+                ChatId = msg.ChatId,
+                Files = msg.Files.ConvertAll(x => new FileDto(x.Name, x.Text))
+            };
 
+        public MessageDto ToMessageDto(ClientMessage cm, List<FileDto>? files = null)
+            => new()
+            {
+                Id = cm.Id,
+                Text = cm.Text,
+                CreatedAt = cm.CreatedAt,
+                ChatId = cm.ChatId,
+                Files = files ?? []
+            };
     }
 }

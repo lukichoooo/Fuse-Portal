@@ -20,13 +20,10 @@ namespace Infrastructure.Services.LLM
             if (!string.IsNullOrWhiteSpace(msg.Text))
                 sb.AppendLine($"{_settings.UserInputDelimiter}\n{msg.Text}");
 
-            if (msg.FileToContent is not null)
+            foreach (var (name, content) in msg.Files)
             {
-                foreach (var (name, content) in msg.FileToContent)
-                {
-                    sb.AppendLine($"{_settings.FileNameDelimiter}\n{name}");
-                    sb.AppendLine($"{_settings.FileContentDelimiter}\n{content}");
-                }
+                sb.AppendLine($"{_settings.FileNameDelimiter}\n{name}");
+                sb.AppendLine($"{_settings.FileContentDelimiter}\n{content}");
             }
 
             return sb.ToString().Trim();

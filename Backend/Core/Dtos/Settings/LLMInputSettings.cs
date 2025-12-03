@@ -2,9 +2,9 @@ namespace Core.Dtos.Settings
 {
     public class LLMInputSettings
     {
-        public string RulesDelimiter { get; set; }
-        public string UserInputDelimiter { get; set; }
-        public string FileNameDelimiter { get; set; }
-        public string FileContentDelimiter { get; set; }
+        public string RulesDelimiter { get; set; } = null!;
+        public string UserInputDelimiter { get; set; } = null!;
+        public string FileNameDelimiter { get; set; } = null!;
+        public string FileContentDelimiter { get; set; } = null!;
     }
 }

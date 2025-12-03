@@ -12,14 +12,16 @@ namespace Infrastructure.Services.LLM.LMStudio
         private readonly ILLMInputGenerator _requestGenerator = requestGenerator;
 
         public MessageDto ToMessageDto(LMStudioResponse response, int chatId)
-            => new(
-                    Id: 0,
-                    Text: response.Output[0].Content[0].Text,
-                    CreatedAt: DateTimeOffset
+            => new()
+            {
+                Id = 0,
+                Text = response.Output[0].Content[0].Text,
+                CreatedAt = DateTimeOffset
                         .FromUnixTimeSeconds(response.CreatedAt)
                         .UtcDateTime,
-                    ChatId: chatId
-                );
+                ChatId = chatId,
+                Files = []
+            };
 
 
         public LMStudioRequest ToRequest(MessageDto msg, string? previousResponseId = null)

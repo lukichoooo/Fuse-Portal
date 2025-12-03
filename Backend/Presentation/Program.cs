@@ -58,7 +58,7 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = builder.Configuration["JwtSettings:Issuer"],
         ValidAudience = builder.Configuration["JwtSettings:Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"])),
+            Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"]!)),
         RoleClaimType = ClaimTypes.Role,
     };
 });
@@ -83,3 +83,7 @@ app.MapControllers();
 
 app.Run();
 
+
+
+// For Intergration Testing
+public partial class Program { }

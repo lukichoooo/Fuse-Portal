@@ -12,19 +12,10 @@ public record UniDtoWithUsers(
     );
 
 
-public class UniRequestDto
+public record UniRequestDto
 {
-    public int Id { get; set; }
-    public string Name { get; set; }
-    public AddressDto Address { get; set; }
-
-    public UniRequestDto() { }
-
-    public UniRequestDto(int id, string name, AddressDto address)
-    {
-        Id = id;
-        Name = name;
-        Address = address;
-    }
+    public int Id { get; init; }
+    public string Name { get; init; } = null!;
+    public AddressDto Address { get; init; } = null!;
 }
 

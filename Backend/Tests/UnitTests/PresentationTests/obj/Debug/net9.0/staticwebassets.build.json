@@ -1,0 +1,24 @@
+{
+  "Version": 1,
+  "Hash": "eJ+8twOsxvECRyPytync80XMM5TGCPH5aGxbef7fOV4=",
+  "Source": "PresentationTests",
+  "BasePath": "_content/PresentationTests",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [
+    {
+      "Identity": "/home/lukacho/Desktop/AI HIGGS/Backend/Presentation/Presentation.csproj",
+      "Version": 2,
+      "Source": "Presentation",
+      "GetPublishAssetsTargets": "ComputeReferencedStaticWebAssetsPublishManifest;GetCurrentProjectPublishStaticWebAssetItems",
+      "AdditionalPublishProperties": "Configuration=Debug;Platform=AnyCPU",
+      "AdditionalPublishPropertiesToRemove": "WebPublishProfileFile;TargetFramework",
+      "GetBuildAssetsTargets": "GetCurrentProjectBuildStaticWebAssetItems",
+      "AdditionalBuildProperties": "Configuration=Debug;Platform=AnyCPU",
+      "AdditionalBuildPropertiesToRemove": "WebPublishProfileFile;TargetFramework"
+    }
+  ],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}

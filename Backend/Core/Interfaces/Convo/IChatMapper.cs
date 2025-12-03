@@ -1,5 +1,4 @@
 using Core.Dtos;
-using Core.Entities;
 using Core.Entities.Convo;
 
 namespace Core.Interfaces.Convo
@@ -11,6 +10,8 @@ namespace Core.Interfaces.Convo
         ChatFullDto ToFullChatDto(Chat chat);
 
         MessageDto ToMessageDto(Message msg);
+        MessageDto ToMessageDto(ClientMessage cm, List<FileDto>? files = null);
+        Message ToMessage(ClientMessage cm);
         Message ToMessage(MessageDto dto);
     }
 }

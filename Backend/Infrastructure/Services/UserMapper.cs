@@ -1,6 +1,5 @@
 using Core.Dtos;
 using Core.Entities;
-using Core.Enums;
 using Core.Interfaces;
 
 namespace Infrastructure.Services
@@ -23,13 +22,14 @@ namespace Infrastructure.Services
                     );
 
         public UserPrivateDto ToPrivateDto(User user)
-            => new(
-                        id: user.Id,
-                        name: user.Name,
-                        email: user.Email,
-                        password: user.Password,
-                        address: user.Address
-                    );
+            => new()
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Email = user.Email,
+                Password = user.Password,
+                Address = user.Address
+            };
 
         public User ToUser(UserDto userDto)
             => new()

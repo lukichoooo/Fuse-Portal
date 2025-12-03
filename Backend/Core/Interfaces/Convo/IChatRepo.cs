@@ -5,7 +5,7 @@ namespace Core.Interfaces.Convo
 {
     public interface IChatRepo
     {
-        ValueTask<Chat?> GetChatAsync(int chatId);
+        ValueTask<Chat?> GetChatByIdAsync(int chatId);
         Task<List<Chat>> GetAllChatsPageAsync(int lastId, int pageSize);
 
         Task<List<Message>> GetMessagesForChat(int chatId, int lastId, int pageSize);

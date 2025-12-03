@@ -5,13 +5,28 @@ public record ChatDto(
         string Name
         );
 
-public record MessageDto(
-    int Id,
-    string Text,
-    DateTime CreatedAt,
-    int ChatId,
-    Dictionary<string, string>? FileToContent = null
-);
+
+public record FileDto(
+        string Name,
+        string Text
+        );
+
+public record MessageDto
+{
+    public int Id { get; init; }
+    public required string Text { get; init; }
+    public DateTime CreatedAt { get; init; }
+    public int ChatId { get; init; }
+    public List<FileDto> Files { get; init; } = [];
+}
+
+public record ClientMessage
+{
+    public int Id { get; init; }
+    public required string Text { get; init; }
+    public DateTime CreatedAt { get; init; }
+    public int ChatId { get; init; }
+}
 
 
 public record ChatFullDto(
