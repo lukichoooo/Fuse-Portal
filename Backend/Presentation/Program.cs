@@ -8,6 +8,7 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Infrastructure;
 using Infrastructure.Contexts;
+using Infrastructure.Services.LLM.LMStudio;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -22,6 +23,9 @@ builder.Services.AddControllers(options =>
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Http Clients
+builder.Services.AddHttpClient<LMStudioApi>();
 
 // DB context
 builder.Services.AddDbContext<MyContext>(options =>

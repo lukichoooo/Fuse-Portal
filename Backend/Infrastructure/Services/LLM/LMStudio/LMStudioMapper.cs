@@ -4,7 +4,6 @@ using Core.Interfaces.LLM;
 using Core.Interfaces.LLM.LMStudio;
 using Microsoft.Extensions.Options;
 
-// TODO: implement Settings
 namespace Infrastructure.Services.LLM.LMStudio
 {
     public class LMStudioMapper(IOptions<LMStudioSettings> options, ILLMInputGenerator requestGenerator) : ILMStudioMapper
@@ -24,7 +23,7 @@ namespace Infrastructure.Services.LLM.LMStudio
                 Files = []
             };
 
-
+        // TODO: implement Settings
         public LMStudioRequest ToRequest(MessageDto msg, string? previousResponseId = null)
         {
             return new()
