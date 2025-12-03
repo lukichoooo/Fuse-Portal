@@ -6,7 +6,7 @@ namespace Core.Dtos.Settings
         public string ChatRoute { get; set; } = null!;
 
         public string Model { get; set; } = null!;
-        public string Rules { get; set; } = null!;
+        public string SystemPrompt { get; set; } = null!;
 
         public float Temperature { get; set; }
         public int MaxTokens { get; set; }

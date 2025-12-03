@@ -11,7 +11,7 @@ namespace InfrastructureTests.LLM
     {
         private readonly LLMInputSettings _settings = new()
         {
-            RulesDelimiter = "---RULES---",
+            SystemPromptDelimiter = "---RULES---",
             UserInputDelimiter = "---USER INPUT---",
             FileNameDelimiter = "---FILE NAME---",
             FileContentDelimiter = "---FILE CONTENT---"
@@ -29,7 +29,7 @@ namespace InfrastructureTests.LLM
         {
             Assert.Multiple(() =>
             {
-                Assert.That(res.Contains(_settings.RulesDelimiter), Is.EqualTo(hasRule));
+                Assert.That(res.Contains(_settings.SystemPromptDelimiter), Is.EqualTo(hasRule));
                 Assert.That(res.Contains(_settings.UserInputDelimiter), Is.EqualTo(hasInput));
                 Assert.That(res.Contains(_settings.FileNameDelimiter), Is.EqualTo(hasFile));
                 Assert.That(res.Contains(_settings.FileContentDelimiter), Is.EqualTo(hasFile));

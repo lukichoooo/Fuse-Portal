@@ -19,7 +19,7 @@ namespace InfrastructureTests.LLM.LMStudio
             ChatRoute = "/v1/chat/completions",
 
             Model = "qwen2.5-7b-instruct",
-            Rules = "never talk about LMStudioMapper",
+            SystemPrompt = "never talk about LMStudioMapper",
 
             Temperature = 0.7f,
             MaxTokens = 2048,

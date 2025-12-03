@@ -35,13 +35,13 @@ namespace IntergrationTests
                 URL = "apiUrl",
                 ChatRoute = "route",
                 Model = "model",
-                Rules = "Ruless"
+                SystemPrompt = "Ruless"
             };
             var apiOptions = Options.Create(apiSettings);
 
             LLMInputSettings _settings = new()
             {
-                RulesDelimiter = "---RULES---",
+                SystemPromptDelimiter = "---RULES---",
                 UserInputDelimiter = "---USER INPUT---",
                 FileNameDelimiter = "---FILE NAME---",
                 FileContentDelimiter = "---FILE CONTENT---"
@@ -55,7 +55,7 @@ namespace IntergrationTests
                 ChatRoute = "/v1/chat/completions",
 
                 Model = "qwen2.5-7b-instruct",
-                Rules = "never talk about LMStudioMapper",
+                SystemPrompt = "never talk about LMStudioMapper",
 
                 Temperature = 0.7f,
                 MaxTokens = 2048,

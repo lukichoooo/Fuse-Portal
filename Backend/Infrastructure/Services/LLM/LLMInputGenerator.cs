@@ -15,7 +15,7 @@ namespace Infrastructure.Services.LLM
             var sb = new StringBuilder();
 
             if (!string.IsNullOrWhiteSpace(rules))
-                sb.AppendLine($"{_settings.RulesDelimiter}\n{rules}");
+                sb.AppendLine($"{_settings.SystemPromptDelimiter}\n{rules}");
 
             if (!string.IsNullOrWhiteSpace(msg.Text))
                 sb.AppendLine($"{_settings.UserInputDelimiter}\n{msg.Text}");

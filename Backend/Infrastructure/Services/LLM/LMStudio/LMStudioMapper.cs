@@ -4,6 +4,7 @@ using Core.Interfaces.LLM;
 using Core.Interfaces.LLM.LMStudio;
 using Microsoft.Extensions.Options;
 
+// TODO: implement Settings
 namespace Infrastructure.Services.LLM.LMStudio
 {
     public class LMStudioMapper(IOptions<LMStudioSettings> options, ILLMInputGenerator requestGenerator) : ILMStudioMapper
@@ -29,7 +30,7 @@ namespace Infrastructure.Services.LLM.LMStudio
             return new()
             {
                 Model = _settings.Model,
-                Input = _requestGenerator.GenerateInput(msg, _settings.Rules),
+                Input = _requestGenerator.GenerateInput(msg, _settings.SystemPrompt),
                 PreviousResponseId = previousResponseId
             };
         }
