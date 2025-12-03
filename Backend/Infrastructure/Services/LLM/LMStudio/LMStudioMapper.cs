@@ -6,9 +6,9 @@ using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Services.LLM.LMStudio
 {
-    public class LMStudioMapper(IOptions<LMStudioSettings> options, ILLMInputGenerator requestGenerator) : ILMStudioMapper
+    public class LMStudioMapper(IOptions<LMStudioApiSettings> options, ILLMInputGenerator requestGenerator) : ILMStudioMapper
     {
-        private readonly LMStudioSettings _settings = options.Value;
+        private readonly LMStudioApiSettings _settings = options.Value;
         private readonly ILLMInputGenerator _requestGenerator = requestGenerator;
 
         public MessageDto ToMessageDto(LMStudioResponse response, int chatId)

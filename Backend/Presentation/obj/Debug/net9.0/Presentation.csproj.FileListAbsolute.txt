@@ -342,3 +342,5 @@
 /home/lukacho/Desktop/AI HIGGS/Backend/Presentation/bin/Debug/net9.0/FluentValidation.dll
 /home/lukacho/Desktop/AI HIGGS/Backend/Presentation/bin/Debug/net9.0/FluentValidation.AspNetCore.dll
 /home/lukacho/Desktop/AI HIGGS/Backend/Presentation/bin/Debug/net9.0/FluentValidation.DependencyInjectionExtensions.dll
+/home/lukacho/Desktop/AI HIGGS/Backend/Presentation/bin/Debug/net9.0/NLog.dll
+/home/lukacho/Desktop/AI HIGGS/Backend/Presentation/bin/Debug/net9.0/NLog.Extensions.Logging.dll

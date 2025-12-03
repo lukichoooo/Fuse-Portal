@@ -581,3 +581,5 @@
 /home/lukacho/Desktop/AI HIGGS/Backend/Tests/IntergrationTests/obj/Debug/net9.0/IntergrationTests.pdb
 /home/lukacho/Desktop/AI HIGGS/Backend/Tests/IntergrationTests/obj/Debug/net9.0/IntergrationTests.genruntimeconfig.cache
 /home/lukacho/Desktop/AI HIGGS/Backend/Tests/IntergrationTests/obj/Debug/net9.0/ref/IntergrationTests.dll
+/home/lukacho/Desktop/AI HIGGS/Backend/Tests/IntergrationTests/bin/Debug/net9.0/NLog.dll
+/home/lukacho/Desktop/AI HIGGS/Backend/Tests/IntergrationTests/bin/Debug/net9.0/NLog.Extensions.Logging.dll

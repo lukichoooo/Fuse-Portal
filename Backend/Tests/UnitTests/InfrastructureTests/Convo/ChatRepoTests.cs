@@ -218,5 +218,16 @@ namespace InfrastructureTests.Convo
             Assert.ThrowsAsync<ChatNotFoundException>(async () =>
                     await _repo.UpdateChatLastResponseIdAsync(chatId, newVal));
         }
+
+        [Test]
+        public async Task CreateNewChat_Success()
+        {
+            var chatName = _globalFixture.Create<string>();
+            var returnValue = await _repo.CreateNewChat(chatName);
+            var res = await _context.Chats.FindAsync(returnValue.Id);
+
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res.Id, Is.EqualTo(res!.Id));
+        }
     }
 }

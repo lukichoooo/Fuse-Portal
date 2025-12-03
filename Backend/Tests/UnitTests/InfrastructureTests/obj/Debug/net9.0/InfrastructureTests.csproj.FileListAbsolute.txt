@@ -484,3 +484,5 @@
 /home/lukacho/Desktop/AI HIGGS/Backend/Tests/UnitTests/InfrastructureTests/obj/Debug/net9.0/Infrastr.7BDE2058.Up2Date
 /home/lukacho/Desktop/AI HIGGS/Backend/Tests/UnitTests/InfrastructureTests/obj/Debug/net9.0/InfrastructureTests.genruntimeconfig.cache
 /home/lukacho/Desktop/AI HIGGS/Backend/Tests/UnitTests/InfrastructureTests/obj/Debug/net9.0/ref/InfrastructureTests.dll
+/home/lukacho/Desktop/AI HIGGS/Backend/Tests/UnitTests/InfrastructureTests/bin/Debug/net9.0/NLog.dll
+/home/lukacho/Desktop/AI HIGGS/Backend/Tests/UnitTests/InfrastructureTests/bin/Debug/net9.0/NLog.Extensions.Logging.dll

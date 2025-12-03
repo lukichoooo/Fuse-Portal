@@ -11,7 +11,7 @@ namespace InfrastructureTests.LLM
     [TestFixture]
     public class LMStudioMapperTests
     {
-        private readonly LMStudioSettings _settings = new()
+        private readonly LMStudioApiSettings _settings = new()
         {
             URL = "asdadjaod",
             ChatRoute = "/v1/chat/completions",

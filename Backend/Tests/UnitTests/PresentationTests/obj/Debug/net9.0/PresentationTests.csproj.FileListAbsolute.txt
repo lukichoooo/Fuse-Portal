@@ -536,3 +536,5 @@
 /home/lukacho/Desktop/AI HIGGS/Backend/Tests/UnitTests/PresentationTests/obj/Debug/net9.0/Presenta.97D1C685.Up2Date
 /home/lukacho/Desktop/AI HIGGS/Backend/Tests/UnitTests/PresentationTests/obj/Debug/net9.0/PresentationTests.genruntimeconfig.cache
 /home/lukacho/Desktop/AI HIGGS/Backend/Tests/UnitTests/PresentationTests/obj/Debug/net9.0/ref/PresentationTests.dll
+/home/lukacho/Desktop/AI HIGGS/Backend/Tests/UnitTests/PresentationTests/bin/Debug/net9.0/NLog.dll
+/home/lukacho/Desktop/AI HIGGS/Backend/Tests/UnitTests/PresentationTests/bin/Debug/net9.0/NLog.Extensions.Logging.dll

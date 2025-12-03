@@ -13,7 +13,7 @@ namespace InfrastructureTests.LLM.LMStudio
     [TestFixture]
     public class LMStudioLLMServiceTests
     {
-        private readonly LMStudioSettings _settings = new()
+        private readonly LMStudioApiSettings _settings = new()
         {
             URL = "asdadjaod",
             ChatRoute = "/v1/chat/completions",

@@ -22,6 +22,7 @@ namespace Presentation.Filters
             {
                 context.Result = new ObjectResult(new())
                 {
+                    Value = ex.Message,
                     StatusCode = 500
                 };
                 context.ExceptionHandled = true;

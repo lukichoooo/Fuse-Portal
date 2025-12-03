@@ -1,6 +1,6 @@
 namespace Core.Dtos.Settings
 {
-    public class LMStudioSettings
+    public class LMStudioApiSettings
     {
         public string URL { get; set; } = null!;
         public string ChatRoute { get; set; } = null!;

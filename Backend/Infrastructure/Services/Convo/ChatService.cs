@@ -8,7 +8,8 @@ namespace Infrastructure.Services
     public class ChatService(
             IChatRepo repo,
             ILLMService LLMService,
-            IChatMapper mapper) : IChatService
+            IChatMapper mapper
+            ) : IChatService
     {
         private readonly IChatRepo _repo = repo;
         private readonly IChatMapper _mapper = mapper;
@@ -34,6 +35,8 @@ namespace Infrastructure.Services
         public async Task<MessageDto> DeleteMessageByIdAsync(int msgId)
             => _mapper.ToMessageDto(await _repo.DeleteMessageByIdAsync(msgId));
 
+
+
         // TODO: ADD file handling
         // TODO: Make Concurrent (maybe add fire & forget)
         public async Task<MessageDto> SendMessageAsync(ClientMessage cm)
@@ -45,5 +48,7 @@ namespace Infrastructure.Services
             return response;
         }
 
+        public async Task<ChatDto> CreateNewChat(string chatName)
+            => _mapper.ToChatDto(await _repo.CreateNewChat(chatName));
     }
 }

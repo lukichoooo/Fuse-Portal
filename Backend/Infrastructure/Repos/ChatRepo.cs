@@ -45,12 +45,20 @@ namespace Infrastructure.Repos
                     .Take(pageSize)
                     .ToListAsync();
 
-        public async ValueTask<Chat> UpdateChatLastResponseIdAsync(int chatId, string newLastResponseId)
+        public async Task<Chat> UpdateChatLastResponseIdAsync(int chatId, string newLastResponseId)
         {
             var chat = await _context.Chats.FindAsync(chatId)
                 ?? throw new ChatNotFoundException($" No Chat found with Id={chatId}");
             chat.LastResponseId = newLastResponseId;
 
+            await _context.SaveChangesAsync();
+            return chat;
+        }
+
+        public async Task<Chat> CreateNewChat(string chatName)
+        {
+            var chat = new Chat { Name = chatName };
+            await _context.Chats.AddAsync(chat);
             await _context.SaveChangesAsync();
             return chat;
         }

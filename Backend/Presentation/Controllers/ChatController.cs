@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Presentation.Controllers
 {
+    // TODO: Default arguments dont work
     [Authorize]
     [Route("api/[controller]")]
     public class ChatController(IChatService service) : ControllerBase
@@ -24,6 +25,12 @@ namespace Presentation.Controllers
             [FromQuery] int lastId = int.MinValue,
             [FromQuery] int pageSize = 16)
             => Ok(await _service.GetFullChatPageAsync(chatId, lastId, pageSize));
+
+        [HttpPost("{chatName}")]
+        public async Task<ActionResult<ChatDto>> CreateNewChat(
+                [FromRoute] string chatName = "New Chat"
+                )
+            => await _service.CreateNewChat(chatName);
 
 
         [HttpPost("messages/text")]

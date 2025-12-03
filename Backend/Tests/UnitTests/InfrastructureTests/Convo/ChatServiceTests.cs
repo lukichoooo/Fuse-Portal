@@ -169,5 +169,23 @@ namespace InfrastructureTests.Convo
             LLMServiceMock.Verify(s => s.SendMessageAsync(It.IsAny<MessageDto>()), Times.Once());
             repoMock.Verify(r => r.AddMessageAsync(It.IsAny<Message>()), Times.Exactly(2));
         }
+
+
+        [Test]
+        public async Task CreateNewChat()
+        {
+            var chatId = _globalFixture.Create<int>();
+            var chat = CreateChatById(chatId);
+            var repoMock = new Mock<IChatRepo>();
+            repoMock.Setup(r => r.CreateNewChat(chat.Name))
+                .ReturnsAsync(chat);
+            var LLMServiceMock = new Mock<ILLMService>();
+            var service = CreateService(repoMock.Object, LLMServiceMock.Object);
+
+            var res = await service.CreateNewChat(chat.Name);
+
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res.Name, Is.EqualTo(chat.Name));
+        }
     }
 }

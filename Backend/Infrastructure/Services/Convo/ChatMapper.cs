@@ -41,14 +41,7 @@ namespace Infrastructure.Services
                 })
             };
 
-        public Message ToMessage(ClientMessage cm)
-            => new()
-            {
-                Id = cm.Id,
-                Text = cm.Text,
-                CreatedAt = cm.CreatedAt,
-                ChatId = cm.ChatId,
-            };
+
 
         public MessageDto ToMessageDto(Message msg)
             => new()
@@ -60,12 +53,21 @@ namespace Infrastructure.Services
                 Files = msg.Files.ConvertAll(x => new FileDto(x.Name, x.Text))
             };
 
+
+
+        // From Client
+
+        public Message ToMessage(ClientMessage cm)
+            => new()
+            {
+                Text = cm.Text,
+                ChatId = cm.ChatId,
+            };
+
         public MessageDto ToMessageDto(ClientMessage cm, List<FileDto>? files = null)
             => new()
             {
-                Id = cm.Id,
                 Text = cm.Text,
-                CreatedAt = cm.CreatedAt,
                 ChatId = cm.ChatId,
                 Files = files ?? []
             };

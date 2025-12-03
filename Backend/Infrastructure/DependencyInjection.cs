@@ -11,6 +11,8 @@ using Infrastructure.Services.LLM;
 using Infrastructure.Services.LLM.Cache;
 using Infrastructure.Services.LLM.LMStudio;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using NLog.Extensions.Logging;
 
 namespace Infrastructure;
 
@@ -20,7 +22,6 @@ public static class DependencyInjection
         this IServiceCollection services)
     {
         // Add services here for Infrastructure
-
 
 
         // Repos
