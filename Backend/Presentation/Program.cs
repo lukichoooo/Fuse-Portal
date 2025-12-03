@@ -35,8 +35,8 @@ builder.Services.AddDbContext<MyContext>(options =>
 // get Settings from Appsettings
 builder.Services.Configure<ValidatorSettings>(builder.Configuration.GetSection("ValidatorSettings"));
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
-
-
+builder.Services.Configure<LLMApiSettings>(builder.Configuration.GetSection("LLMApiSettings"));
+builder.Services.Configure<LLMInputSettings>(builder.Configuration.GetSection("LLMInputSettings"));
 builder.Services.Configure<EncryptorSettings>(builder.Configuration.GetSection("EncryptorSettings"));
 
 // Validaton
@@ -86,6 +86,10 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+internal class LLMApiSettings
+{
+}
 
 
 

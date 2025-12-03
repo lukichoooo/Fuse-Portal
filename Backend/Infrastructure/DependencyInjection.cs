@@ -31,7 +31,7 @@ public static class DependencyInjection
         // Mappers
         services.AddScoped<IUserMapper, UserMapper>();
         services.AddScoped<IUniversityMapper, UniversityMapper>();
-        services.AddScoped<IChatMapper, IChatMapper>();
+        services.AddScoped<IChatMapper, ChatMapper>();
         services.AddScoped<ILMStudioMapper, LMStudioMapper>();
 
         // Services
@@ -40,6 +40,9 @@ public static class DependencyInjection
         services.AddScoped<IChatService, ChatService>();
         services.AddScoped<IChatMetadataService, ChatMetadataService>();
         services.AddScoped<IChatMetadataCache, ChatMetadataCache>();
+
+        // LLM
+        services.AddScoped<ILLMService, LMStudioLLMService>();
 
         // extra
         services.AddScoped<ILLMInputGenerator, LLMInputGenerator>();

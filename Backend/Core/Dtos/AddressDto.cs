@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Core.Entities;
 using Core.Enums;
 
@@ -6,6 +7,8 @@ namespace Core.Dtos
     public class AddressDto(string City, CountryCode CountryA3)
     {
         public string City { get; set; } = City;
+
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public CountryCode CountryA3 { get; set; } = CountryA3;
 
         public static implicit operator AddressDto(Address address)
