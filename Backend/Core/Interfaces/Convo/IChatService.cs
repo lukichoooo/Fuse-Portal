@@ -9,7 +9,9 @@ namespace Core.Interfaces.Convo
 
         Task<ChatFullDto> GetFullChatPageAsync(int chatId, int lastId, int pageSize);
 
-        Task<MessageDto> SendMessageAsync(ClientMessage cm);
+        Task<MessageDto> SendMessageAsync(MessageRequest messageRequest);
+        Task<List<int>> UploadFilesForMessageAsync(List<FileUpload> files);
+        Task<FileDto> RemoveFileAsync(int fileId);
         Task<MessageDto> DeleteMessageByIdAsync(int msgId);
     }
 }

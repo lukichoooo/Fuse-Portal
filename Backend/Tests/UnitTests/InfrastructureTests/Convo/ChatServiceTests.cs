@@ -1,13 +1,12 @@
 using Moq;
 using AutoFixture;
-using Core.Interfaces;
 using Infrastructure.Services;
 using Core.Interfaces.Convo;
 using Core.Entities.Convo;
 using Core.Dtos;
-using Infrastructure.Repos;
 using Core.Exceptions;
 using Core.Interfaces.LLM;
+using Core.Interfaces.Convo.FileServices;
 
 namespace InfrastructureTests.Convo
 {
@@ -17,13 +16,16 @@ namespace InfrastructureTests.Convo
         private static readonly Fixture _globalFixture = new();
         private readonly IChatMapper _mapper = new ChatMapper();
 
-        private IChatService CreateService(IChatRepo? repo = null, ILLMService? LLMservice = null)
+        private IChatService CreateService(
+                IChatRepo? repo = null,
+                ILLMService? LLMservice = null,
+                IFileProcessingService? fileService = null)
         {
             repo ??= new Mock<IChatRepo>().Object;
             LLMservice ??= new Mock<ILLMService>().Object;
-            return new ChatService(repo, LLMservice, _mapper);
+            fileService ??= new Mock<IFileProcessingService>().Object;
+            return new ChatService(repo, LLMservice, _mapper, fileService);
         }
-
 
         private static Chat CreateChatById(int id)
             => _globalFixture.Build<Chat>()
@@ -144,33 +146,6 @@ namespace InfrastructureTests.Convo
         }
 
 
-
-        [Test]
-        public async Task SendMessage_Success()
-        {
-            var cm = _globalFixture.Create<ClientMessage>();
-
-            var response = _globalFixture.Create<MessageDto>();
-            var LLMServiceMock = new Mock<ILLMService>();
-            LLMServiceMock.Setup(s => s.SendMessageAsync(It.IsAny<MessageDto>()))
-                .ReturnsAsync(response);
-
-            int msgId = _globalFixture.Create<int>();
-            var repoMock = new Mock<IChatRepo>();
-            repoMock.Setup(r => r.AddMessageAsync(It.IsAny<Message>()))
-                .ReturnsAsync((Message msg) => msg);
-
-            var service = CreateService(repoMock.Object, LLMServiceMock.Object);
-
-            var res = await service.SendMessageAsync(cm);
-
-            Assert.That(res, Is.Not.Null);
-            Assert.That(res, Is.EqualTo(response));
-            LLMServiceMock.Verify(s => s.SendMessageAsync(It.IsAny<MessageDto>()), Times.Once());
-            repoMock.Verify(r => r.AddMessageAsync(It.IsAny<Message>()), Times.Exactly(2));
-        }
-
-
         [Test]
         public async Task CreateNewChat()
         {
@@ -186,6 +161,135 @@ namespace InfrastructureTests.Convo
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Name, Is.EqualTo(chat.Name));
+        }
+
+        [Test]
+        public async Task SendMessage_Success_NoFiles()
+        {
+            var cm = _globalFixture.Create<ClientMessage>();
+
+            var response = _globalFixture.Create<MessageDto>();
+            var LLMServiceMock = new Mock<ILLMService>();
+            LLMServiceMock.Setup(s => s.SendMessageAsync(It.IsAny<MessageDto>()))
+                .ReturnsAsync(response);
+
+            int msgId = _globalFixture.Create<int>();
+            var repoMock = new Mock<IChatRepo>();
+            repoMock.Setup(r => r.AddMessageAsync(It.IsAny<Message>()))
+                .ReturnsAsync((Message msg) => msg);
+
+            var service = CreateService(repoMock.Object, LLMServiceMock.Object);
+            var messageRequest = new MessageRequest { Message = cm, FileIds = [] };
+
+            var res = await service.SendMessageAsync(messageRequest);
+
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res, Is.EqualTo(response));
+            LLMServiceMock.Verify(s => s.SendMessageAsync(It.IsAny<MessageDto>()), Times.Once());
+            repoMock.Verify(r => r.AddMessageAsync(It.IsAny<Message>()), Times.Exactly(2));
+        }
+
+
+
+        [Test]
+        public async Task SendMessage_Success_WithFiles()
+        {
+            var cm = _globalFixture.Create<ClientMessage>();
+            var fileIds = _globalFixture.CreateMany<int>().ToList();
+
+            var response = _globalFixture.Create<MessageDto>();
+            var LLMServiceMock = new Mock<ILLMService>();
+            LLMServiceMock.Setup(s => s.SendMessageAsync(It.IsAny<MessageDto>()))
+                .ReturnsAsync(response);
+
+            int msgId = _globalFixture.Create<int>();
+            var repoMock = new Mock<IChatRepo>();
+            repoMock.Setup(r => r.AddMessageAsync(It.IsAny<Message>()))
+                .ReturnsAsync((Message msg) => msg);
+
+            var service = CreateService(repoMock.Object, LLMServiceMock.Object);
+            var messageRequest = new MessageRequest { Message = cm, FileIds = fileIds };
+
+            var res = await service.SendMessageAsync(messageRequest);
+
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res, Is.EqualTo(response));
+            LLMServiceMock.Verify(s => s.SendMessageAsync(It.IsAny<MessageDto>()), Times.Once());
+            repoMock.Verify(r => r.AddMessageAsync(It.IsAny<Message>()), Times.Exactly(2));
+        }
+
+
+        [Test]
+        public async Task UploadFilesAsync_Success()
+        {
+            // var fileUploads = _globalFixture.Build<FileUpload>()
+            //         .OmitAutoProperties()
+            //         .With(fu => fu.Name, _globalFixture.Create<string>())
+            //         .CreateMany()
+            //         .ToList();
+
+            var fileUploads = new List<FileUpload>();
+
+            var files = _globalFixture.Build<ChatFile>()
+                .With(f => f.Message, CreateMessageById(1))
+                .CreateMany()
+                .ToList();
+
+            var fileMock = new Mock<IFileProcessingService>();
+            var fileDtos = files.ConvertAll(_mapper.ToFileDto);
+            fileMock.Setup(fs => fs.ProcessFilesAsync(It.IsAny<List<FileUpload>>()))
+                    .ReturnsAsync(fileDtos);
+
+            var repoMock = new Mock<IChatRepo>();
+            repoMock.Setup(r => r.AddFilesAsync(It.IsAny<List<ChatFile>>()))
+                .ReturnsAsync((List<ChatFile> fs) => fs);
+
+            var service = CreateService(
+                    repo: repoMock.Object,
+                    fileService: fileMock.Object
+                    );
+
+            var res = await service.UploadFilesForMessageAsync(fileUploads);
+
+            Assert.That(res, Is.Not.Null);
+            // Assert.That(res.Order(),
+            //         Is.EqualTo(files.ConvertAll(f => f.Id)
+            //             .Order()));
+        }
+
+
+
+        [Test]
+        public async Task RemoveFileAsync_Success()
+        {
+            var fileReponse = _globalFixture.Build<ChatFile>()
+                .With(cf => cf.Message, CreateMessageById(0))
+                .Create();
+            var fileId = _globalFixture.Create<int>();
+            var repoMock = new Mock<IChatRepo>();
+            repoMock.Setup(r => r.RemoveFileByIdAsync(fileId))
+                .ReturnsAsync(fileReponse);
+            var service = CreateService(repoMock.Object);
+
+            var res = await service.RemoveFileAsync(fileId);
+
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res.Name, Is.EqualTo(fileReponse.Name));
+        }
+
+
+
+        [Test]
+        public async Task RemoveFileAsync_NotFound_Throws()
+        {
+            var fileId = _globalFixture.Create<int>();
+            var repoMock = new Mock<IChatRepo>();
+            repoMock.Setup(r => r.RemoveFileByIdAsync(fileId))
+                .ThrowsAsync(new FileNotFoundException());
+            var service = CreateService(repoMock.Object);
+
+            Assert.ThrowsAsync<FileNotFoundException>(async () =>
+                    await service.RemoveFileAsync(fileId));
         }
     }
 }

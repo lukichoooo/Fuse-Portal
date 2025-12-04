@@ -13,10 +13,8 @@ namespace Core.Entities.Convo
         [Required]
         public string Text { get; set; } = null!;
 
-        [Required]
-        public int MessageId { get; set; }
+        public int? MessageId { get; set; }
 
-        [Required]
         public Message Message { get; set; } = null!;
     }
 }

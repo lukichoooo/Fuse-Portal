@@ -40,6 +40,7 @@ namespace InfrastructureTests.Convo
 
         private static ChatFile CreateChatFileById(int id)
             => _globalFixture.Build<ChatFile>()
+            .With(cf => cf.Message, CreateMessageById(id))
             .With(cf => cf.Id, id)
             .Create();
 
@@ -228,6 +229,42 @@ namespace InfrastructureTests.Convo
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Id, Is.EqualTo(res!.Id));
+        }
+
+        [Test]
+        public async Task RemoveFileByIdAsync_Success()
+        {
+            var fileId = _globalFixture.Create<int>();
+            var file = CreateChatFileById(fileId);
+            await _context.ChatFiles.AddAsync(file);
+            await _context.SaveChangesAsync();
+
+            var returnValue = await _repo.RemoveFileByIdAsync(fileId);
+            var res = await _context.ChatFiles.FindAsync(fileId);
+
+            Assert.That(res, Is.Null);
+            Assert.That(returnValue, Is.Not.Null);
+            Assert.That(returnValue, Is.EqualTo(file));
+        }
+
+        [Test]
+        public async Task RemoveFileByIdAsync_NotFound_Throws()
+        {
+            var fileId = _globalFixture.Create<int>();
+            Assert.ThrowsAsync<FileNotFoundException>(async () =>
+                    await _repo.RemoveFileByIdAsync(fileId));
+        }
+
+        [Test]
+        public async Task AddFilesAsync_Success()
+        {
+            var fileIds = _globalFixture.CreateMany<int>()
+                .ToList();
+            var files = fileIds.ConvertAll(id => CreateChatFileById(id));
+
+            var returnValue = await _repo.AddFilesAsync(files);
+            foreach (var id in fileIds)
+                Assert.That(await _context.ChatFiles.FindAsync(id), Is.Not.Null);
         }
     }
 }

@@ -1,0 +1,158 @@
+{
+  "configurations":
+  [
+    {
+      "name": "default",
+	  "version": "1.0",
+      "verify": [
+            "ldd liblept-5.so",
+			"ldd libtesseract-5.so"
+      ],
+        "install": [
+            "apt-get update",
+            "apt-get install -y libpng16-16 libjpeg-turbo8 libopenjp2-7 libcurl4 libarchive13 libgif-dev libtiff-dev libwebp-dev libgomp1 libgdiplus"
+        ],
+      "runtime": [
+      ]
+    },
+    {
+      "name": "amzn",
+	  "version": "2",
+      "verify": [
+            "ldd liblept-5.so",
+			"ldd libtesseract-5.so"
+      ],
+      "install": [
+      ],
+      "runtime": [
+      ]
+    },
+    {
+      "name": "debian",
+	  "version": "10",
+      "verify": [
+            "ldd liblept-5.so",
+			"ldd libtesseract-5.so"
+      ],
+        "install": [
+            "apt-get update",
+            "apt-get install -y libpng16-16 libgif-dev libtiff-dev libwebp-dev libopenjp2-7 libarchive-dev libgomp1 libcurl4 libgdiplus"
+        ],
+      "runtime": [
+      ]
+    },
+    {
+      "name": "debian",
+	  "version": "11",
+      "verify": [
+            "ldd liblept-5.so",
+			"ldd libtesseract-5.so"
+      ],
+        "install": [
+            "apt-get update",
+            "apt-get install -y libpng16-16 libgif-dev libtiff-dev libwebp-dev libopenjp2-7 libarchive-dev libgomp1 libcurl4 libgdiplus"
+        ],
+      "runtime": [
+      ]
+    },
+    {
+      "name": "alpine",
+	  "version": "1.0",
+      "verify": [
+      ],
+        "install": [
+        ],
+      "runtime": [
+      ]
+    },
+    {
+      "name": "ubuntu",
+	  "version": "16",
+      "verify": [
+            "ldd liblept-5.so",
+			"ldd libtesseract-5.so"
+      ],
+        "install": [
+            "apt-get update",
+            "apt-get install -y libpng16-16 libjpeg-turbo8 libopenjp2-7 libcurl4 libarchive13 libgif-dev libtiff-dev libwebp-dev libgomp1 libgdiplus"
+        ],
+      "runtime": [
+      ]
+    },
+    {
+      "name": "ubuntu",
+	  "version": "18",
+      "verify": [
+            "ldd liblept-5.so",
+			"ldd libtesseract-5.so"
+      ],
+        "install": [
+            "apt-get update",
+            "apt-get install -y libpng16-16 libjpeg-turbo8 libopenjp2-7 libcurl4 libarchive13 libgif-dev libtiff-dev libwebp-dev libgomp1 libgdiplus"
+        ],
+      "runtime": [
+      ]
+    },
+    {
+      "name": "ubuntu",
+	  "version": "20",
+      "verify": [
+            "ldd liblept-5.so",
+			"ldd libtesseract-5.so"
+      ],
+        "install": [
+            "apt-get update",
+            "apt-get install -y libpng16-16 libjpeg-turbo8 libopenjp2-7 libcurl4 libarchive13 libgif-dev libtiff-dev libwebp-dev libgomp1 libgdiplus"
+        ],
+      "runtime": [
+      ]
+    },
+    {
+      "name": "centos",
+	  "version": "7",
+      "verify": [
+      ],
+        "install": [
+            "ldd liblept-5.so",
+			"ldd libtesseract-5.so"
+        ],
+      "runtime": [
+			"yum install -y libpng-devel libwebp"
+      ]
+    },
+    {
+      "name": "centos",
+	  "version": "8",
+      "verify": [
+      ],
+        "install": [
+			
+			
+        ],
+      "runtime": [
+      ]
+    },
+    {
+      "name": "fedora",
+	  "version": "33",
+      "verify": [
+      ],
+        "install": [
+			
+        ],
+      "runtime": [
+      ]
+    },
+    {
+      "name": "rocky",
+	  "version": "8.4",
+      "verify": [
+      ],
+        "install": [
+			
+        ],
+      "runtime": [
+      ]
+    }
+  ]
+}

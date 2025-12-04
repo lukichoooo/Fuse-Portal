@@ -15,11 +15,11 @@ namespace Infrastructure.Services.LLM.Cache
             => await _cache.GetValueAsync(chatId)
                 ?? (await _chatRepo.GetChatByIdAsync(chatId))?.LastResponseId;
 
-        // TODO: Make Concurrent
-        public async Task SetLastResponseIdAsync(int chatId, string responseId)
-        {
-            await _chatRepo.UpdateChatLastResponseIdAsync(chatId, responseId);
-            await _cache.SetValueAsync(chatId, responseId);
-        }
+        public Task SetLastResponseIdAsync(int chatId, string responseId)
+            => Task.WhenAll
+            (
+                _chatRepo.UpdateChatLastResponseIdAsync(chatId, responseId),
+                _cache.SetValueAsync(chatId, responseId)
+            );
     }
 }

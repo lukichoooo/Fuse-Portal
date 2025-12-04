@@ -1,3 +1,4 @@
+using AutoFixture;
 using Core.Dtos;
 using Core.Dtos.Settings;
 using Core.Interfaces.LLM;
@@ -9,6 +10,7 @@ namespace InfrastructureTests.LLM
     [TestFixture]
     public class LLMInputGeneratorTests
     {
+        private readonly Fixture _globalFixture = new();
         private readonly LLMInputSettings _settings = new()
         {
             SystemPromptDelimiter = "---RULES---",
@@ -40,14 +42,9 @@ namespace InfrastructureTests.LLM
         [Test]
         public void GenerateInput_WithRules_ReturnsExpectedString()
         {
-            var dto = new MessageDto()
-            {
-                Id = 1,
-                Text = "Test",
-                CreatedAt = DateTime.UtcNow,
-                ChatId = 1,
-                Files = []
-            };
+            var dto = _globalFixture.Build<MessageDto>()
+                .With(m => m.Files, [])
+                .Create();
 
             const string rules = "Do this carefully";
             string res = _generator.GenerateInput(dto, rules);
@@ -57,19 +54,12 @@ namespace InfrastructureTests.LLM
         [Test]
         public void GenerateInput_WithFiles_ReturnsExpectedString()
         {
-            var files = new List<FileDto>
-            {
-                new("fileName", "text"),
-                new("fileName", "text")
-            };
-            var dto = new MessageDto()
-            {
-                Id = 1,
-                Text = "Test",
-                CreatedAt = DateTime.UtcNow,
-                ChatId = 1,
-                Files = files
-            };
+            var files = _globalFixture.CreateMany<FileDto>()
+                .ToList();
+            var dto = _globalFixture.Build<MessageDto>()
+                .With(m => m.Files, files)
+                .Create();
+
             string res = _generator.GenerateInput(dto);
             AssertFields(res, hasRule: false, hasInput: true, hasFile: true);
         }
@@ -77,14 +67,9 @@ namespace InfrastructureTests.LLM
         [Test]
         public void GenerateInput_WithoutRulesOrFiles_ReturnsUserInputOnly()
         {
-            var dto = new MessageDto()
-            {
-                Id = 1,
-                Text = "Test",
-                CreatedAt = DateTime.UtcNow,
-                ChatId = 1,
-                Files = []
-            };
+            var dto = _globalFixture.Build<MessageDto>()
+                .With(m => m.Files, [])
+                .Create();
 
             string res = _generator.GenerateInput(dto);
             AssertFields(res, hasRule: false, hasInput: true, hasFile: false);

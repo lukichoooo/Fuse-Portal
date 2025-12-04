@@ -62,5 +62,25 @@ namespace Infrastructure.Repos
             await _context.SaveChangesAsync();
             return chat;
         }
+
+        public async Task<List<ChatFile>> AddFilesAsync(List<ChatFile> files)
+        {
+            await _context.ChatFiles.AddRangeAsync(files);
+            await _context.SaveChangesAsync();
+            return files;
+        }
+
+        public async Task<ChatFile> RemoveFileByIdAsync(int fileId)
+        {
+            var file = await _context.ChatFiles.FindAsync(fileId)
+                ?? throw new FileNotFoundException($"File with Id={fileId} Not Found");
+            _context.Remove(file);
+            await _context.SaveChangesAsync();
+            return file;
+        }
+
+        public ValueTask<ChatFile?> GetFileByIdAsync(int fileId)
+            => _context.ChatFiles.FindAsync(fileId);
+
     }
 }

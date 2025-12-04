@@ -33,12 +33,7 @@ namespace Infrastructure.Services
                 Text = dto.Text,
                 CreatedAt = dto.CreatedAt,
                 ChatId = dto.ChatId,
-                Files = dto.Files.ConvertAll(x => new ChatFile
-                {
-                    Name = x.Name,
-                    Text = x.Text,
-                    MessageId = dto.Id
-                })
+                Files = dto.Files.ConvertAll(f => ToChatFile(f))
             };
 
 
@@ -50,18 +45,19 @@ namespace Infrastructure.Services
                 Text = msg.Text,
                 CreatedAt = msg.CreatedAt,
                 ChatId = msg.ChatId,
-                Files = msg.Files.ConvertAll(x => new FileDto(x.Name, x.Text))
+                Files = msg.Files.ConvertAll(ToFileDto)
             };
 
 
 
         // From Client
 
-        public Message ToMessage(ClientMessage cm)
+        public Message ToMessage(ClientMessage cm, List<FileDto>? files = null)
             => new()
             {
                 Text = cm.Text,
                 ChatId = cm.ChatId,
+                Files = files?.ConvertAll(f => ToChatFile(f)) ?? []
             };
 
         public MessageDto ToMessageDto(ClientMessage cm, List<FileDto>? files = null)
@@ -71,5 +67,21 @@ namespace Infrastructure.Services
                 ChatId = cm.ChatId,
                 Files = files ?? []
             };
+
+        public ChatFile ToChatFile(FileDto dto, int? messageId = null)
+            => new()
+            {
+                Text = dto.Text,
+                Name = dto.Name,
+                MessageId = messageId
+            };
+
+
+        public FileDto ToFileDto(ChatFile f)
+            => new(
+                    Name: f.Name,
+                    Text: f.Text
+                    );
+
     }
 }

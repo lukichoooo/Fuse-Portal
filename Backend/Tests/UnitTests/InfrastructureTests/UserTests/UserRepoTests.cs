@@ -260,17 +260,22 @@ namespace InfrastructureTests.UserTests
         public async Task GetFullById_Success(int[] ids)
         {
             const int id = 5;
+
             var unis = ids
-                .Select(id => CreateUniById(id))
+                .Select(id =>
+                _globalFixture.Build<University>()
+                    .With(uni => uni.Id, id)
+                    .With(uni => uni.Users, [])
+                    .With(uni => uni.Address, _globalFixture.Create<Address>())
+                    .Create())
                 .ToList();
-            var fixture = new Fixture();
             var faculties = ids
-                .Select(id => fixture.Build<Faculty>()
+                .Select(id => _globalFixture.Build<Faculty>()
                         .With(f => f.Users, [])
                         .With(f => f.Id, id)
                         .Create())
                 .ToList();
-            var user = fixture.Build<User>()
+            var user = _globalFixture.Build<User>()
                 .With(u => u.Id, id)
                 .With(u => u.Universities, unis)
                 .With(u => u.Faculties, faculties)

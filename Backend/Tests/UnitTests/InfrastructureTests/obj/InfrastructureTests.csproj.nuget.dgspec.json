@@ -109,6 +109,18 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "dependencies": {
+            "DotNetCore.NPOI": {
+              "target": "Package",
+              "version": "[1.2.3, )"
+            },
+            "IronOcr": {
+              "target": "Package",
+              "version": "[2025.9.2, )"
+            },
+            "IronOcr.Linux": {
+              "target": "Package",
+              "version": "[2025.11.31, )"
+            },
             "Microsoft.EntityFrameworkCore.Design": {
               "target": "Package",
               "version": "[9.0.11, )"

@@ -133,15 +133,40 @@ namespace InfrastructureTests.LLM
         }
 
         [Test]
-        public void ToMessageDto_From_ClientMessage()
+        public void ToMessageDto_From_ClientMessage_WithFiles()
         {
             var cm = _globalFixture.Create<ClientMessage>();
-            MessageDto res = _mapper.ToMessageDto(cm);
+            var fileDtos = _globalFixture.CreateMany<FileDto>()
+                .ToList();
+            MessageDto res = _mapper.ToMessageDto(cm, fileDtos);
 
             Assert.That(res, Is.Not.Null);
             MapperTestHelper.AssertCommonPropsByName(cm, res);
             Assert.That(res.Files, Is.Not.Null);
         }
 
+
+        [Test]
+        public void ToChatFile_From_FileDto()
+        {
+            var dto = _globalFixture.Create<FileDto>();
+            ChatFile res = _mapper.ToChatFile(dto);
+
+            Assert.That(res, Is.Not.Null);
+            MapperTestHelper.AssertCommonPropsByName(dto, res);
+        }
+
+
+        [Test]
+        public void ToFileDto_From_ChatFile()
+        {
+            var chatFile = _globalFixture.Build<ChatFile>()
+                .With(f => f.Message, CreateMessageNoFiles())
+                .Create();
+            FileDto res = _mapper.ToFileDto(chatFile);
+
+            Assert.That(res, Is.Not.Null);
+            MapperTestHelper.AssertCommonPropsByName(res, chatFile);
+        }
     }
 }

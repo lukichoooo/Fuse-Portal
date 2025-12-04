@@ -23,7 +23,6 @@ namespace Infrastructure.Services.LLM.LMStudio
                 Files = []
             };
 
-        // TODO: implement Settings
         public LMStudioRequest ToRequest(MessageDto msg, string? previousResponseId = null)
         {
             return new()

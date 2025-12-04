@@ -34,3 +34,4 @@
 /home/lukacho/Desktop/AI HIGGS/Backend/Infrastructure/obj/Debug/net9.0/Infrastructure.pdb
 /home/lukacho/Desktop/AI HIGGS/Backend/Infrastructure/obj/Debug/net9.0/Infrastructure.genruntimeconfig.cache
 /home/lukacho/Desktop/AI HIGGS/Backend/Infrastructure/obj/Debug/net9.0/ref/Infrastructure.dll
+/home/lukacho/Desktop/AI HIGGS/Backend/Infrastructure/bin/Debug/net9.0/NOTICE.TXT

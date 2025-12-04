@@ -1,18 +1,20 @@
 
 using Core.Interfaces;
 using Core.Interfaces.Convo;
+using Core.Interfaces.Convo.FileServices;
 using Core.Interfaces.LLM;
 using Core.Interfaces.LLM.Cache;
 using Core.Interfaces.LLM.LMStudio;
 using Infrastructure.Contexts;
 using Infrastructure.Repos;
 using Infrastructure.Services;
+using Infrastructure.Services.Convo.FileServices;
+using Infrastructure.Services.Convo.Ocr;
 using Infrastructure.Services.LLM;
 using Infrastructure.Services.LLM.Cache;
 using Infrastructure.Services.LLM.LMStudio;
+using IronOcr;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using NLog.Extensions.Logging;
 
 namespace Infrastructure;
 
@@ -41,9 +43,18 @@ public static class DependencyInjection
         services.AddScoped<IChatService, ChatService>();
         services.AddScoped<IChatMetadataService, ChatMetadataService>();
         services.AddScoped<IChatMetadataCache, ChatMetadataCache>();
+        services.AddScoped<IFileTextParser, FileTextParser>();
 
         // LLM
         services.AddScoped<ILLMService, LMStudioLLMService>();
+
+        // ORC
+        services.AddSingleton(new IronTesseract
+        {
+            Language = OcrLanguage.EnglishBest
+        });
+        services.AddSingleton<IOcrService, IronTesseractOcrService>();
+        services.AddScoped<IFileProcessingService, FileProcessingService>();
 
         // extra
         services.AddScoped<ILLMInputGenerator, LLMInputGenerator>();

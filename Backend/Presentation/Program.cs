@@ -1,6 +1,7 @@
 
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using Core.Dtos;
 using Core.Dtos.Settings;
 using Core.Settings;
@@ -12,7 +13,6 @@ using Infrastructure.Services.LLM.LMStudio;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using NLog.Extensions.Logging;
 using Presentation.Filters;
 using Presentation.Validator;
 
@@ -25,6 +25,11 @@ builder.Services.AddControllers(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddSingleton(new JsonSerializerOptions
+{
+    PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+    PropertyNameCaseInsensitive = true
+});
 
 // Http Clients
 builder.Services.AddHttpClient<LMStudioApi>();
@@ -40,6 +45,8 @@ builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSet
 builder.Services.Configure<LMStudioApiSettings>(builder.Configuration.GetSection("LMStudioApiSettings"));
 builder.Services.Configure<LLMInputSettings>(builder.Configuration.GetSection("LLMInputSettings"));
 builder.Services.Configure<EncryptorSettings>(builder.Configuration.GetSection("EncryptorSettings"));
+builder.Services.Configure<FileProcessingSettings>(builder.Configuration.GetSection("FileProcessingSettings"));
+builder.Services.Configure<IronTesseractSettings>(builder.Configuration.GetSection("IronTesseractSettings"));
 
 // Validaton
 builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();

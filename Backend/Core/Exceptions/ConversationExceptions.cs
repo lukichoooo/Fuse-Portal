@@ -23,3 +23,10 @@ public class FileTooLargeException : Exception, ICustomException
     public FileTooLargeException() { }
     public FileTooLargeException(string? message, Exception? innerException) : base(message, innerException) { }
 }
+
+public class UnsupportedFileParseException : Exception, ICustomException
+{
+    public UnsupportedFileParseException(string message) : base(message) { }
+    public UnsupportedFileParseException() { }
+    public UnsupportedFileParseException(string? message, Exception? innerException) : base(message, innerException) { }
+}

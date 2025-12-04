@@ -70,7 +70,7 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("MessageId")
+                    b.Property<int?>("MessageId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -219,9 +219,7 @@ namespace Infrastructure.Migrations
                 {
                     b.HasOne("Core.Entities.Convo.Message", "Message")
                         .WithMany()
-                        .HasForeignKey("MessageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("MessageId");
 
                     b.Navigation("Message");
                 });

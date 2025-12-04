@@ -12,5 +12,9 @@ namespace Core.Interfaces.Convo
         Task<List<Message>> GetMessagesForChat(int chatId, int lastId, int pageSize);
         Task<Message> AddMessageAsync(Message msg);
         Task<Message> DeleteMessageByIdAsync(int msgId);
+
+        ValueTask<ChatFile?> GetFileByIdAsync(int fileId);
+        Task<List<ChatFile>> AddFilesAsync(List<ChatFile> files);
+        Task<ChatFile> RemoveFileByIdAsync(int fileId);
     }
 }

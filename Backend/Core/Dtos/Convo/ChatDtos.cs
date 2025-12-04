@@ -11,6 +11,11 @@ public record FileDto(
         string Text
         );
 
+public record FileUpload(
+        string Name,
+        Stream Stream
+        );
+
 public record MessageDto
 {
     public int Id { get; init; }
@@ -24,6 +29,12 @@ public record ClientMessage
 {
     public required string Text { get; init; }
     public int ChatId { get; init; }
+}
+
+public record MessageRequest
+{
+    public required ClientMessage Message { get; init; }
+    public List<int> FileIds { get; init; } = [];
 }
 
 

@@ -33,26 +33,39 @@ namespace Presentation.Controllers
             => await _service.CreateNewChat(chatName);
 
 
-        [HttpPost("messages/text")]
-        public async Task<ActionResult<MessageDto>> SendMessageAsync( // TODO: Add cencelation Token
-            [FromBody] ClientMessage message)
-            => Ok(await _service.SendMessageAsync(message));
-
-
-        // TODO: implement
-        [HttpPost("messages/file")]
-        public async Task<ActionResult<MessageDto>> SendMessageWithFileAsync(
-                [FromBody] ClientMessage message,
-                IFormFileCollection files
-                )
-        {
-            throw new NotImplementedException();
-        }
-
-
         [HttpDelete("messages/{msgId}")]
         public async Task<ActionResult<MessageDto>> RemoveMessageByIdAsync(
             [FromRoute] int msgId)
             => Ok(await _service.DeleteMessageByIdAsync(msgId));
+
+        // TODO: Add cencelation Token
+        [HttpPost("messages/text")]
+        public async Task<ActionResult<MessageDto>> SendMessageAsync(
+            [FromBody] MessageRequest messageRequest)
+            => Ok(await _service.SendMessageAsync(messageRequest));
+
+
+        // TODO: Add cencelation Token
+        [HttpPost("messages/file")]
+        public async Task<ActionResult<List<int>>> UploadFilesForMessage(
+                [FromForm] IFormFileCollection Files)
+            => Ok(await _service.UploadFilesForMessageAsync(await FilesToStream(Files)));
+
+
+
+        // Helper
+
+        private static async Task<List<FileUpload>> FilesToStream(IFormFileCollection formFiles)
+        {
+            var result = new List<FileUpload>(formFiles.Count);
+            foreach (var file in formFiles)
+            {
+                if (file.Length == 0)
+                    continue;
+                result.Add(new FileUpload(file.FileName, file.OpenReadStream()));
+            }
+            return result;
+        }
+
     }
 }
