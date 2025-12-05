@@ -1,6 +1,7 @@
 using System.Text;
 using Core.Dtos;
 using Core.Dtos.Settings;
+using Core.Exceptions;
 using Core.Interfaces.Convo.FileServices;
 using Infrastructure.Services.Convo.FileServices;
 using Microsoft.Extensions.Logging;
@@ -12,18 +13,19 @@ namespace InfrastructureTests.Convo.FileServices
     [TestFixture]
     public class FileProcessingServiceTests
     {
-        private readonly FileProcessingSettings _fileProcessingSettings = new()
+        private FileProcessingSettings _fileProcessingSettings = new()
         {
-            Handlers = {
-                {".txt", "text"},
-                {".md", "text"},
-                {".docx", "docx"},
-                {".jpeg", "ocr"},
-                {".png", "ocr"},
-                {".pdf", "ocr"}
+            MaxFileSizeBytes = int.MaxValue,
+            Handlers = new()
+            {
+                { ".txt", "text"},
+                { ".md", "text"},
+                { ".docx", "docx"},
+                { ".jpeg", "ocr"},
+                { ".png", "ocr"},
+                { ".pdf", "ocr"}
             }
         };
-
         private Mock<IOcrService> _ocrMock = null!;
         private Mock<IOptions<FileProcessingSettings>> _optionsMock = null!;
         private Mock<ILogger<FileProcessingService>> _loggerMock = null!;
@@ -44,7 +46,6 @@ namespace InfrastructureTests.Convo.FileServices
             _ocrMock = new Mock<IOcrService>();
             _loggerMock = new Mock<ILogger<FileProcessingService>>();
             _fileParserMock = new Mock<IFileTextParser>();
-
             _optionsMock = new Mock<IOptions<FileProcessingSettings>>();
             _optionsMock.Setup(x => x.Value).Returns(_fileProcessingSettings);
         }
@@ -81,7 +82,7 @@ namespace InfrastructureTests.Convo.FileServices
             var sut = CreateSUT();
             var fileName = "NAME" + extension;
 
-            var fileUpload = CreateFileUpload("NAME" + extension);
+            var fileUpload = CreateFileUpload(fileName);
 
 
             var result = await sut.ProcessFilesAsync([fileUpload]);
@@ -99,7 +100,7 @@ namespace InfrastructureTests.Convo.FileServices
             var sut = CreateSUT();
             var fileName = "NAME" + extension;
 
-            var fileUpload = CreateFileUpload("NAME" + extension);
+            var fileUpload = CreateFileUpload(fileName);
 
             var result = await sut.ProcessFilesAsync([fileUpload]);
             Assert.That(result[0].Text, Is.EqualTo(expected));
@@ -117,7 +118,7 @@ namespace InfrastructureTests.Convo.FileServices
             var sut = CreateSUT();
             var fileName = "NAME" + extension;
 
-            var fileUpload = CreateFileUpload("NAME" + extension);
+            var fileUpload = CreateFileUpload(fileName);
 
             var result = await sut.ProcessFilesAsync([fileUpload]);
             Assert.That(result[0].Text, Is.EqualTo(expected));
@@ -135,13 +136,29 @@ namespace InfrastructureTests.Convo.FileServices
             var sut = CreateSUT();
             var fileName = "NAME" + extension;
 
-            var fileUpload = CreateFileUpload("NAME" + extension);
+            var fileUpload = CreateFileUpload(fileName);
 
             var result = await sut.ProcessFilesAsync([fileUpload]);
             Assert.That(result[0].Text, Is.EqualTo(expected));
             VerifyCalled(isText: true);
         }
 
+        [Test]
+        public async Task ProcessFilesAsync_FileTooBig_Throws()
+        {
+            _fileProcessingSettings.MaxFileSizeBytes = int.MinValue;
+            _optionsMock.Setup(x => x.Value).Returns(_fileProcessingSettings);
+
+            var sut = CreateSUT();
+            const string fileName = "NAME";
+
+            var fileUpload = CreateFileUpload(fileName);
+
+            Assert.ThrowsAsync<FileTooLargeException>(async () =>
+                    await sut.ProcessFilesAsync([fileUpload]));
+            VerifyCalled();
+            _fileProcessingSettings.MaxFileSizeBytes = int.MaxValue;
+        }
 
     }
 }

@@ -1,5 +1,6 @@
 using Core.Dtos;
 using Core.Dtos.Settings;
+using Core.Exceptions;
 using Core.Interfaces.Convo.FileServices;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -9,6 +10,7 @@ namespace Infrastructure.Services.Convo.FileServices
     public class FileProcessingService : IFileProcessingService
     {
         private readonly IOcrService _ocr;
+        private readonly FileProcessingSettings _settings;
         private readonly ILogger<FileProcessingService> _logger;
         private readonly IFileTextParser _fileParser;
         private readonly Dictionary<string, Func<Stream, Task<string>>> _handlers;
@@ -23,10 +25,11 @@ namespace Infrastructure.Services.Convo.FileServices
             _ocr = ocr;
             _logger = logger;
             _fileParser = fileParser;
+            _settings = options.Value;
 
             _handlers = [];
 
-            foreach (var kv in options.Value.Handlers)
+            foreach (var kv in _settings.Handlers)
             {
                 var ext = kv.Key;
                 var handlerType = kv.Value;
@@ -48,6 +51,8 @@ namespace Infrastructure.Services.Convo.FileServices
             {
                 await using var ms = new MemoryStream();
                 await f.Stream.CopyToAsync(ms);
+                ValidateSize(ms.Length, f.Name);
+
                 ms.Position = 0;
 
                 string ext = Path.GetExtension(f.Name).ToLowerInvariant();
@@ -60,6 +65,23 @@ namespace Infrastructure.Services.Convo.FileServices
             });
 
             return (await Task.WhenAll(tasks)).ToList();
+        }
+
+        private void ValidateSize(long fileSize, string fileName)
+        {
+            if (fileSize > _settings.MaxFileSizeBytes)
+            {
+                _logger.LogWarning(
+                    "File too big. Name={Name}, SizeKB={SizeKb}, MaxKB={MaxKb}",
+                    fileName,
+                    fileSize / 1024,
+                    _settings.MaxFileSizeBytes / 1024
+                );
+
+                throw new FileTooLargeException(
+                    $"File '{fileName}' is {fileSize / 1024} KB, exceeding the max allowed {_settings.MaxFileSizeBytes / 1024} KB."
+                );
+            }
         }
 
     }
