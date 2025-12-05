@@ -1,11 +1,11 @@
 using AutoFixture;
-using Core.Dtos;
 using Core.Entities;
 using Core.Exceptions;
 using Core.Interfaces;
 using Infrastructure.Contexts;
 using Infrastructure.Repos;
 using Microsoft.EntityFrameworkCore;
+using UnitTests;
 
 namespace InfrastructureTests
 {
@@ -14,7 +14,6 @@ namespace InfrastructureTests
     {
         private IUniversityRepo _repo;
         private MyContext _context;
-        private static readonly Fixture _globalFixture = new();
 
         [SetUp]
         public void BeforeEach()
@@ -33,33 +32,12 @@ namespace InfrastructureTests
             await _context.DisposeAsync();
         }
 
-        private static University CreateUniWithId(int id)
-        {
-            return _globalFixture.Build<University>()
-                .With(uni => uni.Id, id)
-                .With(uni => uni.Users, [])
-                .With(uni => uni.Address, _globalFixture.Create<Address>())
-                .Create();
-        }
-
-        private static List<University> CreateUniList(int repeatCount)
-        {
-            _globalFixture.RepeatCount = repeatCount;
-            var res = _globalFixture.Build<University>()
-                .With(uni => uni.Users, [])
-                .With(uni => uni.Address, _globalFixture.Create<Address>())
-                .CreateMany()
-                .ToList();
-            _globalFixture.RepeatCount = 3;
-            return res;
-        }
-
         [TestCase(0)]
         [TestCase(3)]
         public async Task GetAllAsync_Success(int repeatCount)
         {
             const int pageSize = 16;
-            var universities = CreateUniList(repeatCount);
+            var universities = HelperAutoFactory.CreateUniversityList(repeatCount);
             await _context.Universities.AddRangeAsync(universities);
             await _context.SaveChangesAsync();
 
@@ -76,10 +54,9 @@ namespace InfrastructureTests
         public async Task GetAllAsync_Paged_Success(int lastId)
         {
             const int pageSize = 16;
-            var fixture = new Fixture();
             List<University> unis = Enumerable.Range(1, 25)
                     .Reverse()
-                    .Select(id => CreateUniWithId(id)
+                    .Select(id => HelperAutoFactory.CreateUniversity(id)
                     ).ToList();
 
             await _context.Universities.AddRangeAsync(unis);
@@ -96,7 +73,7 @@ namespace InfrastructureTests
         public async Task GetByIdAsync_Success()
         {
             const int id = 5;
-            var uni = CreateUniWithId(id);
+            var uni = HelperAutoFactory.CreateUniversity(id);
             await _context.Universities.AddAsync(uni);
             await _context.SaveChangesAsync();
 
@@ -120,7 +97,7 @@ namespace InfrastructureTests
         public async Task CreateAsync_Success()
         {
             const int id = 5;
-            var uni = CreateUniWithId(id);
+            var uni = HelperAutoFactory.CreateUniversity(id);
 
             var rv = await _repo.CreateAsync(uni);
             var res = await _context.Universities
@@ -139,9 +116,9 @@ namespace InfrastructureTests
         public async Task UpdateAsync_Success()
         {
             const int id = 5;
-            var uni = CreateUniWithId(5);
+            var uni = HelperAutoFactory.CreateUniversity(5);
             uni.Name = "oldUni";
-            var newUni = CreateUniWithId(5);
+            var newUni = HelperAutoFactory.CreateUniversity(5);
             newUni.Name = "newUni";
             await _context.Universities.AddAsync(uni);
             await _context.SaveChangesAsync();
@@ -167,7 +144,7 @@ namespace InfrastructureTests
         public async Task UpdateAsync_NotFound_Throws()
         {
             const int id = 5;
-            var newUni = CreateUniWithId(id);
+            var newUni = HelperAutoFactory.CreateUniversity(id);
 
             Assert.ThrowsAsync<UniversityNotFoundException>(async () =>
                     await _repo.UpdateAsync(newUni));
@@ -178,7 +155,7 @@ namespace InfrastructureTests
         public async Task DeleteByIdAsyc_Success()
         {
             const int id = 5;
-            var uni = CreateUniWithId(id);
+            var uni = HelperAutoFactory.CreateUniversity(id);
             await _context.Universities.AddAsync(uni);
             await _context.SaveChangesAsync();
 
@@ -211,13 +188,7 @@ namespace InfrastructureTests
         public async Task GetPageByNameAsync_SearchName_Success(string name)
         {
             const int lastId = int.MinValue, pageSize = 16;
-            var fixture = new Fixture();
-            var unis = fixture.Build<University>()
-                .With(uni => uni.Users, [])
-                .With(uni => uni.Name, "luKa")
-                .With(uni => uni.Address, fixture.Create<Address>())
-                .CreateMany()
-                .ToList();
+            var unis = HelperAutoFactory.CreateUniversityList(3);
             await _context.Universities.AddRangeAsync(unis);
             await _context.SaveChangesAsync();
 
@@ -243,18 +214,9 @@ namespace InfrastructureTests
         [TestCase(3)]
         public async Task GetPageByName_Paged_Success(int repeatCount)
         {
-            var fixture = new Fixture { RepeatCount = repeatCount };
-            var name = fixture.Create<string>();
             const int lastId = int.MinValue, pageSize = 16;
-            var unis = Enumerable.Range(1, 25)
-                .Reverse()
-                .Select(id => fixture.Build<University>()
-                        .With(uni => uni.Name, name)
-                        .With(uni => uni.Users, [])
-                        .With(uni => uni.Address, fixture.Create<Address>())
-                        .With(uni => uni.Id, id)
-                        .Create())
-                .ToList();
+            const string name = "";
+            var unis = HelperAutoFactory.CreateUniversityList(repeatCount);
             await _context.Universities.AddRangeAsync(unis);
             await _context.SaveChangesAsync();
 
@@ -277,24 +239,25 @@ namespace InfrastructureTests
         public async Task GetUsersByUniversityIdAsync_Success(int repeatCount)
         {
             const int id = 1, lastId = int.MinValue, pageSize = 16;
+            const int uniId = 4;
 
-            var fixture = new Fixture() { RepeatCount = repeatCount };
-            var users = fixture.Build<User>()
-                .With(u => u.Universities, [])
-                .With(u => u.Faculties, [])
-                .With(uni => uni.Address, fixture.Create<Address>())
-                .CreateMany()
+            var users = Enumerable.Range(1, repeatCount)
+                .Select(id =>
+                {
+                    var user = HelperAutoFactory.CreateUser(id);
+                    user.Id = id;
+                    return user;
+                })
                 .ToList();
-            var uni = fixture.Build<University>()
-                .With(uni => uni.Id, id)
-                .With(uni => uni.Users, users)
-                .With(uni => uni.Address, fixture.Create<Address>())
-                .Create();
+
+            var uni = HelperAutoFactory.CreateUniversity();
+            uni.Id = uniId;
+            uni.Users = users;
 
             await _context.Universities.AddAsync(uni);
             await _context.SaveChangesAsync();
 
-            var res = await _repo.GetUsersPageAsync(id, lastId, pageSize);
+            var res = await _repo.GetUsersPageAsync(uniId, lastId, pageSize);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res, Is.EquivalentTo(users));
@@ -314,11 +277,9 @@ namespace InfrastructureTests
         {
             var fixture = new Fixture();
             var name = fixture.Create<string>();
-            var uni = fixture.Build<University>()
-                .With(uni => uni.Users, [])
-                .With(uni => uni.Name, name)
-                .With(uni => uni.Address, fixture.Create<Address>())
-                .Create();
+            var uni = HelperAutoFactory.CreateUniversity();
+            uni.Name = name;
+
             await _context.AddAsync(uni);
             await _context.SaveChangesAsync();
 

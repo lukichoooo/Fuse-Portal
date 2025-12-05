@@ -30,20 +30,31 @@ namespace Infrastructure.Repos
         public ValueTask<Chat?> GetChatByIdAsync(int chatId)
             => _context.Chats.FindAsync(chatId);
 
-        public Task<List<Chat>> GetAllChatsPageAsync(int lastId, int pageSize)
-            => _context.Chats
-            .Where(c => c.Id > lastId)
-            .OrderBy(c => c.Id)
-            .Take(pageSize)
-            .ToListAsync();
+        public Task<List<Chat>> GetAllChatsPageAsync(int? lastId, int pageSize)
+        {
+            IQueryable<Chat> query = _context.Chats;
+            if (lastId is not null)
+                query = query.Where(c => c.Id > lastId);
+
+            return query
+                .OrderBy(c => c.Id)
+                .Take(pageSize)
+                .ToListAsync();
+        }
 
 
-        public Task<List<Message>> GetMessagesForChat(int chatId, int lastId, int pageSize)
-            => _context.Messages
-                    .Where(m => m.ChatId == chatId && m.Id > lastId)
+        public Task<List<Message>> GetMessagesForChat(int chatId, int? lastId, int pageSize)
+        {
+            IQueryable<Message> query = _context.Messages
+                .Where(m => m.ChatId == chatId);
+            if (lastId is not null)
+                query = query.Where(m => m.Id > lastId);
+
+            return query
                     .OrderBy(m => m.Id)
                     .Take(pageSize)
                     .ToListAsync();
+        }
 
         public async Task<Chat> UpdateChatLastResponseIdAsync(int chatId, string newLastResponseId)
         {
@@ -55,7 +66,7 @@ namespace Infrastructure.Repos
             return chat;
         }
 
-        public async Task<Chat> CreateNewChat(string chatName)
+        public async Task<Chat> CreateNewChatAsync(string chatName)
         {
             var chat = new Chat { Name = chatName };
             await _context.Chats.AddAsync(chat);

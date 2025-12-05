@@ -15,11 +15,17 @@ namespace InfrastructureTests.Convo
         private MyContext _context;
         private static readonly Fixture _globalFixture = new();
 
-        [SetUp]
+        [OneTimeSetUp]
         public void BeforeAll()
         {
+            _globalFixture.Behaviors.Add(new OmitOnRecursionBehavior());
+        }
+
+        [SetUp]
+        public void BeforeEach()
+        {
             var options = new DbContextOptionsBuilder<MyContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString()) // random Id
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .Options;
             _context = new MyContext(options);
             _repo = new ChatRepo(_context);
@@ -224,7 +230,7 @@ namespace InfrastructureTests.Convo
         public async Task CreateNewChat_Success()
         {
             var chatName = _globalFixture.Create<string>();
-            var returnValue = await _repo.CreateNewChat(chatName);
+            var returnValue = await _repo.CreateNewChatAsync(chatName);
             var res = await _context.Chats.FindAsync(returnValue.Id);
 
             Assert.That(res, Is.Not.Null);

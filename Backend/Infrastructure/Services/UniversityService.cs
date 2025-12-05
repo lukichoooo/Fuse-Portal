@@ -18,11 +18,11 @@ public class UniversityService(IUniversityRepo repo, IUniversityMapper mapper, I
         return _mapper.ToDto(uni);
     }
 
-    public async Task<List<UserDto>> GetUsersPageAsync(int id, int lastId, int pageSize)
+    public async Task<List<UserDto>> GetUsersPageAsync(int id, int? lastId, int pageSize)
         => (await _repo.GetUsersPageAsync(id, lastId, pageSize))
         .ConvertAll(_userMapper.ToDto);
 
-    public async Task<List<UniDto>> GetPageByNameLikeAsync(string name, int lastId, int pageSize)
+    public async Task<List<UniDto>> GetPageByNameLikeAsync(string name, int? lastId, int pageSize)
         => (await _repo.GetPageByNameAsync(name, lastId, pageSize))
         .ConvertAll(_mapper.ToDto);
 

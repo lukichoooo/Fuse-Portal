@@ -10,6 +10,7 @@ namespace Core.Interfaces
         UserDetailsDto ToDetailsDto(User user);
         User ToUser(UserDto dto);
         User ToUser(UserPrivateDto dto);
+        User ToUser(UserUpdateRequest request);
         User ToUser(RegisterRequest register);
         User ToUser(LoginRequest login);
     }

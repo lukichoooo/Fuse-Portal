@@ -14,6 +14,14 @@ namespace InfrastructureTests.Convo
     public class ChatServiceTests
     {
         private static readonly Fixture _globalFixture = new();
+
+        [OneTimeSetUp]
+        public void BeforeAll()
+        {
+            _globalFixture.Behaviors.Add(new OmitOnRecursionBehavior());
+        }
+
+
         private readonly IChatMapper _mapper = new ChatMapper();
 
         private IChatService CreateService(
@@ -46,6 +54,8 @@ namespace InfrastructureTests.Convo
         public async Task GetAllChatsPageAsync_Success(int repeat)
         {
             var fixture = new Fixture() { RepeatCount = repeat };
+            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
             const int lastId = int.MinValue, pageSize = 16;
             var chats = fixture.Build<Chat>()
                 .With(c => c.Messages, [])
@@ -69,6 +79,8 @@ namespace InfrastructureTests.Convo
         public async Task GetFullChatPageAsync_Success(int repeat)
         {
             var fixture = new Fixture() { RepeatCount = repeat };
+            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
             const int lastId = -1, pageSize = 16;
             int chatId = fixture.Create<int>();
             var chat = CreateChatById(chatId);
@@ -150,14 +162,18 @@ namespace InfrastructureTests.Convo
         public async Task CreateNewChat()
         {
             var chatId = _globalFixture.Create<int>();
+            var request = _globalFixture.Create<CreateChatRequest>();
             var chat = CreateChatById(chatId);
+            chat.Name = request.ChatName;
+
             var repoMock = new Mock<IChatRepo>();
-            repoMock.Setup(r => r.CreateNewChat(chat.Name))
+            repoMock.Setup(r => r.CreateNewChatAsync(chat.Name))
                 .ReturnsAsync(chat);
+
             var LLMServiceMock = new Mock<ILLMService>();
             var service = CreateService(repoMock.Object, LLMServiceMock.Object);
 
-            var res = await service.CreateNewChat(chat.Name);
+            var res = await service.CreateNewChatAsync(request);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Name, Is.EqualTo(chat.Name));
@@ -223,8 +239,8 @@ namespace InfrastructureTests.Convo
         public async Task UploadFilesAsync_Success()
         {
             // var fileUploads = _globalFixture.Build<FileUpload>()
-            //         .OmitAutoProperties()
             //         .With(fu => fu.Name, _globalFixture.Create<string>())
+            //         .With(fu => fu.Stream, _globalFixture.Create<MemoryStream>())
             //         .CreateMany()
             //         .ToList();
 
@@ -249,7 +265,7 @@ namespace InfrastructureTests.Convo
                     fileService: fileMock.Object
                     );
 
-            var res = await service.UploadFilesForMessageAsync(fileUploads);
+            var res = await service.UploadFilesAsync(fileUploads);
 
             Assert.That(res, Is.Not.Null);
             // Assert.That(res.Order(),

@@ -19,14 +19,14 @@ namespace Infrastructure.Services
         private readonly IFileProcessingService _fileService = fileService;
 
         public async Task<List<ChatDto>> GetAllChatsPageAsync(
-                int lastId,
+                int? lastId,
                 int pageSize)
             => (await _repo.GetAllChatsPageAsync(lastId, pageSize))
                 .ConvertAll(_mapper.ToChatDto);
 
         public async Task<ChatFullDto> GetFullChatPageAsync(
                 int chatId,
-                int lastId,
+                int? lastId,
                 int pageSize)
         {
             var chat = await _repo.GetChatByIdAsync(chatId)
@@ -39,8 +39,8 @@ namespace Infrastructure.Services
             => _mapper.ToMessageDto(await _repo.DeleteMessageByIdAsync(msgId));
 
 
-        public async Task<ChatDto> CreateNewChat(string chatName)
-            => _mapper.ToChatDto(await _repo.CreateNewChat(chatName));
+        public async Task<ChatDto> CreateNewChatAsync(CreateChatRequest request)
+            => _mapper.ToChatDto(await _repo.CreateNewChatAsync(request.ChatName));
 
 
         public async Task<MessageDto> SendMessageAsync(MessageRequest messageRequest)
@@ -65,7 +65,7 @@ namespace Infrastructure.Services
         public async Task<FileDto> RemoveFileAsync(int fileId)
             => _mapper.ToFileDto(await _repo.RemoveFileByIdAsync(fileId));
 
-        public async Task<List<int>> UploadFilesForMessageAsync(List<FileUpload> fileUploads)
+        public async Task<List<int>> UploadFilesAsync(List<FileUpload> fileUploads)
         {
             var fileDtos = await _fileService.ProcessFilesAsync(fileUploads);
             var files = fileDtos.ConvertAll(f => _mapper.ToChatFile(f));

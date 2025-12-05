@@ -10,9 +10,9 @@ namespace Core.Interfaces
         Task<University> UpdateAsync(University university);
         Task<University> DeleteByIdAsync(int id);
 
-        Task<List<University>> GetPageAsync(int lastId, int pageSize);
-        Task<List<University>> GetPageByNameAsync(string name, int lastId, int pageSize);
-        Task<List<User>> GetUsersPageAsync(int id, int LastId, int pageSize);
+        Task<List<University>> GetPageAsync(int? lastId, int pageSize);
+        Task<List<University>> GetPageByNameAsync(string name, int? lastId, int pageSize);
+        Task<List<User>> GetUsersPageAsync(int id, int? LastId, int pageSize);
     }
 }
 

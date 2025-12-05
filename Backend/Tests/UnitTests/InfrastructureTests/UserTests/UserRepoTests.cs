@@ -5,6 +5,7 @@ using Core.Interfaces;
 using Infrastructure.Contexts;
 using Infrastructure.Repos;
 using Microsoft.EntityFrameworkCore;
+using UnitTests;
 
 namespace InfrastructureTests.UserTests
 {
@@ -32,26 +33,13 @@ namespace InfrastructureTests.UserTests
         }
 
 
-        private static User CreateUserById(int id)
-            => _globalFixture.Build<User>()
-            .With(u => u.Universities, [])
-            .With(u => u.Faculties, [])
-            .With(u => u.Id, id)
-            .Create();
-
-        private static University CreateUniById(int id)
-            => _globalFixture.Build<University>()
-                .With(uni => uni.Id, id)
-                .With(uni => uni.Users, [])
-                .With(uni => uni.Address, _globalFixture.Create<Address>())
-                .Create();
 
         [TestCase(new int[] { })]
         [TestCase(new[] { 1, 2, 5, 6, 7 })]
         public async Task GetAllAsync_Success(int[] ids)
         {
             const int pageSize = 16;
-            var users = ids.Select(id => CreateUserById(id)).ToList();
+            var users = ids.Select(id => HelperAutoFactory.CreateUser(id)).ToList();
             await _context.AddRangeAsync(users);
             await _context.SaveChangesAsync();
 
@@ -69,7 +57,7 @@ namespace InfrastructureTests.UserTests
             const int pageSize = 16;
             var users = Enumerable.Range(1, 25)
                     .Reverse()
-                    .Select(id => CreateUserById(id))
+                    .Select(id => HelperAutoFactory.CreateUser(id))
                     .ToList();
             await _context.AddRangeAsync(users);
             await _context.SaveChangesAsync();
@@ -89,7 +77,7 @@ namespace InfrastructureTests.UserTests
             const int pageSize = 16;
             var users = Enumerable.Range(1, 25)
                     .Reverse()
-                    .Select(id => CreateUserById(id))
+                    .Select(id => HelperAutoFactory.CreateUser(id))
                     .ToList();
             await _context.AddRangeAsync(users);
             await _context.SaveChangesAsync();
@@ -110,7 +98,7 @@ namespace InfrastructureTests.UserTests
                 .Reverse()
                 .Select(id =>
                 {
-                    var user = CreateUserById(id);
+                    var user = HelperAutoFactory.CreateUser(id);
                     user.Name = name.ToUpper() + id.ToString();
                     return user;
                 })
@@ -133,7 +121,7 @@ namespace InfrastructureTests.UserTests
         public async Task GetByIdAsync_Found()
         {
             const int id = 5;
-            var user = CreateUserById(id);
+            var user = HelperAutoFactory.CreateUser(id);
             await _context.AddAsync(user);
             await _context.SaveChangesAsync();
 
@@ -158,7 +146,7 @@ namespace InfrastructureTests.UserTests
         public async Task GetByEmail_Found()
         {
             const string email = "myemial@explam.co";
-            var user = CreateUserById(0);
+            var user = HelperAutoFactory.CreateUser();
             user.Email = email;
             await _context.AddAsync(user);
             await _context.SaveChangesAsync();
@@ -182,7 +170,7 @@ namespace InfrastructureTests.UserTests
         public async Task CreateAsync_Success()
         {
             const int id = 2;
-            var user = CreateUserById(id);
+            var user = HelperAutoFactory.CreateUser(id);
 
             var rv = await _repo.CreateAsync(user);
             var res = await _context.Users.FindAsync(id);
@@ -197,10 +185,12 @@ namespace InfrastructureTests.UserTests
         public async Task UpdateUserCredentialsAsync_Success()
         {
             const int id = 2;
-            var user = CreateUserById(id);
+            var user = HelperAutoFactory.CreateUser(id);
             user.Email = "oldEmail@gmail.com";
-            var newUser = CreateUserById(id);
+            user.Name = "wOldName";
+            var newUser = HelperAutoFactory.CreateUser(id);
             user.Email = "newEmail@gmai.com";
+            user.Name = "NewNAme";
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
 
@@ -212,31 +202,29 @@ namespace InfrastructureTests.UserTests
             Assert.That(rv, Is.EqualTo(res));
             Assert.That(rv, Is.EqualTo(user));
             Assert.That(user.Email, Is.EqualTo(newUser.Email));
+            Assert.That(user.Name, Is.EqualTo(newUser.Name));
         }
 
         [Test]
         public async Task UpdateUserCredentialsAsync_NotFound_Throws()
         {
             const int id = 2;
-            var newUser = CreateUserById(id);
+            var newUser = HelperAutoFactory.CreateUser(id);
             Assert.ThrowsAsync<UserNotFoundException>(async () =>
                     await _repo.UpdateUserCredentialsAsync(newUser));
         }
 
-        [TestCase(new int[] { })]
-        [TestCase(new[] { 1, 4, 32 })]
-        public async Task GetUniversitiesForUserAsync_Success(int[] uniIds)
+        [TestCase(0)]
+        [TestCase(4)]
+        public async Task GetUniversitiesForUserAsync_Success(int repeatCount)
         {
             const int id = 5;
-            var fixture = new Fixture();
-            var unis = uniIds
-                .Select(id => CreateUniById(id))
-                .ToList();
-            var user = fixture.Build<User>()
-                .With(u => u.Universities, unis)
-                .With(u => u.Faculties, [])
-                .With(u => u.Id, id)
-                .Create();
+            var unis = HelperAutoFactory.CreateUniversityList(repeatCount);
+            var user = HelperAutoFactory.CreateUser();
+
+            user.Universities = unis;
+            user.Id = id;
+
             await _context.Universities.AddRangeAsync(unis);
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
@@ -261,28 +249,14 @@ namespace InfrastructureTests.UserTests
         {
             const int id = 5;
 
-            var unis = ids
-                .Select(id =>
-                _globalFixture.Build<University>()
-                    .With(uni => uni.Id, id)
-                    .With(uni => uni.Users, [])
-                    .With(uni => uni.Address, _globalFixture.Create<Address>())
-                    .Create())
-                .ToList();
-            var faculties = ids
-                .Select(id => _globalFixture.Build<Faculty>()
-                        .With(f => f.Users, [])
-                        .With(f => f.Id, id)
-                        .Create())
-                .ToList();
-            var user = _globalFixture.Build<User>()
-                .With(u => u.Id, id)
-                .With(u => u.Universities, unis)
-                .With(u => u.Faculties, faculties)
-                .Create();
+            var unis = HelperAutoFactory.CreateUniversityList(ids.Length);
+            var faculties = HelperAutoFactory.CreateCourseList(ids.Length);
+            var user = HelperAutoFactory.CreateUser(id);
+            user.Courses = faculties;
+            user.Universities = unis;
 
             await _context.Universities.AddRangeAsync(unis);
-            await _context.Faculties.AddRangeAsync(faculties);
+            await _context.Courses.AddRangeAsync(faculties);
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
 
@@ -292,7 +266,7 @@ namespace InfrastructureTests.UserTests
             Assert.That(res, Is.EqualTo(user));
             Assert.Multiple(() =>
             {
-                Assert.That(res.Faculties.Select(f => f.Name),
+                Assert.That(res.Courses.Select(f => f.Name),
                                 Is.EqualTo(faculties.Select(f => f.Name)));
                 Assert.That(res.Universities.Select(u => u.Id),
                         Is.EqualTo(unis.Select(u => u.Id)));

@@ -1,15 +1,21 @@
 using Core.Dtos;
+using Core.Dtos.Settings.Presentation;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace Presentation.Controllers;
 
 [Authorize]
 [Route("api/[controller]")]
-public class UniversityController(IUniversityService service) : ControllerBase
+public class UniversityController(
+        IUniversityService service,
+        IOptions<ControllerSettings> options
+        ) : ControllerBase
 {
     private readonly IUniversityService _service = service;
+    private readonly ControllerSettings _settings = options.Value;
 
     [HttpGet("{id}")]
     public async Task<ActionResult<UniDto>> GetByIdAsync([FromRoute] int id)
@@ -18,18 +24,24 @@ public class UniversityController(IUniversityService service) : ControllerBase
     [HttpGet("search/{name}")]
     public async Task<ActionResult<List<UniDto>>> GetPageByNameLikeAsync(
             [FromRoute] string name,
-            [FromQuery] int lastId = int.MinValue,
-            [FromQuery] int pageSize = 16
+            [FromQuery] int? lastId,
+            [FromQuery] int? pageSize
             )
-        => Ok(await _service.GetPageByNameLikeAsync(name, lastId, pageSize));
+        => Ok(await _service.GetPageByNameLikeAsync(
+                    name,
+                    lastId,
+                    pageSize ?? _settings.DefaultPageSize));
 
     [HttpGet("{uniId:int}/users")]
     public async Task<ActionResult<List<UserDto>>> GetUsersPageAsync(
             [FromRoute] int uniId,
-            [FromQuery] int lastId = int.MinValue,
-            [FromQuery] int pageSize = 16
+            [FromQuery] int? lastId,
+            [FromQuery] int? pageSize
             )
-        => Ok(await _service.GetUsersPageAsync(uniId, lastId, pageSize));
+        => Ok(await _service.GetUsersPageAsync(
+                    uniId,
+                    lastId,
+                    pageSize ?? _settings.BigPageSize));
 
     [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]

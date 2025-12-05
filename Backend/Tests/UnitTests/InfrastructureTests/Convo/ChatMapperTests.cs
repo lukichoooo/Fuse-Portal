@@ -12,6 +12,12 @@ namespace InfrastructureTests.LLM
         private readonly IChatMapper _mapper = new ChatMapper();
         private readonly Fixture _globalFixture = new();
 
+        [SetUp]
+        public void BeforeEach()
+        {
+            _globalFixture.Behaviors.Add(new OmitOnRecursionBehavior());
+        }
+
         private Message CreateMessageNoFiles()
             => _globalFixture.Build<Message>()
                 .With(c => c.Chat, CreateChatNoMessages())
@@ -84,6 +90,7 @@ namespace InfrastructureTests.LLM
         public void ToMessageDto_From_Message(int repeat)
         {
             var fixture = new Fixture() { RepeatCount = repeat };
+            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
             var msg = fixture.Build<Message>()
                 .With(m => m.Files, fixture.Build<ChatFile>()
                         .With(f => f.Message, CreateMessageNoFiles())
@@ -104,7 +111,7 @@ namespace InfrastructureTests.LLM
         }
 
         [TestCase]
-        public void ToMessageDto_From_Message()
+        public void ToMessageDto_From_ClientMessage()
         {
             var cm = _globalFixture.Create<ClientMessage>();
             var files = _globalFixture.CreateMany<FileDto>().ToList();

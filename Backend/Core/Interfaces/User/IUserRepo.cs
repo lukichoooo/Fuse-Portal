@@ -11,8 +11,8 @@ namespace Core.Interfaces
         Task<User> UpdateUserCredentialsAsync(User user);
         Task<User> DeleteByIdAsync(int id);
 
-        Task<List<User>> GetAllPageAsync(int lastId, int pageSize);
-        Task<List<User>> PageByNameAsync(string name, int lastId, int pageSize);
+        Task<List<User>> GetAllPageAsync(int? lastId, int pageSize);
+        Task<List<User>> PageByNameAsync(string name, int? lastId, int pageSize);
         Task<List<University>> GetUnisForUserAsync(int userId);
     }
 }

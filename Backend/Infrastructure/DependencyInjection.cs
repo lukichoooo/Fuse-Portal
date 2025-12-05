@@ -1,5 +1,6 @@
 
 using Core.Interfaces;
+using Core.Interfaces.Auth;
 using Core.Interfaces.Convo;
 using Core.Interfaces.Convo.FileServices;
 using Core.Interfaces.LLM;
@@ -8,6 +9,7 @@ using Core.Interfaces.LLM.LMStudio;
 using Infrastructure.Contexts;
 using Infrastructure.Repos;
 using Infrastructure.Services;
+using Infrastructure.Services.Auth;
 using Infrastructure.Services.Convo.FileServices;
 using Infrastructure.Services.Convo.Ocr;
 using Infrastructure.Services.LLM;
@@ -69,6 +71,7 @@ public static class DependencyInjection
         services.AddScoped<IAuthService, AuthService>();
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddSingleton<IEncryptor, Encryptor>();
+        services.AddSingleton<ICurrentContext, CurrentContext>();
 
         return services;
     }

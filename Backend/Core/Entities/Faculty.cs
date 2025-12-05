@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Core.Entities
 {
-    public class Faculty
+    public class Course
     {
         [Key]
         public int Id { get; set; }

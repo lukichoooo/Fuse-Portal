@@ -67,6 +67,9 @@ namespace Infrastructure.Services.Convo.FileServices
             return (await Task.WhenAll(tasks)).ToList();
         }
 
+
+        // Helper
+
         private void ValidateSize(long fileSize, string fileName)
         {
             if (fileSize > _settings.MaxFileSizeBytes)

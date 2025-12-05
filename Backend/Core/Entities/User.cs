@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Core.Entities.Convo;
 using Core.Enums;
 
 namespace Core.Entities
@@ -22,8 +23,9 @@ namespace Core.Entities
         [Required]
         public Address Address { get; set; } = null!;
 
-        public List<Faculty> Faculties { get; set; } = [];
+        public List<Course> Courses { get; set; } = [];
         public List<University> Universities { get; set; } = [];
+        public List<Chat> Chats { get; set; } = [];
     }
 }
 

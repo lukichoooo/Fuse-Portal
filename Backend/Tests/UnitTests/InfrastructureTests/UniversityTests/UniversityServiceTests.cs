@@ -7,6 +7,7 @@ using Core.Exceptions;
 using Core.Interfaces;
 using Infrastructure.Services;
 using Moq;
+using UnitTests;
 
 namespace InfrastructureTests.UniversityTests
 {
@@ -15,7 +16,6 @@ namespace InfrastructureTests.UniversityTests
     {
         private readonly IUniversityMapper _mapper = new UniversityMapper();
         private readonly IUserMapper _userMapper = new UserMapper();
-        private static readonly Fixture _globalFixture = new();
 
         private IUniversityService CreateServiceReturns<T>(
                 Expression<Func<IUniversityRepo, Task<T>>> exp, T returnValue)
@@ -36,19 +36,12 @@ namespace InfrastructureTests.UniversityTests
         private IUniversityService CreateService(IUniversityRepo repo)
             => new UniversityService(repo, _mapper, _userMapper);
 
-        private static University CreateUniversityById(int id)
-        {
-            return _globalFixture.Build<University>()
-                .With(uni => uni.Id, id)
-                .With(uni => uni.Users, [])
-                .Create();
-        }
 
         [Test]
         public async Task GetAsync_Success()
         {
             const int id = 5;
-            var uni = CreateUniversityById(id);
+            var uni = HelperAutoFactory.CreateUniversity(id);
             var service = CreateServiceReturns(r => r.GetAsync(id), uni);
 
             var res = await service.GetByIdAsync(id);

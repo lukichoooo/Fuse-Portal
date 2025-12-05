@@ -18,7 +18,7 @@ namespace Infrastructure.Services
                         Name: user.Name,
                         Universities: user.Universities
                             .ConvertAll(uni => new UniDto(uni.Id, uni.Name)),
-                        Faculties: user.Faculties.ConvertAll(f => f.Name)
+                        Courses: user.Courses.ConvertAll(f => f.Name)
                     );
 
         public UserPrivateDto ToPrivateDto(User user)
@@ -29,6 +29,27 @@ namespace Infrastructure.Services
                 Email = user.Email,
                 Password = user.Password,
                 Address = user.Address
+            };
+
+        public User ToUser(UserUpdateRequest request)
+            => new()
+            {
+                Name = request.Name,
+                Email = request.Email,
+                Password = request.Password,
+                Address = new()
+                {
+                    City = request.Address.City,
+                    CountryA3 = request.Address.CountryA3
+                },
+
+                Courses = request.Courses?
+                                .ConvertAll(x => new Course { Name = x })
+                                ?? [],
+
+                Universities = request.Universities?
+                                .ConvertAll(u => new University { Id = u.Id })
+                                ?? [],
             };
 
         public User ToUser(UserDto userDto)
@@ -49,8 +70,8 @@ namespace Infrastructure.Services
                     City = register.Address.City,
                     CountryA3 = register.Address.CountryA3
                 },
-                Faculties = register.Faculties
-                                .ConvertAll(x => new Faculty { Name = x }),
+                Courses = register.Courses
+                                .ConvertAll(x => new Course { Name = x }),
                 Universities = register.Universities
                     .ConvertAll(u => new University { Id = u.Id }),
             };

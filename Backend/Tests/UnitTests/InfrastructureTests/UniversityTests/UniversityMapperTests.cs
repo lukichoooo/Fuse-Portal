@@ -3,6 +3,7 @@ using Core.Dtos;
 using Core.Entities;
 using Core.Interfaces;
 using Infrastructure.Services;
+using UnitTests;
 
 namespace InfrastructureTests
 {
@@ -16,9 +17,7 @@ namespace InfrastructureTests
         [Test]
         public void ToDto_From_University()
         {
-            var uni = _fixture.Build<University>()
-                .With(uni => uni.Users, [])
-                .Create();
+            var uni = HelperAutoFactory.CreateUniversity();
 
             var res = _mapper.ToDto(uni);
 
@@ -30,13 +29,7 @@ namespace InfrastructureTests
         [Test]
         public void ToDtoWithUsers_From_University()
         {
-            var uni = _fixture.Build<University>()
-                .With(uni => uni.Users, _fixture.Build<User>()
-                        .With(u => u.Universities, [])
-                        .With(u => u.Faculties, [])
-                        .CreateMany()
-                        .ToList())
-                .Create();
+            var uni = HelperAutoFactory.CreateUniversity();
 
             var res = _mapper.ToDtoWithUsers(uni);
 

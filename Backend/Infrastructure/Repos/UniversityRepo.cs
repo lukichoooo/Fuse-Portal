@@ -26,40 +26,55 @@ public class UniversityRepo(MyContext context) : IUniversityRepo
         return uni;
     }
 
-    public async Task<List<University>> GetPageAsync(int lastId = -1, int pageSize = 16)
-        => await _context.Universities
+    public async Task<List<University>> GetPageAsync(int? lastId, int pageSize)
+    {
+        IQueryable<University> query = _context.Universities;
+        if (lastId is not null)
+            query = query.Where(u => u.Id > lastId);
+
+        return await query
             .OrderBy(uni => uni.Id)
-            .Where(uni => uni.Id > lastId)
             .Take(pageSize)
             .ToListAsync();
+    }
 
     public async Task<University?> GetAsync(int id)
         => await _context.Universities.FindAsync(id);
 
-    public async Task<List<University>> GetPageByNameAsync(string name, int lastId, int pageSize)
-        => await _context.Universities
-        .Where(uni =>
-                uni.Id > lastId &&
-                EF.Functions.Like(uni.Name, $"%{name}%"))
-        .Take(pageSize)
-        .ToListAsync();
+    public async Task<List<University>> GetPageByNameAsync(string name, int? lastId, int pageSize)
+    {
+        IQueryable<University> query = _context.Universities;
+        if (lastId is not null)
+            query = query.Where(uni => uni.Id > lastId);
+
+        return await query
+            .Where(uni => EF.Functions.Like(uni.Name, $"{name}%"))
+            .Take(pageSize)
+            .ToListAsync();
+    }
+
 
     public async Task<University> UpdateAsync(University university)
     {
-        var onDbUni = await _context.Universities.FindAsync(university.Id) ?? throw new UniversityNotFoundException($"University Not Found With Id {university.Id}");
+        var onDbUni = await _context.Universities.FindAsync(university.Id)
+            ?? throw new UniversityNotFoundException($"University Not Found With Id {university.Id}");
         onDbUni.Name = university.Name;
         await _context.SaveChangesAsync();
         return onDbUni;
     }
 
-    public async Task<List<User>> GetUsersPageAsync(int uniId, int lastUserId, int pageSize)
+    public async Task<List<User>> GetUsersPageAsync(int uniId, int? lastUserId, int pageSize)
     {
         var exists = await _context.Universities.AnyAsync(u => u.Id == uniId);
         if (!exists)
             throw new UniversityNotFoundException($"University Not Found With Id={uniId}");
 
-        return await _context.Users
-            .Where(u => u.Universities.Any(uni => uni.Id == uniId) && u.Id > lastUserId)
+        IQueryable<User> query = _context.Users
+            .Where(u => u.Universities.Any(uni => uni.Id == uniId));
+        if (lastUserId is not null)
+            query = query.Where(u => u.Id > lastUserId);
+
+        return await query
             .OrderBy(u => u.Id)
             .Take(pageSize)
             .ToListAsync();

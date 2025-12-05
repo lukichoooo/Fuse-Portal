@@ -12,6 +12,12 @@ namespace InfrastructureTests.LLM.Cache
     {
         private readonly Fixture _globalFixture = new();
 
+        [SetUp]
+        public void BeforeAll()
+        {
+            _globalFixture.Behaviors.Add(new OmitOnRecursionBehavior());
+        }
+
         private static IChatMetadataService CreateService(IChatRepo repo, IChatMetadataCache cache)
             => new ChatMetadataService(repo, cache);
 

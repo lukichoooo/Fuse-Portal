@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "+ymX1g6MF8E=",
+  "dgSpecHash": "wpwZFmTadVY=",
   "success": true,
   "projectFilePath": "/home/lukacho/Desktop/AI HIGGS/Backend/Infrastructure/Infrastructure.csproj",
   "expectedPackageFiles": [
@@ -22,6 +22,8 @@
     "/home/lukacho/.nuget/packages/ironsoftware.common/2025.11.2/ironsoftware.common.2025.11.2.nupkg.sha512",
     "/home/lukacho/.nuget/packages/ironsoftware.drawing.abstractions/2025.4.2/ironsoftware.drawing.abstractions.2025.4.2.nupkg.sha512",
     "/home/lukacho/.nuget/packages/ironsoftware.system.drawing/2025.9.3/ironsoftware.system.drawing.2025.9.3.nupkg.sha512",
+    "/home/lukacho/.nuget/packages/microsoft.aspnetcore.http.abstractions/2.3.0/microsoft.aspnetcore.http.abstractions.2.3.0.nupkg.sha512",
+    "/home/lukacho/.nuget/packages/microsoft.aspnetcore.http.features/2.3.0/microsoft.aspnetcore.http.features.2.3.0.nupkg.sha512",
     "/home/lukacho/.nuget/packages/microsoft.bcl.asyncinterfaces/7.0.0/microsoft.bcl.asyncinterfaces.7.0.0.nupkg.sha512",
     "/home/lukacho/.nuget/packages/microsoft.build.framework/17.8.3/microsoft.build.framework.17.8.3.nupkg.sha512",
     "/home/lukacho/.nuget/packages/microsoft.build.locator/1.7.8/microsoft.build.locator.1.7.8.nupkg.sha512",
@@ -107,7 +109,7 @@
     "/home/lukacho/.nuget/packages/system.security.principal.windows/5.0.0/system.security.principal.windows.5.0.0.nupkg.sha512",
     "/home/lukacho/.nuget/packages/system.text.encoding/4.3.0/system.text.encoding.4.3.0.nupkg.sha512",
     "/home/lukacho/.nuget/packages/system.text.encoding.codepages/6.0.0/system.text.encoding.codepages.6.0.0.nupkg.sha512",
-    "/home/lukacho/.nuget/packages/system.text.encodings.web/6.0.0/system.text.encodings.web.6.0.0.nupkg.sha512",
+    "/home/lukacho/.nuget/packages/system.text.encodings.web/8.0.0/system.text.encodings.web.8.0.0.nupkg.sha512",
     "/home/lukacho/.nuget/packages/system.text.json/9.0.11/system.text.json.9.0.11.nupkg.sha512",
     "/home/lukacho/.nuget/packages/system.threading.channels/7.0.0/system.threading.channels.7.0.0.nupkg.sha512",
     "/home/lukacho/.nuget/packages/system.threading.tasks.extensions/4.5.4/system.threading.tasks.extensions.4.5.4.nupkg.sha512",

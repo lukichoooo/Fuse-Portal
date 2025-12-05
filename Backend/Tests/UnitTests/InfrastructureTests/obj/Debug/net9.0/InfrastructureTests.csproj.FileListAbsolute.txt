@@ -564,3 +564,5 @@
 /home/lukacho/Desktop/AI HIGGS/Backend/Tests/UnitTests/InfrastructureTests/bin/Debug/net9.0/NPOI.OpenXml4Net.dll
 /home/lukacho/Desktop/AI HIGGS/Backend/Tests/UnitTests/InfrastructureTests/bin/Debug/net9.0/NPOI.OpenXmlFormats.dll
 /home/lukacho/Desktop/AI HIGGS/Backend/Tests/UnitTests/InfrastructureTests/bin/Debug/net9.0/ICSharpCode.SharpZipLib.dll
+/home/lukacho/Desktop/AI HIGGS/Backend/Tests/UnitTests/InfrastructureTests/bin/Debug/net9.0/Microsoft.AspNetCore.Http.Abstractions.dll
+/home/lukacho/Desktop/AI HIGGS/Backend/Tests/UnitTests/InfrastructureTests/bin/Debug/net9.0/Microsoft.AspNetCore.Http.Features.dll

@@ -37,6 +37,9 @@ public record MessageRequest
     public List<int> FileIds { get; init; } = [];
 }
 
+public record CreateChatRequest(
+        string ChatName = "New Chat"
+        );
 
 public record ChatFullDto(
         int Id,

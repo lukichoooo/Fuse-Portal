@@ -4,13 +4,13 @@ namespace Core.Interfaces.Convo
 {
     public interface IChatService
     {
-        Task<List<ChatDto>> GetAllChatsPageAsync(int lastId, int pageSize);
-        Task<ChatDto> CreateNewChat(string chatName);
+        Task<List<ChatDto>> GetAllChatsPageAsync(int? lastId, int pageSize);
+        Task<ChatDto> CreateNewChatAsync(CreateChatRequest request);
 
-        Task<ChatFullDto> GetFullChatPageAsync(int chatId, int lastId, int pageSize);
+        Task<ChatFullDto> GetFullChatPageAsync(int chatId, int? lastId, int pageSize);
 
         Task<MessageDto> SendMessageAsync(MessageRequest messageRequest);
-        Task<List<int>> UploadFilesForMessageAsync(List<FileUpload> files);
+        Task<List<int>> UploadFilesAsync(List<FileUpload> files);
         Task<FileDto> RemoveFileAsync(int fileId);
         Task<MessageDto> DeleteMessageByIdAsync(int msgId);
     }

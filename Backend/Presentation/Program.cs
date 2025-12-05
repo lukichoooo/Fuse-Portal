@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using Core.Dtos;
 using Core.Dtos.Settings;
+using Core.Dtos.Settings.Presentation;
 using Core.Settings;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -14,9 +15,14 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Presentation.Filters;
+using Presentation.Validation;
 using Presentation.Validator;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+// Allow Injecting HttpContext via DI
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddControllers(options =>
 {
@@ -47,10 +53,15 @@ builder.Services.Configure<LLMInputSettings>(builder.Configuration.GetSection("L
 builder.Services.Configure<EncryptorSettings>(builder.Configuration.GetSection("EncryptorSettings"));
 builder.Services.Configure<FileProcessingSettings>(builder.Configuration.GetSection("FileProcessingSettings"));
 builder.Services.Configure<IronTesseractSettings>(builder.Configuration.GetSection("IronTesseractSettings"));
+builder.Services.Configure<ControllerSettings>(builder.Configuration.GetSection("ControllerSettings"));
 
 // Validaton
 builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateChatRequestValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<MessageRequestValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<ClientMessageValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<AddressValidator>();
 builder.Services.AddFluentValidationAutoValidation();
 
 

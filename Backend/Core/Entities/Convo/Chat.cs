@@ -12,6 +12,12 @@ namespace Core.Entities.Convo
 
         public string? LastResponseId { get; set; }
 
+        [Required]
+        public int UserId { get; set; }
+
+        [Required]
+        public User User { get; set; } = null!;
+
         public List<Message> Messages { get; set; } = [];
     }
 }

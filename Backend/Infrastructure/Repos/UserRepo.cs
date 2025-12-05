@@ -25,12 +25,17 @@ public class UserRepo(MyContext context) : IUserRepo
         return user;
     }
 
-    public Task<List<User>> GetAllPageAsync(int lastId = -1, int pageSize = 16)
-        => _context.Users
+    public Task<List<User>> GetAllPageAsync(int? lastId, int pageSize = 16)
+    {
+        IQueryable<User> query = _context.Users;
+        if (lastId is not null)
+            query = query.Where(u => u.Id > lastId);
+
+        return query
             .OrderBy(u => u.Id)
-            .Where(u => u.Id > lastId)
             .Take(pageSize)
             .ToListAsync();
+    }
 
     public async Task<List<University>> GetUnisForUserAsync(int userId)
     {
@@ -41,14 +46,18 @@ public class UserRepo(MyContext context) : IUserRepo
         return user.Universities.ToList();
     }
 
-    public Task<List<User>> PageByNameAsync(string name, int lastId = -1, int pageSize = 16)
-        => _context.Users
-        .OrderBy(u => u.Id)
-        .Where(u =>
-                u.Id > lastId &&
-               EF.Functions.Like(u.Name, $"%{name}%"))
-        .Take(pageSize)
-        .ToListAsync();
+    public Task<List<User>> PageByNameAsync(string name, int? lastId, int pageSize)
+    {
+        IQueryable<User> query = _context.Users;
+        if (lastId is not null)
+            query = query.Where(u => u.Id > lastId);
+
+        return query
+            .Where(u => EF.Functions.Like(u.Name, $"{name}%"))
+            .OrderBy(u => u.Id)
+            .Take(pageSize)
+            .ToListAsync();
+    }
 
     public async Task<User> UpdateUserCredentialsAsync(User user)
     {
@@ -57,8 +66,6 @@ public class UserRepo(MyContext context) : IUserRepo
         onDbUser.Name = user.Name;
         onDbUser.Email = user.Email;
         onDbUser.Password = user.Password;
-        onDbUser.Universities = user.Universities;
-        onDbUser.Faculties = user.Faculties;
         await _context.SaveChangesAsync();
         return onDbUser;
     }
@@ -75,7 +82,7 @@ public class UserRepo(MyContext context) : IUserRepo
 
     public async Task<User?> GetUserDetailsAsync(int id)
         => await _context.Users
-            .Include(u => u.Faculties)
+            .Include(u => u.Courses)
             .Include(u => u.Universities)
             .FirstOrDefaultAsync(u => u.Id == id)
             ?? throw new UserNotFoundException($"User Not Found With Id={id}");

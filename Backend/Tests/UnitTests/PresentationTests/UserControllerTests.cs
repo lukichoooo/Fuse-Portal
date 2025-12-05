@@ -2,9 +2,11 @@ using System.Linq.Expressions;
 using System.Security.Claims;
 using AutoFixture;
 using Core.Dtos;
+using Core.Dtos.Settings.Presentation;
 using Core.Exceptions;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Moq;
 using Presentation.Controllers;
 
@@ -13,13 +15,21 @@ namespace PresentationTests
     [TestFixture]
     public class UsercontrollerTests
     {
+
+        private static readonly ControllerSettings _settings = new()
+        {
+            DefaultPageSize = 16,
+            SmallPageSize = 8,
+            BigPageSize = 32
+        };
+
         private static UserController CreateControllerReturn<T>(
                 Expression<Func<IUserService, Task<T>>> exp,
                 T returnValue)
         {
             var mock = new Mock<IUserService>();
             mock.Setup(exp).ReturnsAsync(returnValue);
-            return new UserController(mock.Object);
+            return new UserController(mock.Object, Options.Create(_settings));
         }
 
         private static UserController CreateControllerThrows<T>(
@@ -28,11 +38,11 @@ namespace PresentationTests
         {
             var mock = new Mock<IUserService>();
             mock.Setup(exp).ThrowsAsync(e);
-            return new UserController(mock.Object);
+            return new UserController(mock.Object, Options.Create(_settings));
         }
 
 
-        private UserController CreateControllerWithContext<T>(
+        private static UserController CreateControllerWithContext<T>(
             Expression<Func<IUserService, Task<T>>> exp,
             T returnValue, int id)
         {
@@ -46,23 +56,24 @@ namespace PresentationTests
 
             var httpContext = new DefaultHttpContext { User = user };
 
-            return new UserController(mock.Object)
+            return new UserController(mock.Object, Options.Create(_settings))
             {
                 ControllerContext = new ControllerContext { HttpContext = httpContext }
             };
         }
 
 
-        [Test]
-        public async Task GetAllPageAsync_Success()
+        [TestCase(null, null)]
+        [TestCase(0, null)]
+        public async Task GetAllPageAsync_Success(int? lastId, int? pageSize)
         {
             var fixture = new Fixture();
             var users = fixture.CreateMany<UserDto>().ToList();
             var controller = CreateControllerReturn(s =>
-                    s.GetAllPageAsync(It.IsAny<int>(), It.IsAny<int>()),
+                    s.GetAllPageAsync(lastId, It.IsAny<int>()),
                     users);
 
-            var rv = await controller.GetAllPageAsync();
+            var rv = await controller.GetAllPageAsync(lastId, pageSize);
             var res = rv.Result as OkObjectResult;
 
             Assert.That(res, Is.Not.Null);
@@ -100,17 +111,18 @@ namespace PresentationTests
 
 
 
-        [Test]
-        public async Task PageByName_Success()
+        [TestCase(null, null)]
+        [TestCase(int.MinValue, null)]
+        public async Task PageByName_Success(int? lastId, int? pageSize)
         {
             var fixture = new Fixture();
             var name = fixture.Create<string>();
             var users = fixture.CreateMany<UserDto>().ToList();
             var controller = CreateControllerReturn(s =>
-                    s.GetPageByNameAsync(name, It.IsAny<int>(), It.IsAny<int>()),
+                    s.GetPageByNameAsync(name, lastId, It.IsAny<int>()),
                     users);
 
-            var rv = await controller.GetPageByNameAsync(name);
+            var rv = await controller.GetPageByNameAsync(name, lastId, pageSize);
             var res = rv.Result as OkObjectResult;
 
             Assert.That(res, Is.Not.Null);
@@ -155,7 +167,7 @@ namespace PresentationTests
             var id = fixture.Create<int>();
             var user = fixture.Create<UserDetailsDto>();
             var controller = CreateControllerWithContext(s =>
-                    s.DeleteByIdAsync(id), user, id);
+                    s.DeleteCurrentUserAsync(), user, id);
 
             var rv = await controller.DeleteCurrentUser();
             var res = rv.Result as OkObjectResult;
@@ -172,7 +184,7 @@ namespace PresentationTests
             var id = fixture.Create<int>();
             var user = fixture.Create<UserPrivateDto>();
             var controller = CreateControllerWithContext(s =>
-                    s.GetPrivateDtoById(id), user, id);
+                    s.GetCurrentUserPrivateDtoAsync(), user, id);
 
             var rv = await controller.GetCurrentUserPrivateDto();
             var res = rv.Result as OkObjectResult;

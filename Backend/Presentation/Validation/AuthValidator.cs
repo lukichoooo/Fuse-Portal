@@ -38,11 +38,11 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
         RuleFor(x => x.Universities)
             .NotNull();
 
-        RuleFor(x => x.Faculties)
+        RuleFor(x => x.Courses)
             .NotNull();
 
         RuleFor(x => x.Address)
-            .SetValidator(new AddressValidator());
+            .SetValidator(new AddressValidator(options));
     }
 }
 
