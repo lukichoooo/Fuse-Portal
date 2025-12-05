@@ -1,0 +1,29 @@
+# C#
+bin/
+obj/
+*.pdf
+*.png
+*.jpg
+*.zip
+*.dll
+*.so
+
+# settings
+.appsettings.Development.json
+
+
+# js
+node_modules/
+
+dist/
+build/
+
+.next/
+.vite/
+.parcel-cache/
+.cache/
+
+*.log
+*.zip
+*.tar
+*.7z
