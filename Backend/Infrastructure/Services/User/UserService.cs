@@ -64,7 +64,7 @@ public class UserService(
 
     public async Task<UserDetailsDto> GetUserDetailsAsync(int id)
     {
-        var user = await _repo.GetUserDetailsAsync(id)
+        var user = await _repo.GetUserDetailsByIdAsync(id)
             ?? throw new UserNotFoundException($"User not found with Id={id}");
         return _mapper.ToDetailsDto(user);
     }

@@ -6,6 +6,7 @@ using Core.Interfaces;
 using Core.Settings;
 using Infrastructure.Services;
 using Microsoft.Extensions.Options;
+using UnitTests;
 
 namespace Tests.Infrastructure
 {
@@ -13,7 +14,6 @@ namespace Tests.Infrastructure
     public class JwtTokenGeneratorTests
     {
         private IJwtTokenGenerator _jwt;
-        private static readonly Fixture _globalFixture = new();
 
         private readonly JwtSettings _settings = new()
         {
@@ -31,17 +31,10 @@ namespace Tests.Infrastructure
             _jwt = new JwtTokenGenerator(options);
         }
 
-        private User CreateUser()
-            => _globalFixture.Build<User>()
-                .With(u => u.Chats, [])
-                .With(u => u.Universities, [])
-                .With(u => u.Courses, [])
-                .Create();
-
         [Test]
         public void GenerateToken_Returns_Valid_Result()
         {
-            var user = CreateUser();
+            var user = HelperAutoFactory.CreateUser();
             var handler = new JwtSecurityTokenHandler();
 
             var tokenString = _jwt.GenerateToken(user);

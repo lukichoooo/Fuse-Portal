@@ -1,0 +1,49 @@
+
+namespace Core.Dtos;
+
+public record TestDto(
+        int Id,
+        string Name
+        );
+
+public record TestFullDto(
+        int Id,
+        string Name,
+        string Content,
+        string? Metadata
+        );
+
+public record ScheduleDto(
+        int Id,
+        DateTime Start,
+        DateTime End,
+        string? Metadata
+        );
+
+public record CourseDto(
+        int Id,
+        string Name,
+        string? Metadata
+        );
+
+public record SubjectDto(
+        int Id,
+        string Name,
+        string? Metadata
+        );
+
+public record SubjectFullDto
+{
+    public required int Id { get; init; }
+
+    public required string Name { get; init; } = null!;
+
+    public required int? Grade { get; init; }
+
+    public required List<ScheduleDto> Schedules { get; init; } = [];
+    public required List<UserDto> Students { get; init; } = [];
+    public required List<UserDto> Lecturers { get; init; } = [];
+    public required List<TestDto> Tests { get; init; } = [];
+
+    public string? Metadata { get; init; }
+}

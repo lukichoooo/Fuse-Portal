@@ -232,46 +232,6 @@ namespace InfrastructureTests
                         .Take(pageSize)));
         }
 
-
-
-        [TestCase(0)]
-        [TestCase(3)]
-        public async Task GetUsersByUniversityIdAsync_Success(int repeatCount)
-        {
-            const int id = 1, lastId = int.MinValue, pageSize = 16;
-            const int uniId = 4;
-
-            var users = Enumerable.Range(1, repeatCount)
-                .Select(id =>
-                {
-                    var user = HelperAutoFactory.CreateUser(id);
-                    user.Id = id;
-                    return user;
-                })
-                .ToList();
-
-            var uni = HelperAutoFactory.CreateUniversity();
-            uni.Id = uniId;
-            uni.Users = users;
-
-            await _context.Universities.AddAsync(uni);
-            await _context.SaveChangesAsync();
-
-            var res = await _repo.GetUsersPageAsync(uniId, lastId, pageSize);
-
-            Assert.That(res, Is.Not.Null);
-            Assert.That(res, Is.EquivalentTo(users));
-        }
-
-
-        [Test]
-        public async Task GetUsersByUniversityIdAsync_NotFound_Throws()
-        {
-            const int id = 1, lastId = int.MinValue, pageSize = 16;
-            Assert.ThrowsAsync<UniversityNotFoundException>(async () =>
-                    await _repo.GetUsersPageAsync(id, lastId, pageSize));
-        }
-
         [Test]
         public async Task GetByNameAsync_Success()
         {

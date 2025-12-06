@@ -12,21 +12,18 @@ namespace InfrastructureTests.LLM
         private readonly IChatMapper _mapper = new ChatMapper();
         private readonly Fixture _globalFixture = new();
 
-        [SetUp]
-        public void BeforeEach()
+        [OneTimeSetUp]
+        public void BeforeAll()
         {
             _globalFixture.Behaviors.Add(new OmitOnRecursionBehavior());
         }
 
         private Message CreateMessageNoFiles()
             => _globalFixture.Build<Message>()
-                .With(c => c.Chat, CreateChatNoMessages())
-                .With(c => c.Files, [])
                 .Create();
 
         private Chat CreateChatNoMessages()
             => _globalFixture.Build<Chat>()
-                .With(c => c.Messages, [])
                 .Create();
 
         [Test]
@@ -36,7 +33,7 @@ namespace InfrastructureTests.LLM
             Chat res = _mapper.ToChat(dto);
 
             Assert.That(res, Is.Not.Null);
-            MapperTestHelper.AssertCommonPropsByName(dto, res);
+            HelperMapperTest.AssertCommonPropsByName(dto, res);
         }
 
         [Test]
@@ -46,7 +43,7 @@ namespace InfrastructureTests.LLM
             ChatFullDto res = _mapper.ToFullChatDto(chat);
 
             Assert.That(res, Is.Not.Null);
-            MapperTestHelper.AssertCommonPropsByName(chat, res);
+            HelperMapperTest.AssertCommonPropsByName(chat, res);
 
         }
 
@@ -57,7 +54,7 @@ namespace InfrastructureTests.LLM
             ChatDto res = _mapper.ToChatDto(chat);
 
             Assert.That(res, Is.Not.Null);
-            MapperTestHelper.AssertCommonPropsByName(chat, res);
+            HelperMapperTest.AssertCommonPropsByName(chat, res);
         }
 
 
@@ -73,7 +70,7 @@ namespace InfrastructureTests.LLM
             Message res = _mapper.ToMessage(dto);
 
             Assert.That(res, Is.Not.Null);
-            MapperTestHelper.AssertCommonPropsByName(dto, res);
+            HelperMapperTest.AssertCommonPropsByName(dto, res);
             Assert.That(res.Files, Is.Not.Null);
             Assert.That(res.Files
                     .ConvertAll(f => f.Name)
@@ -101,7 +98,7 @@ namespace InfrastructureTests.LLM
             MessageDto res = _mapper.ToMessageDto(msg);
 
             Assert.That(res, Is.Not.Null);
-            MapperTestHelper.AssertCommonPropsByName(msg, res);
+            HelperMapperTest.AssertCommonPropsByName(msg, res);
             Assert.That(res.Files, Is.Not.Null);
             Assert.That(res.Files.ToList()
                     .ConvertAll(f => f.Name)
@@ -119,7 +116,7 @@ namespace InfrastructureTests.LLM
             MessageDto res = _mapper.ToMessageDto(cm, files);
 
             Assert.That(res, Is.Not.Null);
-            MapperTestHelper.AssertCommonPropsByName(cm, res);
+            HelperMapperTest.AssertCommonPropsByName(cm, res);
             Assert.That(res.Files, Is.Not.Null);
             Assert.That(res.Files.ToList()
                     .ConvertAll(f => f.Name)
@@ -135,7 +132,7 @@ namespace InfrastructureTests.LLM
             Message res = _mapper.ToMessage(cm);
 
             Assert.That(res, Is.Not.Null);
-            MapperTestHelper.AssertCommonPropsByName(cm, res);
+            HelperMapperTest.AssertCommonPropsByName(cm, res);
             Assert.That(res.Files, Is.Not.Null);
         }
 
@@ -148,7 +145,7 @@ namespace InfrastructureTests.LLM
             MessageDto res = _mapper.ToMessageDto(cm, fileDtos);
 
             Assert.That(res, Is.Not.Null);
-            MapperTestHelper.AssertCommonPropsByName(cm, res);
+            HelperMapperTest.AssertCommonPropsByName(cm, res);
             Assert.That(res.Files, Is.Not.Null);
         }
 
@@ -160,7 +157,7 @@ namespace InfrastructureTests.LLM
             ChatFile res = _mapper.ToChatFile(dto);
 
             Assert.That(res, Is.Not.Null);
-            MapperTestHelper.AssertCommonPropsByName(dto, res);
+            HelperMapperTest.AssertCommonPropsByName(dto, res);
         }
 
 
@@ -173,7 +170,7 @@ namespace InfrastructureTests.LLM
             FileDto res = _mapper.ToFileDto(chatFile);
 
             Assert.That(res, Is.Not.Null);
-            MapperTestHelper.AssertCommonPropsByName(res, chatFile);
+            HelperMapperTest.AssertCommonPropsByName(res, chatFile);
         }
     }
 }

@@ -5,6 +5,7 @@ using Core.Exceptions;
 using Core.Interfaces;
 using Core.Settings;
 using Infrastructure.Services;
+using Infrastructure.Services.Portal;
 using Microsoft.Extensions.Options;
 using Moq;
 
@@ -13,7 +14,9 @@ namespace InfrastructureTests.AuthTests
     [TestFixture]
     public class AuthServiceTests
     {
-        private readonly IUserMapper _mapper = new UserMapper();
+        private readonly IUserMapper _mapper = new UserMapper(
+                new PortalMapper(),
+                new UniversityMapper());
         private IEncryptor _encryptor;
         private IJwtTokenGenerator _jwt;
 

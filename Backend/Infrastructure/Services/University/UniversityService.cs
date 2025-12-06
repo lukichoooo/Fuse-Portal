@@ -9,7 +9,6 @@ public class UniversityService(IUniversityRepo repo, IUniversityMapper mapper, I
 {
     private readonly IUniversityRepo _repo = repo;
     private readonly IUniversityMapper _mapper = mapper;
-    private readonly IUserMapper _userMapper = userMapper;
 
     public async Task<UniDto> GetByIdAsync(int id)
     {
@@ -18,9 +17,6 @@ public class UniversityService(IUniversityRepo repo, IUniversityMapper mapper, I
         return _mapper.ToDto(uni);
     }
 
-    public async Task<List<UserDto>> GetUsersPageAsync(int id, int? lastId, int pageSize)
-        => (await _repo.GetUsersPageAsync(id, lastId, pageSize))
-        .ConvertAll(_userMapper.ToDto);
 
     public async Task<List<UniDto>> GetPageByNameLikeAsync(string name, int? lastId, int pageSize)
         => (await _repo.GetPageByNameAsync(name, lastId, pageSize))

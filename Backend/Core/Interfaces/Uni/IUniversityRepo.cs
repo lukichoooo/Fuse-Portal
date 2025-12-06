@@ -12,7 +12,6 @@ namespace Core.Interfaces
 
         Task<List<University>> GetPageAsync(int? lastId, int pageSize);
         Task<List<University>> GetPageByNameAsync(string name, int? lastId, int pageSize);
-        Task<List<User>> GetUsersPageAsync(int id, int? LastId, int pageSize);
     }
 }
 

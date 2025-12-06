@@ -1,6 +1,3 @@
-using System.Buffers.Text;
-using System.Linq.Expressions;
-using System.Security.Cryptography;
 using AutoFixture;
 using Core.Dtos;
 using Core.Dtos.Settings;
@@ -9,7 +6,7 @@ using Core.Exceptions;
 using Core.Interfaces;
 using Core.Interfaces.Auth;
 using Infrastructure.Services;
-using Infrastructure.Services.Auth;
+using Infrastructure.Services.Portal;
 using Microsoft.Extensions.Options;
 using Moq;
 using UnitTests;
@@ -18,7 +15,9 @@ namespace InfrastructureTests.UserTests
 {
     public class UserServiceTests
     {
-        private readonly IUserMapper _mapper = new UserMapper();
+        private readonly IUserMapper _mapper = new UserMapper(
+                new PortalMapper(),
+                new UniversityMapper());
 
         private const int DEFAULT_CONTEXT_ID = 9845;
 
@@ -185,8 +184,22 @@ namespace InfrastructureTests.UserTests
             var fixture = new Fixture();
             fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
-            var request = fixture.Create<UserUpdateRequest>();
-            var user = _mapper.ToUser(request);
+            var user = fixture.Create<User>();
+            var updateRequest = fixture.Create<UserUpdateRequest>();
+
+            var userProps = typeof(User).GetProperties().ToDictionary(p => p.Name);
+            foreach (var p in typeof(UserUpdateRequest).GetProperties())
+            {
+                if (userProps.TryGetValue(p.Name, out var targetProp) &&
+                    targetProp.CanWrite &&
+                    targetProp.PropertyType == p.PropertyType)
+                {
+                    var value = p.GetValue(updateRequest);
+                    targetProp.SetValue(user, value);
+                }
+            }
+
+
             user.Id = DEFAULT_CONTEXT_ID;
 
             var currContextMock = new Mock<ICurrentContext>();
@@ -199,7 +212,7 @@ namespace InfrastructureTests.UserTests
 
             var service = CreateService(repoMock.Object, currContextMock.Object);
 
-            var res = await service.UpdateCurrentUserCredentialsAsync(request);
+            var res = await service.UpdateCurrentUserCredentialsAsync(updateRequest);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Id, Is.EqualTo(DEFAULT_CONTEXT_ID));
@@ -270,7 +283,7 @@ namespace InfrastructureTests.UserTests
             var dto = HelperAutoFactory.CreateUserPrivateDto(id: id);
             var user = _mapper.ToUser(dto);
             var repoMock = new Mock<IUserRepo>();
-            repoMock.Setup(r => r.GetUserDetailsAsync(id))
+            repoMock.Setup(r => r.GetUserDetailsByIdAsync(id))
                 .ReturnsAsync(user);
             var service = CreateService(repoMock.Object, null);
 
@@ -287,7 +300,7 @@ namespace InfrastructureTests.UserTests
         {
             const int id = 5;
             var repoMock = new Mock<IUserRepo>();
-            repoMock.Setup(r => r.GetUserDetailsAsync(id))
+            repoMock.Setup(r => r.GetUserDetailsByIdAsync(id))
                 .ReturnsAsync(() => null);
             var service = CreateService(repoMock.Object, null);
 

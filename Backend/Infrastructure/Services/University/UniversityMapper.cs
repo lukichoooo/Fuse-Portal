@@ -4,8 +4,9 @@ using Core.Interfaces;
 
 namespace Infrastructure.Services;
 
-public class UniversityMapper : IUniversityMapper
+public class UniversityMapper() : IUniversityMapper
 {
+
     public UniDto ToDto(University uni)
         => new(
                 Id: uni.Id,
@@ -16,7 +17,8 @@ public class UniversityMapper : IUniversityMapper
         => new(
                 Id: uni.Id,
                 Name: uni.Name,
-                Users: uni.Users.ConvertAll(u => new UserDto(u.Id, u.Name))
+                Users: uni.UserUniversities
+                .ConvertAll(uu => new UserDto(uu.UserId, uu.User.Name))
                 );
 
     public University ToUniversity(UniDto dto)
@@ -31,11 +33,12 @@ public class UniversityMapper : IUniversityMapper
         {
             Id = dto.Id,
             Name = dto.Name,
-            Users = dto.Users.ConvertAll(d => new User
-            {
-                Id = d.Id,
-                Name = d.Name,
-            })
+            UserUniversities = dto.Users
+                .ConvertAll(u => new UserUniversity
+                {
+                    UserId = u.Id,
+                    UniversityId = dto.Id
+                })
         };
 
     public University ToUniversity(UniRequestDto info)

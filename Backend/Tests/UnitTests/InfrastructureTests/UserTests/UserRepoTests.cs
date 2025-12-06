@@ -1,5 +1,6 @@
 using AutoFixture;
 using Core.Entities;
+using Core.Entities.Portal;
 using Core.Exceptions;
 using Core.Interfaces;
 using Infrastructure.Contexts;
@@ -214,73 +215,57 @@ namespace InfrastructureTests.UserTests
                     await _repo.UpdateUserCredentialsAsync(newUser));
         }
 
+
         [TestCase(0)]
         [TestCase(4)]
-        public async Task GetUniversitiesForUserAsync_Success(int repeatCount)
+        public async Task GetUserDetailsByIdAsync_Success(int count)
         {
             const int id = 5;
-            var unis = HelperAutoFactory.CreateUniversityList(repeatCount);
-            var user = HelperAutoFactory.CreateUser();
 
-            user.Universities = unis;
+            var fixture = new Fixture() { RepeatCount = count };
+            fixture.Behaviors.Add(new OmitOnRecursionBehavior(1));
+
+            var unis = fixture.CreateMany<University>().ToList();
+            var courses = fixture.CreateMany<Course>().ToList();
+            var subjectsEnroll = fixture.CreateMany<Subject>().ToList();
+            var subjectsTeaching = fixture.CreateMany<Subject>().ToList();
+            var user = fixture.Create<User>();
+
             user.Id = id;
+            user.UserUniversities = unis
+                .ConvertAll(uni =>
+                    new UserUniversity
+                    {
+                        University = uni,
+                        User = user,
+                    });
+            user.Courses = courses;
+            user.SubjectEnrollments = subjectsEnroll;
+            user.TeachingSubjects = subjectsTeaching;
 
             await _context.Universities.AddRangeAsync(unis);
+            await _context.Subjects.AddRangeAsync(subjectsEnroll);
+            await _context.Subjects.AddRangeAsync(subjectsTeaching);
+            await _context.Courses.AddRangeAsync(courses);
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
 
-            var res = await _repo.GetUnisForUserAsync(id);
-
-            Assert.That(res, Is.Not.Null);
-            Assert.That(res, Is.EquivalentTo(unis));
-        }
-
-        [Test]
-        public async Task GetUniversitiesForUserAsync_NotFound_Throws()
-        {
-            const int id = 5;
-            Assert.ThrowsAsync<UserNotFoundException>(async () =>
-                    await _repo.GetUnisForUserAsync(id));
-        }
-
-        [TestCase(new int[] { })]
-        [TestCase(new[] { 1, 4, 32 })]
-        public async Task GetFullById_Success(int[] ids)
-        {
-            const int id = 5;
-
-            var unis = HelperAutoFactory.CreateUniversityList(ids.Length);
-            var faculties = HelperAutoFactory.CreateCourseList(ids.Length);
-            var user = HelperAutoFactory.CreateUser(id);
-            user.Courses = faculties;
-            user.Universities = unis;
-
-            await _context.Universities.AddRangeAsync(unis);
-            await _context.Courses.AddRangeAsync(faculties);
-            await _context.Users.AddAsync(user);
-            await _context.SaveChangesAsync();
-
-            var res = await _repo.GetUserDetailsAsync(id);
+            var res = await _repo.GetUserDetailsByIdAsync(id);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res, Is.EqualTo(user));
             Assert.Multiple(() =>
             {
-                Assert.That(res.Courses.Select(f => f.Name),
-                                Is.EqualTo(faculties.Select(f => f.Name)));
-                Assert.That(res.Universities.Select(u => u.Id),
-                        Is.EqualTo(unis.Select(u => u.Id)));
+                Assert.That(
+                    res.Courses.ConvertAll(f => f.Name).Order(),
+                    Is.EqualTo(courses.ConvertAll(f => f.Name).Order())
+                );
+
+                Assert.That(
+                    res.UserUniversities.ConvertAll(uu => uu.University.Name).Order(),
+                    Is.EquivalentTo(unis.ConvertAll(u => u.Name).Order())
+                );
             });
-
-        }
-
-
-        [Test]
-        public async Task GetFullById_NotFOund_Throws()
-        {
-            const int id = 5;
-            Assert.ThrowsAsync<UserNotFoundException>(async () =>
-                    await _repo.GetUserDetailsAsync(id));
         }
 
     }

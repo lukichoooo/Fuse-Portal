@@ -18,7 +18,6 @@ namespace Presentation.Filters
                 {
                     Error = ex.Message
                 });
-                context.ExceptionHandled = true;
             }
             else
             {
@@ -28,8 +27,8 @@ namespace Presentation.Filters
                     Value = ex.Message,
                     StatusCode = 500
                 };
-                context.ExceptionHandled = true;
             }
+            context.ExceptionHandled = true;
         }
     }
 }

@@ -1,11 +1,11 @@
 using System.Linq.Expressions;
-using AutoFixture;
 using Core.Dtos;
 using Core.Entities;
 using Core.Enums;
 using Core.Exceptions;
 using Core.Interfaces;
 using Infrastructure.Services;
+using Infrastructure.Services.Portal;
 using Moq;
 using UnitTests;
 
@@ -15,7 +15,9 @@ namespace InfrastructureTests.UniversityTests
     public class UniversityServiceTests
     {
         private readonly IUniversityMapper _mapper = new UniversityMapper();
-        private readonly IUserMapper _userMapper = new UserMapper();
+        private readonly IUserMapper _userMapper = new UserMapper(
+                new PortalMapper(),
+                new UniversityMapper());
 
         private IUniversityService CreateServiceReturns<T>(
                 Expression<Func<IUniversityRepo, Task<T>>> exp, T returnValue)
@@ -59,21 +61,6 @@ namespace InfrastructureTests.UniversityTests
 
             Assert.ThrowsAsync<UniversityNotFoundException>(async () =>
                     await service.GetByIdAsync(id));
-        }
-
-        [TestCase(new int[] { })]
-        [TestCase(new[] { 1, 5, 19 })]
-        public async Task GetUsersPageAsync_Success(int[] ids)
-        {
-            List<User> users = ids.Select(id => new User { Id = id }).ToList();
-            const int id = 5, lastId = -1, pageSize = 16;
-            var service = CreateServiceReturns(r => r.GetUsersPageAsync(id, lastId, pageSize), users);
-
-            var res = await service.GetUsersPageAsync(id, lastId, pageSize);
-
-            Assert.That(res, Is.Not.Null);
-            Assert.That(res.Select(u => u.Id).Order(),
-                    Is.EquivalentTo(ids.Order()));
         }
 
 

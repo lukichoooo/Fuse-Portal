@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Core.Entities
+namespace Core.Entities.Portal
 {
     public class Course
     {
@@ -11,6 +11,8 @@ namespace Core.Entities
         public string Name { get; set; } = null!;
 
         public List<User> Users { get; set; } = [];
+
+        public string? MetaData { get; set; }
     }
 }
 

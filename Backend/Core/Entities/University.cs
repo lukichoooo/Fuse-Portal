@@ -13,7 +13,7 @@ namespace Core.Entities
         [Required]
         public Address Address { get; set; } = null!;
 
-        public List<User> Users { get; set; } = [];
+        public List<UserUniversity> UserUniversities { get; set; } = [];
 
         public bool Equals(University? other)
         {

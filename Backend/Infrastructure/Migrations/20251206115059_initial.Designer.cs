@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(MyContext))]
-    [Migration("20251203210008_initialize")]
-    partial class initialize
+    [Migration("20251206115059_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -60,7 +60,12 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Chats");
                 });
@@ -73,7 +78,7 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("MessageId")
+                    b.Property<int?>("MessageId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -116,7 +121,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("Messages");
                 });
 
-            modelBuilder.Entity("Core.Entities.Faculty", b =>
+            modelBuilder.Entity("Core.Entities.Course", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -124,13 +129,103 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("MetaData")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Faculties");
+                    b.ToTable("Courses");
+                });
+
+            modelBuilder.Entity("Core.Entities.Portal.Schedule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("End")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Location")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MetaData")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Start")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("SubjectId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SubjectId");
+
+                    b.ToTable("Schedule");
+                });
+
+            modelBuilder.Entity("Core.Entities.Portal.Subject", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("Grade")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Metadata")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Subject");
+                });
+
+            modelBuilder.Entity("Core.Entities.Portal.Test", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Metadata")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ScheduleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubjectId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ScheduleId");
+
+                    b.HasIndex("SubjectId");
+
+                    b.ToTable("Test");
                 });
 
             modelBuilder.Entity("Core.Entities.University", b =>
@@ -188,19 +283,49 @@ namespace Infrastructure.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("FacultyUser", b =>
+            modelBuilder.Entity("CourseUser", b =>
                 {
-                    b.Property<int>("FacultiesId")
+                    b.Property<int>("CoursesId")
                         .HasColumnType("int");
 
                     b.Property<int>("UsersId")
                         .HasColumnType("int");
 
-                    b.HasKey("FacultiesId", "UsersId");
+                    b.HasKey("CoursesId", "UsersId");
 
                     b.HasIndex("UsersId");
 
-                    b.ToTable("FacultyUser");
+                    b.ToTable("CourseUser");
+                });
+
+            modelBuilder.Entity("SubjectUser", b =>
+                {
+                    b.Property<int>("StudentsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubjectEnrollmentsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("StudentsId", "SubjectEnrollmentsId");
+
+                    b.HasIndex("SubjectEnrollmentsId");
+
+                    b.ToTable("SubjectUser");
+                });
+
+            modelBuilder.Entity("SubjectUser1", b =>
+                {
+                    b.Property<int>("LecturersId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TeachingSubjectsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("LecturersId", "TeachingSubjectsId");
+
+                    b.HasIndex("TeachingSubjectsId");
+
+                    b.ToTable("SubjectUser1");
                 });
 
             modelBuilder.Entity("UniversityUser", b =>
@@ -218,13 +343,22 @@ namespace Infrastructure.Migrations
                     b.ToTable("UniversityUser");
                 });
 
+            modelBuilder.Entity("Core.Entities.Convo.Chat", b =>
+                {
+                    b.HasOne("Core.Entities.User", "User")
+                        .WithMany("Chats")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Core.Entities.Convo.ChatFile", b =>
                 {
                     b.HasOne("Core.Entities.Convo.Message", "Message")
                         .WithMany()
-                        .HasForeignKey("MessageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("MessageId");
 
                     b.Navigation("Message");
                 });
@@ -238,6 +372,34 @@ namespace Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Chat");
+                });
+
+            modelBuilder.Entity("Core.Entities.Portal.Schedule", b =>
+                {
+                    b.HasOne("Core.Entities.Portal.Subject", "Subject")
+                        .WithMany("Schedules")
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Subject");
+                });
+
+            modelBuilder.Entity("Core.Entities.Portal.Test", b =>
+                {
+                    b.HasOne("Core.Entities.Portal.Schedule", "Schedule")
+                        .WithMany()
+                        .HasForeignKey("ScheduleId");
+
+                    b.HasOne("Core.Entities.Portal.Subject", "Subject")
+                        .WithMany("Tests")
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Schedule");
+
+                    b.Navigation("Subject");
                 });
 
             modelBuilder.Entity("Core.Entities.University", b =>
@@ -262,11 +424,11 @@ namespace Infrastructure.Migrations
                     b.Navigation("Address");
                 });
 
-            modelBuilder.Entity("FacultyUser", b =>
+            modelBuilder.Entity("CourseUser", b =>
                 {
-                    b.HasOne("Core.Entities.Faculty", null)
+                    b.HasOne("Core.Entities.Course", null)
                         .WithMany()
-                        .HasForeignKey("FacultiesId")
+                        .HasForeignKey("CoursesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -277,12 +439,42 @@ namespace Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("SubjectUser", b =>
+                {
+                    b.HasOne("Core.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("StudentsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.Entities.Portal.Subject", null)
+                        .WithMany()
+                        .HasForeignKey("SubjectEnrollmentsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SubjectUser1", b =>
+                {
+                    b.HasOne("Core.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("LecturersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.Entities.Portal.Subject", null)
+                        .WithMany()
+                        .HasForeignKey("TeachingSubjectsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("UniversityUser", b =>
                 {
                     b.HasOne("Core.Entities.University", null)
                         .WithMany()
                         .HasForeignKey("UniversitiesId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Core.Entities.User", null)
@@ -295,6 +487,18 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Core.Entities.Convo.Chat", b =>
                 {
                     b.Navigation("Messages");
+                });
+
+            modelBuilder.Entity("Core.Entities.Portal.Subject", b =>
+                {
+                    b.Navigation("Schedules");
+
+                    b.Navigation("Tests");
+                });
+
+            modelBuilder.Entity("Core.Entities.User", b =>
+                {
+                    b.Navigation("Chats");
                 });
 #pragma warning restore 612, 618
         }

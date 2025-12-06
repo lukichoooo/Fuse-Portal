@@ -63,22 +63,6 @@ public class UniversityRepo(MyContext context) : IUniversityRepo
         return onDbUni;
     }
 
-    public async Task<List<User>> GetUsersPageAsync(int uniId, int? lastUserId, int pageSize)
-    {
-        var exists = await _context.Universities.AnyAsync(u => u.Id == uniId);
-        if (!exists)
-            throw new UniversityNotFoundException($"University Not Found With Id={uniId}");
-
-        IQueryable<User> query = _context.Users
-            .Where(u => u.Universities.Any(uni => uni.Id == uniId));
-        if (lastUserId is not null)
-            query = query.Where(u => u.Id > lastUserId);
-
-        return await query
-            .OrderBy(u => u.Id)
-            .Take(pageSize)
-            .ToListAsync();
-    }
 
     public Task<University?> GetByNameAsync(string name)
         => _context.Universities

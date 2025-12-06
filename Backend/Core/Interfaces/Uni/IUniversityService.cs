@@ -10,7 +10,5 @@ namespace Core.Interfaces
         Task<UniDto> UpdateAsync(UniRequestDto info);
         Task<UniDto> DeleteByIdAsync(int id);
         Task<List<UniDto>> GetPageByNameLikeAsync(string name, int? lastId, int pageSize);
-
-        Task<List<UserDto>> GetUsersPageAsync(int id, int? lastId, int pageSize);
     }
 }

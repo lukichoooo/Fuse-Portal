@@ -2,7 +2,8 @@ namespace Core.Enums;
 
 public enum RoleType
 {
-    User,
+    Student,
+    Lecturer,
     Admin,
     PremiumUser
 }

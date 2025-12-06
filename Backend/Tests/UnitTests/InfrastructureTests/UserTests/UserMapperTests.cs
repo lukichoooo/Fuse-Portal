@@ -2,6 +2,7 @@ using AutoFixture;
 using Core.Dtos;
 using Core.Interfaces;
 using Infrastructure.Services;
+using Infrastructure.Services.Portal;
 using UnitTests;
 
 namespace InfrastructureTests
@@ -9,7 +10,9 @@ namespace InfrastructureTests
     [TestFixture]
     public class UserMapperTests
     {
-        private readonly IUserMapper _mapper = new UserMapper();
+        private readonly IUserMapper _mapper = new UserMapper(
+                new PortalMapper(),
+                new UniversityMapper());
 
         [OneTimeSetUp]
         public void BeforeAll() { }
@@ -22,7 +25,7 @@ namespace InfrastructureTests
             var res = _mapper.ToDto(user);
 
             Assert.That(res, Is.Not.Null);
-            MapperTestHelper.AssertCommonPropsByName(user, res);
+            HelperMapperTest.AssertCommonPropsByName(user, res);
         }
 
 
@@ -40,7 +43,7 @@ namespace InfrastructureTests
             var res = _mapper.ToUser(request);
 
             Assert.That(res, Is.Not.Null);
-            MapperTestHelper.AssertCommonPropsByName(res, request);
+            HelperMapperTest.AssertCommonPropsByName(res, request);
         }
 
 
@@ -52,7 +55,7 @@ namespace InfrastructureTests
             var res = _mapper.ToPrivateDto(user);
 
             Assert.That(res, Is.Not.Null);
-            MapperTestHelper.AssertCommonPropsByName(res, user);
+            HelperMapperTest.AssertCommonPropsByName(res, user);
         }
 
 
@@ -65,15 +68,7 @@ namespace InfrastructureTests
 
 
             Assert.That(res, Is.Not.Null);
-            Assert.Multiple(() =>
-            {
-                Assert.That(res.Id, Is.EqualTo(user.Id));
-                Assert.That(res.Name, Is.EqualTo(user.Name));
-                Assert.That(res.Universities.Select(u => u.Id).Order(),
-                        Is.EquivalentTo(user.Universities.Select(u => u.Id).Order()));
-                Assert.That(res.Courses.Order(),
-                        Is.EquivalentTo(user.Courses.Select(u => u.Name).Order()));
-            });
+            HelperMapperTest.AssertCommonPropsByName(res, user);
         }
     }
 }

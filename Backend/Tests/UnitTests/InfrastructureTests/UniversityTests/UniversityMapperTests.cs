@@ -1,6 +1,5 @@
 using AutoFixture;
 using Core.Dtos;
-using Core.Entities;
 using Core.Interfaces;
 using Infrastructure.Services;
 using UnitTests;
@@ -13,7 +12,6 @@ namespace InfrastructureTests
         private readonly IUniversityMapper _mapper = new UniversityMapper();
         private readonly Fixture _fixture = new();
 
-
         [Test]
         public void ToDto_From_University()
         {
@@ -22,7 +20,7 @@ namespace InfrastructureTests
             var res = _mapper.ToDto(uni);
 
             Assert.That(res, Is.Not.Null);
-            MapperTestHelper.AssertCommonPropsByName(res, uni);
+            HelperMapperTest.AssertCommonPropsByName(res, uni);
         }
 
 
@@ -34,12 +32,13 @@ namespace InfrastructureTests
             var res = _mapper.ToDtoWithUsers(uni);
 
             Assert.That(res, Is.Not.Null);
+            HelperMapperTest.AssertCommonPropsByName(res, uni);
             Assert.Multiple(() =>
             {
                 Assert.That(res.Id, Is.EqualTo(uni.Id));
                 Assert.That(res.Name, Is.EqualTo(uni.Name));
                 Assert.That(res.Users.Select(u => u.Id).Order(),
-                        Is.EquivalentTo(uni.Users.Select(u => u.Id).Order()));
+                        Is.EquivalentTo(uni.UserUniversities.Select(uu => uu.UserId).Order()));
             });
         }
 
@@ -51,7 +50,7 @@ namespace InfrastructureTests
             var res = _mapper.ToUniversity(dto);
 
             Assert.That(res, Is.Not.Null);
-            MapperTestHelper.AssertCommonPropsByName(res, dto);
+            HelperMapperTest.AssertCommonPropsByName(res, dto);
         }
 
         [Test]
@@ -63,12 +62,14 @@ namespace InfrastructureTests
 
             var res = _mapper.ToUniversity(dto);
 
+
+            HelperMapperTest.AssertCommonPropsByName(res, dto);
             Assert.That(res, Is.Not.Null);
             Assert.Multiple(() =>
             {
                 Assert.That(res.Id, Is.EqualTo(dto.Id));
                 Assert.That(res.Name, Is.EqualTo(dto.Name));
-                Assert.That(res.Users.Select(u => u.Id).Order(),
+                Assert.That(res.UserUniversities.Select(uu => uu.UserId).Order(),
                         Is.EquivalentTo(dto.Users.Select(u => u.Id).Order()));
             });
         }

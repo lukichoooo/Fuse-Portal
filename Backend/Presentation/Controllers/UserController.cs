@@ -41,7 +41,6 @@ public class UserController(
     public async Task<ActionResult<UserDto>> GetByIdAsync(int id)
         => Ok(await _service.GetByIdAsync(id));
 
-    // TODO: add option to update user credentials
     [HttpPut("me")]
     public async Task<ActionResult<UserPrivateDto>> UpdateCurrentUserCredentialsAsync(
             [FromBody] UserUpdateRequest request

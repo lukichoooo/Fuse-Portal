@@ -10,7 +10,6 @@ namespace Core.Dtos
             string Email,
             string Password,
             AddressDto Address,
-            List<string> Courses,
             List<UniDto> Universities
             );
 

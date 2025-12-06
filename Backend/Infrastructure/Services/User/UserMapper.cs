@@ -1,11 +1,17 @@
 using Core.Dtos;
 using Core.Entities;
 using Core.Interfaces;
+using Core.Interfaces.Portal;
 
 namespace Infrastructure.Services
 {
-    public class UserMapper : IUserMapper
+    public class UserMapper(
+            IPortalMapper portalMapper,
+            IUniversityMapper uniMapper) : IUserMapper
     {
+        private readonly IPortalMapper _portalMapper = portalMapper;
+        private readonly IUniversityMapper _uniMapper = uniMapper;
+
         public UserDto ToDto(User user)
             => new(
                     Id: user.Id,
@@ -14,11 +20,16 @@ namespace Infrastructure.Services
 
         public UserDetailsDto ToDetailsDto(User user)
             => new(
-                        Id: user.Id,
-                        Name: user.Name,
-                        Universities: user.Universities
-                            .ConvertAll(uni => new UniDto(uni.Id, uni.Name)),
-                        Courses: user.Courses.ConvertAll(f => f.Name)
+                Id: user.Id,
+                Name: user.Name,
+                Universities: user.UserUniversities
+                    .ConvertAll(uu =>
+                        new UniDto(uu.UniversityId, uu.University.Name)),
+                Courses: user.Courses.ConvertAll(_portalMapper.ToCourseDto),
+                SubjectEnrollments: user.SubjectEnrollments
+                    .ConvertAll(_portalMapper.ToSubjectDto),
+                TeachingSubjects: user.TeachingSubjects
+                    .ConvertAll(_portalMapper.ToSubjectDto)
                     );
 
         public UserPrivateDto ToPrivateDto(User user)
@@ -28,7 +39,12 @@ namespace Infrastructure.Services
                 Name = user.Name,
                 Email = user.Email,
                 Password = user.Password,
-                Address = user.Address
+                Address = user.Address,
+
+                Courses = user.Courses.ConvertAll(_portalMapper.ToCourseDto),
+                SubjectEnrollments = user.SubjectEnrollments.ConvertAll(_portalMapper.ToSubjectDto),
+                TeachingSubjects = user.TeachingSubjects.ConvertAll(_portalMapper.ToSubjectDto),
+                Universities = user.UserUniversities.ConvertAll(uu => _uniMapper.ToDto(uu.University))
             };
 
         public User ToUser(UserUpdateRequest request)
@@ -43,13 +59,17 @@ namespace Infrastructure.Services
                     CountryA3 = request.Address.CountryA3
                 },
 
-                Courses = request.Courses?
-                                .ConvertAll(x => new Course { Name = x })
+                Courses = request.Courses?.ConvertAll(_portalMapper.ToCourse)
                                 ?? [],
 
-                Universities = request.Universities?
-                                .ConvertAll(u => new University { Id = u.Id })
-                                ?? [],
+                UserUniversities = request.Universities?.ConvertAll(
+                        uni => new UserUniversity { UniversityId = uni.Id, }) ?? [],
+
+                SubjectEnrollments = request.SubjectEnrollments?
+                    .ConvertAll(_portalMapper.ToSubject) ?? [],
+
+                TeachingSubjects = request.TeachingSubjects?
+                    .ConvertAll(_portalMapper.ToSubject) ?? [],
             };
 
         public User ToUser(UserDto userDto)
@@ -70,10 +90,9 @@ namespace Infrastructure.Services
                     City = register.Address.City,
                     CountryA3 = register.Address.CountryA3
                 },
-                Courses = register.Courses
-                                .ConvertAll(x => new Course { Name = x }),
-                Universities = register.Universities
-                    .ConvertAll(u => new University { Id = u.Id }),
+
+                UserUniversities = register.Universities
+                    .ConvertAll(uni => new UserUniversity { UniversityId = uni.Id }),
             };
 
         public User ToUser(LoginRequest login)

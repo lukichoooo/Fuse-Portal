@@ -37,14 +37,6 @@ public class UserRepo(MyContext context) : IUserRepo
             .ToListAsync();
     }
 
-    public async Task<List<University>> GetUnisForUserAsync(int userId)
-    {
-        var user = await _context.Users
-            .Include(u => u.Universities)
-            .FirstOrDefaultAsync(u => u.Id == userId)
-            ?? throw new UserNotFoundException($"User Not Found With Id={userId}");
-        return user.Universities.ToList();
-    }
 
     public Task<List<User>> PageByNameAsync(string name, int? lastId, int pageSize)
     {
@@ -80,11 +72,13 @@ public class UserRepo(MyContext context) : IUserRepo
         return user;
     }
 
-    public async Task<User?> GetUserDetailsAsync(int id)
+    public async Task<User?> GetUserDetailsByIdAsync(int id)
         => await _context.Users
             .Include(u => u.Courses)
-            .Include(u => u.Universities)
-            .FirstOrDefaultAsync(u => u.Id == id)
-            ?? throw new UserNotFoundException($"User Not Found With Id={id}");
+            .Include(u => u.UserUniversities)
+                .ThenInclude(uu => uu.University)
+            .Include(u => u.SubjectEnrollments)
+            .Include(u => u.TeachingSubjects)
+            .FirstOrDefaultAsync(u => u.Id == id);
 
 }

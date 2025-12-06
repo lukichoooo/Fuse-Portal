@@ -10,7 +10,9 @@ public record UserDetailsDto(
             int Id,
             string Name,
             List<UniDto> Universities,
-            List<string> Courses
+            List<CourseDto> Courses,
+            List<SubjectDto> SubjectEnrollments,
+            List<SubjectDto> TeachingSubjects
         );
 
 
@@ -20,8 +22,11 @@ public record UserUpdateRequest
     public required string Email { get; init; }
     public required string Password { get; init; }
     public required AddressDto Address { get; init; }
-    public List<string>? Courses { get; init; }
-    public List<UniDto>? Universities { get; init; }
+
+    public required List<SubjectDto>? SubjectEnrollments { get; init; }
+    public required List<SubjectDto>? TeachingSubjects { get; init; }
+    public required List<CourseDto>? Courses { get; init; }
+    public required List<UniDto>? Universities { get; init; }
 }
 
 public record UserPrivateDto
@@ -31,5 +36,11 @@ public record UserPrivateDto
     public required string Email { get; init; }
     public required string Password { get; set; }
     public required AddressDto Address { get; init; }
+
+
+    public required List<SubjectDto>? SubjectEnrollments { get; init; }
+    public required List<SubjectDto>? TeachingSubjects { get; init; }
+    public required List<CourseDto>? Courses { get; init; }
+    public required List<UniDto>? Universities { get; init; }
 }
 
