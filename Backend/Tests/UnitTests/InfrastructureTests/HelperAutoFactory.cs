@@ -28,26 +28,6 @@ namespace UnitTests
                 .With(uni => uni.Id, id ?? Fix.Create<int>())
                 .Create();
 
-
-        public static List<University> CreateUniversityList(int repeatCount)
-        {
-            var fixture = new Fixture { RepeatCount = repeatCount };
-            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
-
-            return fixture.Build<University>()
-                .CreateMany()
-                .ToList();
-        }
-        public static List<Course> CreateCourseList(int repeatCount)
-        {
-            var fixture = new Fixture { RepeatCount = repeatCount };
-            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
-
-            return Fix.Build<Course>()
-                .CreateMany()
-                .ToList();
-        }
-
         public static UserPrivateDto CreateUserPrivateDto(
                 int? id = null,
                         string? name = null,

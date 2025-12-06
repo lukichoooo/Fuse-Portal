@@ -26,8 +26,8 @@ namespace InfrastructureTests
                 }
                 else if (IsEnumerable(propA.PropertyType))
                 {
-                    var listA = ((IEnumerable)valA).Cast<object>().ToList();
-                    var listB = ((IEnumerable)valB).Cast<object>().ToList();
+                    var listA = ((IEnumerable)valA!).Cast<object>().ToList();
+                    var listB = ((IEnumerable)valB!).Cast<object>().ToList();
 
                     Assert.That(listA.Count, Is.EqualTo(listB.Count));
 

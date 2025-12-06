@@ -35,12 +35,6 @@ public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
         RuleFor(x => x.Password)
             .Length(settings.PasswordMinLength, settings.PasswordMaxLength);
 
-        RuleFor(x => x.Universities)
-            .NotNull();
-
-        RuleFor(x => x.Courses)
-            .NotNull();
-
         RuleFor(x => x.Address)
             .SetValidator(new AddressValidator(options));
     }

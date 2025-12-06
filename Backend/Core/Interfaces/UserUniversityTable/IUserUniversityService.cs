@@ -1,6 +1,6 @@
 using Core.Dtos;
 
-namespace Core.Interfaces.UserUniversity
+namespace Core.Interfaces.UserUniversityTable
 {
     public interface IUserUniversityService
     {

@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using AutoFixture;
 using Core.Dtos;
 using Core.Entities;
 using Core.Enums;
@@ -67,12 +68,10 @@ namespace InfrastructureTests.UniversityTests
         [Test]
         public async Task GetPageByNameAsync_Success()
         {
-            List<University> unis =
-            [
-                new() {Name = "luka"},
-                new() {Name = "LuKaa"},
-                new() {Name = "XXLukAXX"},
-            ];
+            var fixture = new Fixture();
+            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
+            List<University> unis = fixture.CreateMany<University>().ToList();
             const int lastId = -1, pageSize = 16;
             const string name = "luka";
             var service = CreateServiceReturns(r => r.GetPageByNameAsync(name, lastId, pageSize), unis);

@@ -8,7 +8,7 @@ namespace Core.Entities.Portal
         public int Id { get; set; }
 
         [Required]
-        public string Name { get; set; } = null!;
+        public required string Name { get; set; } = null!;
 
         public int? Grade { get; set; }
 

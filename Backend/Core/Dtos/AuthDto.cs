@@ -1,3 +1,4 @@
+
 namespace Core.Dtos
 {
     public record LoginRequest(
@@ -9,8 +10,7 @@ namespace Core.Dtos
             string Name,
             string Email,
             string Password,
-            AddressDto Address,
-            List<UniDto> Universities
+            AddressDto Address
             );
 
     public record AuthResponse(

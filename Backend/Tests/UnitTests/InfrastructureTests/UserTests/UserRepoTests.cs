@@ -15,7 +15,6 @@ namespace InfrastructureTests.UserTests
     {
         private IUserRepo _repo;
         private MyContext _context;
-        private static readonly Fixture _globalFixture = new();
 
         [SetUp]
         public void BeforeAll()
@@ -236,8 +235,8 @@ namespace InfrastructureTests.UserTests
                 .ConvertAll(uni =>
                     new UserUniversity
                     {
-                        University = uni,
-                        User = user,
+                        UniversityId = uni.Id,
+                        UserId = user.Id,
                     });
             user.Courses = courses;
             user.SubjectEnrollments = subjectsEnroll;
@@ -262,7 +261,7 @@ namespace InfrastructureTests.UserTests
                 );
 
                 Assert.That(
-                    res.UserUniversities.ConvertAll(uu => uu.University.Name).Order(),
+                    res.UserUniversities.ConvertAll(uu => uu.University?.Name).Order(),
                     Is.EquivalentTo(unis.ConvertAll(u => u.Name).Order())
                 );
             });

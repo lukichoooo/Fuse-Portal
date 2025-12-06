@@ -1,7 +1,7 @@
 using AutoFixture;
 using Core.Entities;
 using Core.Interfaces;
-using Core.Interfaces.UserUniversity;
+using Core.Interfaces.UserUniversityTable;
 using Infrastructure.Services;
 using Infrastructure.Services.Portal;
 using Moq;

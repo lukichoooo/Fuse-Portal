@@ -1,10 +1,9 @@
 using AutoFixture;
 using Core.Entities;
-using Core.Interfaces.UserUniversity;
+using Core.Interfaces.UserUniversityTable;
 using Infrastructure.Contexts;
 using Infrastructure.Repos;
 using Microsoft.EntityFrameworkCore;
-using UnitTests;
 
 namespace InfrastructureTests.UserUniversityTests
 {
@@ -37,28 +36,32 @@ namespace InfrastructureTests.UserUniversityTests
         {
             const int pageSize = 16;
             int? lastId = null;
-            const int id = 5;
-            var unis = HelperAutoFactory.CreateUniversityList(repeatCount);
-            var user = HelperAutoFactory.CreateUser();
+            const int userId = 5;
+
+            var fixture = new Fixture() { RepeatCount = repeatCount };
+            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
+            var unis = fixture.Build<University>()
+                .CreateMany()
+                .ToList();
+            unis.ConvertAll(u => u.UserUniversities = []);
+            var user = fixture.Build<User>()
+                .With(u => u.Id, userId)
+                .Create();
             user.UserUniversities = [];
 
-            foreach (var uni in unis)
-            {
-                user.UserUniversities.Add(
-                        new UserUniversity
-                        {
-                            UserId = id,
-                            UniversityId = uni.Id,
-                        });
-            }
-
-            user.Id = id;
+            user.UserUniversities = unis
+                .ConvertAll(uni => new UserUniversity
+                {
+                    UserId = userId,
+                    UniversityId = uni.Id
+                });
 
             await _context.Universities.AddRangeAsync(unis);
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
 
-            var res = await _repo.GetUnisPageForUserIdAsync(id, lastId, pageSize);
+            var res = await _repo.GetUnisPageForUserIdAsync(userId, lastId, pageSize);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res, Is.EquivalentTo(unis));
@@ -78,25 +81,25 @@ namespace InfrastructureTests.UserUniversityTests
             fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
             var users = fixture.Build<User>()
-                .With(u => u.UserUniversities, [])
                 .CreateMany()
                 .ToList();
+            users.ConvertAll(u => u.UserUniversities = []);
+
             var uni = fixture.Build<University>()
-                .With(uni => uni.UserUniversities, [])
                 .Create();
+            uni.UserUniversities = [];
             uni.Id = uniId;
 
-            uni.UserUniversities = users.ConvertAll(
-                        u => new UserUniversity
-                        {
-                            UserId = u.Id,
-                            UniversityId = uniId
-                        });
+            uni.UserUniversities = users.ConvertAll(u => new UserUniversity
+            {
+                UserId = u.Id,
+                UniversityId = uni.Id,
+            });
 
-            await _context.AddRangeAsync(uni.UserUniversities);
             await _context.Users.AddRangeAsync(users);
             await _context.Universities.AddAsync(uni);
             await _context.SaveChangesAsync();
+
 
             var res = await _repo.GetUsersByUniIdPageAsync(uniId, lastId, pageSize);
 

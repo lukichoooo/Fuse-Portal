@@ -1,6 +1,6 @@
 using Core.Entities;
 
-namespace Core.Interfaces.UserUniversity
+namespace Core.Interfaces.UserUniversityTable
 {
     public interface IUserUniversityRepo
     {

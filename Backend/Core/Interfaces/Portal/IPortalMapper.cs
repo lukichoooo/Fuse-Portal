@@ -8,7 +8,6 @@ namespace Core.Interfaces.Portal
         SubjectDto ToSubjectDto(Subject subject);
         Subject ToSubject(SubjectDto dto);
 
-        Test ToTest(TestDto dto);
         TestDto ToTestDto(Test test);
 
         Course ToCourse(CourseDto dto);

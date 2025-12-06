@@ -226,7 +226,6 @@ namespace InfrastructureTests.UserTests
 
             int currentContextId = fixture.Create<int>();
             var request = fixture.Create<UserUpdateRequest>();
-            var user = _mapper.ToUser(request);
 
             var repoMock = new Mock<IUserRepo>();
             repoMock.Setup(r => r.UpdateUserCredentialsAsync(It.IsAny<User>()))

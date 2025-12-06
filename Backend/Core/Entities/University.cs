@@ -8,12 +8,13 @@ namespace Core.Entities
         public int Id { get; set; }
 
         [Required]
-        public string Name { get; set; } = null!;
+        public required string Name { get; set; } = null!;
 
         [Required]
-        public Address Address { get; set; } = null!;
+        public required Address Address { get; set; } = null!;
 
         public List<UserUniversity> UserUniversities { get; set; } = [];
+
 
         public bool Equals(University? other)
         {

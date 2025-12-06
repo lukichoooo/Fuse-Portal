@@ -10,10 +10,11 @@ namespace Core.Entities
         public int Id { get; set; }
 
         [Required]
-        public CountryCode CountryA3 { get; set; }
+        public required CountryCode CountryA3 { get; set; }
 
         [Required]
-        public string City { get; set; } = null!;
+        public required string City { get; set; } = null!;
+
 
         public bool Equals(Address? other)
         {

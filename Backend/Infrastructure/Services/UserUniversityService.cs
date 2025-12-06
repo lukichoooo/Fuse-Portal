@@ -1,6 +1,6 @@
 using Core.Dtos;
 using Core.Interfaces;
-using Core.Interfaces.UserUniversity;
+using Core.Interfaces.UserUniversityTable;
 
 namespace Infrastructure.Services
 {

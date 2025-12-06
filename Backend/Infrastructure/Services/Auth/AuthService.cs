@@ -1,13 +1,19 @@
 using Core.Dtos;
 using Core.Exceptions;
 using Core.Interfaces;
+using Core.Interfaces.Auth;
 
 namespace Infrastructure.Services
 {
-    public class AuthService(IUserRepo repo, IUserMapper mapper, IEncryptor encryptor, IJwtTokenGenerator jwt) : IAuthService
+    public class AuthService(
+            IUserRepo repo,
+            IAuthMapper mapper,
+            IEncryptor encryptor,
+            IJwtTokenGenerator jwt
+            ) : IAuthService
     {
         private readonly IUserRepo _repo = repo;
-        private readonly IUserMapper _mapper = mapper;
+        private readonly IAuthMapper _mapper = mapper;
         private readonly IEncryptor _encryptor = encryptor;
         private readonly IJwtTokenGenerator _jwt = jwt;
 
@@ -22,10 +28,10 @@ namespace Infrastructure.Services
 
         public async Task<AuthResponse> RegisterAsync(RegisterRequest register)
         {
-            var user = await _repo.GetByEmailAsync(register.Email);
-            if (user is not null)
+            var dbuser = await _repo.GetByEmailAsync(register.Email);
+            if (dbuser is not null)
                 throw new UserAlreadyExistsException($"Email={register.Email} already in use.");
-            user = _mapper.ToUser(register);
+            var user = _mapper.ToUser(register);
             user.Password = _encryptor.Encrypt(user.Password);
             await _repo.CreateAsync(user);
             return new AuthResponse(_jwt.GenerateToken(user), null!);

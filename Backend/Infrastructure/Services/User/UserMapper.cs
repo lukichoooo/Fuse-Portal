@@ -24,7 +24,7 @@ namespace Infrastructure.Services
                 Name: user.Name,
                 Universities: user.UserUniversities
                     .ConvertAll(uu =>
-                        new UniDto(uu.UniversityId, uu.University.Name)),
+                        new UniDto(uu.UniversityId, uu.University?.Name!)),
                 Courses: user.Courses.ConvertAll(_portalMapper.ToCourseDto),
                 SubjectEnrollments: user.SubjectEnrollments
                     .ConvertAll(_portalMapper.ToSubjectDto),
@@ -44,12 +44,13 @@ namespace Infrastructure.Services
                 Courses = user.Courses.ConvertAll(_portalMapper.ToCourseDto),
                 SubjectEnrollments = user.SubjectEnrollments.ConvertAll(_portalMapper.ToSubjectDto),
                 TeachingSubjects = user.TeachingSubjects.ConvertAll(_portalMapper.ToSubjectDto),
-                Universities = user.UserUniversities.ConvertAll(uu => _uniMapper.ToDto(uu.University))
+                Universities = user.UserUniversities.ConvertAll(uu => _uniMapper.ToDto(uu.University!))
             };
 
-        public User ToUser(UserUpdateRequest request)
+        public User ToUser(UserUpdateRequest request, int userId)
             => new()
             {
+                Id = userId,
                 Name = request.Name,
                 Email = request.Email,
                 Password = request.Password,
@@ -63,7 +64,7 @@ namespace Infrastructure.Services
                                 ?? [],
 
                 UserUniversities = request.Universities?.ConvertAll(
-                        uni => new UserUniversity { UniversityId = uni.Id, }) ?? [],
+                        uni => new UserUniversity { UniversityId = uni.Id, UserId = userId }) ?? [],
 
                 SubjectEnrollments = request.SubjectEnrollments?
                     .ConvertAll(_portalMapper.ToSubject) ?? [],
@@ -72,35 +73,7 @@ namespace Infrastructure.Services
                     .ConvertAll(_portalMapper.ToSubject) ?? [],
             };
 
-        public User ToUser(UserDto userDto)
-            => new()
-            {
-                Id = userDto.Id,
-                Name = userDto.Name,
-            };
 
-        public User ToUser(RegisterRequest register)
-            => new()
-            {
-                Name = register.Name,
-                Email = register.Email,
-                Password = register.Password,
-                Address = new()
-                {
-                    City = register.Address.City,
-                    CountryA3 = register.Address.CountryA3
-                },
-
-                UserUniversities = register.Universities
-                    .ConvertAll(uni => new UserUniversity { UniversityId = uni.Id }),
-            };
-
-        public User ToUser(LoginRequest login)
-            => new()
-            {
-                Email = login.Email,
-                Password = login.Password
-            };
 
         public User ToUser(UserPrivateDto info)
             => new()

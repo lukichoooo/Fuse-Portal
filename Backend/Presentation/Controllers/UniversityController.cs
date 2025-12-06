@@ -32,17 +32,6 @@ public class UniversityController(
                     lastId,
                     pageSize ?? _settings.DefaultPageSize));
 
-    [HttpGet("{uniId:int}/users")]
-    public async Task<ActionResult<List<UserDto>>> GetUsersPageAsync(
-            [FromRoute] int uniId,
-            [FromQuery] int? lastId,
-            [FromQuery] int? pageSize
-            )
-        => Ok(await _service.GetUsersPageAsync(
-                    uniId,
-                    lastId,
-                    pageSize ?? _settings.BigPageSize));
-
     [Authorize(Roles = "Admin")]
     [HttpDelete("{id}")]
     public async Task<ActionResult<UniDto>> DeleteByIdAsync(int id)

@@ -27,7 +27,8 @@ namespace Infrastructure.Services.Portal
                 Id = dto.Id,
                 Start = dto.Start,
                 End = dto.End,
-                MetaData = dto.Metadata
+                MetaData = dto.Metadata,
+                SubjectId = dto.SubjectId
             };
 
         public ScheduleDto ToScheduleDto(Schedule schedule)
@@ -35,8 +36,9 @@ namespace Infrastructure.Services.Portal
                     Id: schedule.Id,
                     Start: schedule.Start,
                     End: schedule.End,
+                    SubjectId: schedule.SubjectId,
                     Metadata: schedule.MetaData
-                  );
+                );
 
         public Subject ToSubject(SubjectDto dto)
             => new()
@@ -53,12 +55,6 @@ namespace Infrastructure.Services.Portal
                     Metadata: subject.Metadata
                   );
 
-        public Test ToTest(TestDto dto)
-            => new()
-            {
-                Id = dto.Id,
-                Name = dto.Name
-            };
 
         public TestDto ToTestDto(Test test)
             => new(

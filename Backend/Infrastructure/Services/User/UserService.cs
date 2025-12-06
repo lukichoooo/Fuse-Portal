@@ -47,8 +47,8 @@ public class UserService(
 
     public async Task<UserPrivateDto> UpdateCurrentUserCredentialsAsync(UserUpdateRequest request)
     {
-        var user = _mapper.ToUser(request);
-        user.Id = _currentContext.GetCurrentUserId();
+        int userId = _currentContext.GetCurrentUserId();
+        var user = _mapper.ToUser(request, userId);
         user.Password = _encryptor.Encrypt(user.Password);
         return _mapper.ToPrivateDto(await _repo.UpdateUserCredentialsAsync(user));
     }

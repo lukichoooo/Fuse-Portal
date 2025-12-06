@@ -37,15 +37,21 @@ namespace InfrastructureTests
         public async Task GetAllAsync_Success(int repeatCount)
         {
             const int pageSize = 16;
-            var universities = HelperAutoFactory.CreateUniversityList(repeatCount);
-            await _context.Universities.AddRangeAsync(universities);
+            var fixture = new Fixture() { RepeatCount = repeatCount };
+            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
+            var unis = fixture.Build<University>()
+                .With(uni => uni.UserUniversities, [])
+                .CreateMany()
+                .ToList();
+            await _context.Universities.AddRangeAsync(unis);
             await _context.SaveChangesAsync();
 
             var res = await _repo.GetPageAsync(int.MinValue, pageSize);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Select(u => u.Id).Order(),
-                    Is.EquivalentTo(universities.Select(u => u.Id).Order()));
+                    Is.EquivalentTo(unis.Select(u => u.Id).Order()));
         }
 
 
@@ -188,7 +194,14 @@ namespace InfrastructureTests
         public async Task GetPageByNameAsync_SearchName_Success(string name)
         {
             const int lastId = int.MinValue, pageSize = 16;
-            var unis = HelperAutoFactory.CreateUniversityList(3);
+            var fixture = new Fixture() { RepeatCount = 3 };
+            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
+            var unis = fixture.Build<University>()
+                .With(uni => uni.Name, "LuKA")
+                .CreateMany()
+                .ToList();
+
             await _context.Universities.AddRangeAsync(unis);
             await _context.SaveChangesAsync();
 
@@ -216,7 +229,10 @@ namespace InfrastructureTests
         {
             const int lastId = int.MinValue, pageSize = 16;
             const string name = "";
-            var unis = HelperAutoFactory.CreateUniversityList(repeatCount);
+            var fixture = new Fixture() { RepeatCount = repeatCount };
+            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
+            var unis = fixture.CreateMany<University>().ToList();
             await _context.Universities.AddRangeAsync(unis);
             await _context.SaveChangesAsync();
 

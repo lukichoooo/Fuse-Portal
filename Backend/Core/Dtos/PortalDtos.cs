@@ -17,6 +17,7 @@ public record ScheduleDto(
         int Id,
         DateTime Start,
         DateTime End,
+        int SubjectId,
         string? Metadata
         );
 

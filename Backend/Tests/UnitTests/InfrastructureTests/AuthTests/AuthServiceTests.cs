@@ -3,20 +3,21 @@ using Core.Dtos;
 using Core.Dtos.Settings;
 using Core.Exceptions;
 using Core.Interfaces;
+using Core.Interfaces.Auth;
 using Core.Settings;
 using Infrastructure.Services;
+using Infrastructure.Services.Auth;
 using Infrastructure.Services.Portal;
 using Microsoft.Extensions.Options;
 using Moq;
+using UnitTests;
 
 namespace InfrastructureTests.AuthTests
 {
     [TestFixture]
     public class AuthServiceTests
     {
-        private readonly IUserMapper _mapper = new UserMapper(
-                new PortalMapper(),
-                new UniversityMapper());
+        private readonly IAuthMapper _mapper = new AuthMapper();
         private IEncryptor _encryptor;
         private IJwtTokenGenerator _jwt;
 
@@ -55,7 +56,7 @@ namespace InfrastructureTests.AuthTests
             var fixture = new Fixture();
             var login = fixture.Create<LoginRequest>();
 
-            var user = _mapper.ToUser(login);
+            var user = HelperAutoFactory.CreateUser();
             user.Password = _encryptor.Encrypt(login.Password);
 
             var mock = new Mock<IUserRepo>();
@@ -93,7 +94,7 @@ namespace InfrastructureTests.AuthTests
             var fixture = new Fixture();
             var login = fixture.Create<LoginRequest>();
 
-            var user = _mapper.ToUser(login);
+            var user = HelperAutoFactory.CreateUser();
             user.Password = _encryptor.Encrypt(login.Password + "hehe");
 
             var mock = new Mock<IUserRepo>();

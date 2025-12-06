@@ -1,5 +1,5 @@
 using Core.Entities;
-using Core.Interfaces.UserUniversity;
+using Core.Interfaces.UserUniversityTable;
 using Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,7 +21,7 @@ namespace Infrastructure.Repos
                 .Include(uu => uu.University)
                 .OrderBy(uu => uu.UniversityId)
                 .Take(pageSize)
-                .Select(uu => uu.University)
+                .Select(uu => uu.University!)
                 .ToListAsync();
         }
 
@@ -37,7 +37,7 @@ namespace Infrastructure.Repos
                 .Include(uu => uu.User)
                 .OrderBy(uu => uu.UserId)
                 .Take(pageSize)
-                .Select(uu => uu.User)
+                .Select(uu => uu.User!)
                 .ToListAsync();
         }
 
