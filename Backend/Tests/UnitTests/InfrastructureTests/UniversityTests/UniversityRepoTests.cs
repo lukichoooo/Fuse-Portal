@@ -83,7 +83,7 @@ namespace InfrastructureTests
             await _context.Universities.AddAsync(uni);
             await _context.SaveChangesAsync();
 
-            var res = await _repo.GetAsync(id);
+            var res = await _repo.GetByIdAsync(id);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Id, Is.EqualTo(id));
@@ -94,7 +94,7 @@ namespace InfrastructureTests
         public async Task GetByIdAsync_NotFound_Null()
         {
             const int id = 5;
-            var res = await _repo.GetAsync(id);
+            var res = await _repo.GetByIdAsync(id);
             Assert.That(res, Is.Null);
         }
 

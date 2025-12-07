@@ -1,5 +1,6 @@
 using AutoFixture;
 using Core.Entities;
+using Core.Entities.JoinTables;
 using Core.Entities.Portal;
 using Core.Exceptions;
 using Core.Interfaces;
@@ -225,11 +226,9 @@ namespace InfrastructureTests.UserTests
             fixture.Behaviors.Add(new OmitOnRecursionBehavior(1));
 
             var unis = fixture.CreateMany<University>().ToList();
-            var courses = fixture.CreateMany<Course>().ToList();
-            var subjectsEnroll = fixture.CreateMany<Subject>().ToList();
-            var subjectsTeaching = fixture.CreateMany<Subject>().ToList();
+            var subjects = fixture.CreateMany<Subject>().ToList();
             var user = fixture.Create<User>();
-
+            user.Subjects = [];
             user.Id = id;
             user.UserUniversities = unis
                 .ConvertAll(uni =>
@@ -238,15 +237,15 @@ namespace InfrastructureTests.UserTests
                         UniversityId = uni.Id,
                         UserId = user.Id,
                     });
-            user.Courses = courses;
-            user.SubjectEnrollments = subjectsEnroll;
-            user.TeachingSubjects = subjectsTeaching;
+            foreach (var s in subjects)
+            {
+                s.UserId = user.Id;
+                s.User = null;
+            }
 
             await _context.Universities.AddRangeAsync(unis);
-            await _context.Subjects.AddRangeAsync(subjectsEnroll);
-            await _context.Subjects.AddRangeAsync(subjectsTeaching);
-            await _context.Courses.AddRangeAsync(courses);
             await _context.Users.AddAsync(user);
+            await _context.Subjects.AddRangeAsync(subjects);
             await _context.SaveChangesAsync();
 
             var res = await _repo.GetUserDetailsByIdAsync(id);
@@ -256,8 +255,8 @@ namespace InfrastructureTests.UserTests
             Assert.Multiple(() =>
             {
                 Assert.That(
-                    res.Courses.ConvertAll(f => f.Name).Order(),
-                    Is.EqualTo(courses.ConvertAll(f => f.Name).Order())
+                    res.Subjects.OrderBy(s => s!.Name),
+                    Is.EqualTo(subjects.OrderBy(s => s.Name))
                 );
 
                 Assert.That(

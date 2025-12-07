@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 namespace Presentation.Controllers
 {
     // TODO: Default arguments dont work
+    [ApiController]
     [Authorize]
     [Route("api/[controller]")]
     public class ChatController(

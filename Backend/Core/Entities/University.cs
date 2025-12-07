@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Core.Entities.JoinTables;
 
 namespace Core.Entities
 {

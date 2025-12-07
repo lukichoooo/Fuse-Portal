@@ -1,4 +1,5 @@
 using Core.Entities;
+using Core.Entities.JoinTables;
 using Core.Interfaces.UserUniversityTable;
 using Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -11,13 +12,13 @@ namespace Infrastructure.Repos
 
         public async Task<List<University>> GetUnisPageForUserIdAsync(int userId, int? lastUniId, int pageSize)
         {
-            IQueryable<UserUniversity> unis = _context.UserUniversities
+            IQueryable<UserUniversity> userUnis = _context.UserUniversities
                 .Where(uu => uu.UserId == userId);
 
             if (lastUniId is not null)
-                unis = unis.Where(uu => uu.UniversityId > lastUniId);
+                userUnis = userUnis.Where(uu => uu.UniversityId > lastUniId);
 
-            return await unis
+            return await userUnis
                 .Include(uu => uu.University)
                 .OrderBy(uu => uu.UniversityId)
                 .Take(pageSize)
@@ -27,13 +28,13 @@ namespace Infrastructure.Repos
 
         public async Task<List<User>> GetUsersByUniIdPageAsync(int uniId, int? lastUserId, int pageSize)
         {
-            IQueryable<UserUniversity> query = _context.UserUniversities
+            IQueryable<UserUniversity> userUnis = _context.UserUniversities
                 .Where(uu => uu.UniversityId == uniId);
 
             if (lastUserId is not null)
-                query = query.Where(uu => uu.UserId > lastUserId);
+                userUnis = userUnis.Where(uu => uu.UserId > lastUserId);
 
-            return await query
+            return await userUnis
                 .Include(uu => uu.User)
                 .OrderBy(uu => uu.UserId)
                 .Take(pageSize)

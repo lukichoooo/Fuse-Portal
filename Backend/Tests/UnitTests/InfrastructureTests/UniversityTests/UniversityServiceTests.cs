@@ -6,7 +6,6 @@ using Core.Enums;
 using Core.Exceptions;
 using Core.Interfaces;
 using Infrastructure.Services;
-using Infrastructure.Services.Portal;
 using Moq;
 using UnitTests;
 
@@ -16,16 +15,13 @@ namespace InfrastructureTests.UniversityTests
     public class UniversityServiceTests
     {
         private readonly IUniversityMapper _mapper = new UniversityMapper();
-        private readonly IUserMapper _userMapper = new UserMapper(
-                new PortalMapper(),
-                new UniversityMapper());
 
         private IUniversityService CreateServiceReturns<T>(
                 Expression<Func<IUniversityRepo, Task<T>>> exp, T returnValue)
         {
             var mock = new Mock<IUniversityRepo>();
             mock.Setup(exp).ReturnsAsync(returnValue);
-            return new UniversityService(mock.Object, _mapper, _userMapper);
+            return new UniversityService(mock.Object, _mapper);
         }
 
         private IUniversityService CreateServiceThrows<T>(
@@ -33,11 +29,11 @@ namespace InfrastructureTests.UniversityTests
         {
             var mock = new Mock<IUniversityRepo>();
             mock.Setup(exp).ThrowsAsync(e);
-            return new UniversityService(mock.Object, _mapper, _userMapper);
+            return new UniversityService(mock.Object, _mapper);
         }
 
         private IUniversityService CreateService(IUniversityRepo repo)
-            => new UniversityService(repo, _mapper, _userMapper);
+            => new UniversityService(repo, _mapper);
 
 
         [Test]
@@ -45,7 +41,7 @@ namespace InfrastructureTests.UniversityTests
         {
             const int id = 5;
             var uni = HelperAutoFactory.CreateUniversity(id);
-            var service = CreateServiceReturns(r => r.GetAsync(id), uni);
+            var service = CreateServiceReturns(r => r.GetByIdAsync(id), uni);
 
             var res = await service.GetByIdAsync(id);
 
@@ -58,7 +54,7 @@ namespace InfrastructureTests.UniversityTests
         public async Task GetAsync_NotFound_Throws()
         {
             const int id = 5;
-            var service = CreateServiceReturns(r => r.GetAsync(id), null);
+            var service = CreateServiceReturns(r => r.GetByIdAsync(id), null);
 
             Assert.ThrowsAsync<UniversityNotFoundException>(async () =>
                     await service.GetByIdAsync(id));

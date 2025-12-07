@@ -10,13 +10,17 @@ namespace Core.Entities.Portal
         [Required]
         public required string Name { get; set; } = null!;
 
+        [Required]
+        public required int UserId { get; set; }
+        public User? User { get; set; }
+
         public int? Grade { get; set; }
 
-        public List<Schedule> Schedules { get; set; } = [];
-        public List<User> Students { get; set; } = [];
-        public List<User> Lecturers { get; set; } = [];
-        public List<Test> Tests { get; set; } = [];
-
         public string? Metadata { get; set; }
+
+        public List<Schedule> Schedules { get; set; } = [];
+        public List<Lecturer> Lecturers { get; set; } = [];
+        public List<Test> Tests { get; set; } = [];
     }
 }
+

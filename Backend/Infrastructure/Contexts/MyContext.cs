@@ -1,5 +1,6 @@
 using Core.Entities;
 using Core.Entities.Convo;
+using Core.Entities.JoinTables;
 using Core.Entities.Portal;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,13 +11,11 @@ public class MyContext(DbContextOptions<MyContext> options) : DbContext(options)
     public DbSet<User> Users { get; set; }
     public DbSet<University> Universities { get; set; }
 
+    public DbSet<UserUniversity> UserUniversities { get; set; }
 
-    public DbSet<Course> Courses { get; set; }
     public DbSet<Subject> Subjects { get; set; }
     public DbSet<Schedule> Schedules { get; set; }
     public DbSet<Test> Tests { get; set; }
-
-    public DbSet<UserUniversity> UserUniversities { get; set; }
 
     public DbSet<Chat> Chats { get; set; }
     public DbSet<ChatFile> ChatFiles { get; set; }
@@ -26,13 +25,8 @@ public class MyContext(DbContextOptions<MyContext> options) : DbContext(options)
     {
         base.OnModelCreating(mb);
 
-        mb.Entity<User>()
-            .HasMany(u => u.SubjectEnrollments)
-            .WithMany(s => s.Students);
 
-        mb.Entity<User>()
-            .HasMany(u => u.TeachingSubjects)
-            .WithMany(s => s.Lecturers);
+        // UserUnniversity
 
         mb.Entity<UserUniversity>()
             .HasKey(uu => new { uu.UserId, uu.UniversityId });

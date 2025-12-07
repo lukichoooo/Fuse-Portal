@@ -74,11 +74,9 @@ public class UserRepo(MyContext context) : IUserRepo
 
     public async Task<User?> GetUserDetailsByIdAsync(int id)
         => await _context.Users
-            .Include(u => u.Courses)
             .Include(u => u.UserUniversities)
                 .ThenInclude(uu => uu.University)
-            .Include(u => u.SubjectEnrollments)
-            .Include(u => u.TeachingSubjects)
+            .Include(u => u.Subjects)
             .FirstOrDefaultAsync(u => u.Id == id);
 
 }

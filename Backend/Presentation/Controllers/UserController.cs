@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace Presentation.Controllers;
 
+[ApiController]
 [Authorize]
 [Route("api/[controller]")]
 public class UserController(

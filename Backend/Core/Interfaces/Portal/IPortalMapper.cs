@@ -6,12 +6,12 @@ namespace Core.Interfaces.Portal
     public interface IPortalMapper
     {
         SubjectDto ToSubjectDto(Subject subject);
-        Subject ToSubject(SubjectDto dto);
+        SubjectFullDto ToSubjectFullDto(Subject subject);
+        Subject ToSubject(SubjectDto dto, int userId);
 
         TestDto ToTestDto(Test test);
 
-        Course ToCourse(CourseDto dto);
-        CourseDto ToCourseDto(Course course);
+        LecturerDto ToLecturerDto(Lecturer lecturer);
 
         Schedule ToSchedule(ScheduleDto dto);
         ScheduleDto ToScheduleDto(Schedule schedule);

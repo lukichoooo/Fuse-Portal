@@ -1,5 +1,6 @@
 using AutoFixture;
 using Core.Entities;
+using Core.Entities.JoinTables;
 using Core.Interfaces.UserUniversityTable;
 using Infrastructure.Contexts;
 using Infrastructure.Repos;

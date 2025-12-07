@@ -5,14 +5,14 @@ using Core.Interfaces;
 
 namespace Infrastructure.Services;
 
-public class UniversityService(IUniversityRepo repo, IUniversityMapper mapper, IUserMapper userMapper) : IUniversityService
+public class UniversityService(IUniversityRepo repo, IUniversityMapper mapper) : IUniversityService
 {
     private readonly IUniversityRepo _repo = repo;
     private readonly IUniversityMapper _mapper = mapper;
 
     public async Task<UniDto> GetByIdAsync(int id)
     {
-        var uni = await _repo.GetAsync(id)
+        var uni = await _repo.GetByIdAsync(id)
             ?? throw new UniversityNotFoundException($"University Not Found with Id={id}");
         return _mapper.ToDto(uni);
     }

@@ -38,7 +38,7 @@ public class UniversityRepo(MyContext context) : IUniversityRepo
             .ToListAsync();
     }
 
-    public async Task<University?> GetAsync(int id)
+    public async Task<University?> GetByIdAsync(int id)
         => await _context.Universities.FindAsync(id);
 
     public async Task<List<University>> GetPageByNameAsync(string name, int? lastId, int pageSize)

@@ -4,22 +4,8 @@ using Core.Interfaces.Portal;
 
 namespace Infrastructure.Services.Portal
 {
-    public class PortalMapper : IPortalMapper // TODO: Write tests
+    public class PortalMapper : IPortalMapper
     {
-        public Course ToCourse(CourseDto dto)
-            => new()
-            {
-                Id = dto.Id,
-                Name = dto.Name,
-                MetaData = dto.Metadata
-            };
-
-        public CourseDto ToCourseDto(Course course)
-            => new(
-                    Id: course.Id,
-                    Name: course.Name,
-                    Metadata: course.MetaData
-                  );
 
         public Schedule ToSchedule(ScheduleDto dto)
             => new()
@@ -40,12 +26,19 @@ namespace Infrastructure.Services.Portal
                     Metadata: schedule.MetaData
                 );
 
-        public Subject ToSubject(SubjectDto dto)
+        public LecturerDto ToLecturerDto(Lecturer lecturer)
+            => new(
+                    Id: lecturer.Id,
+                    Name: lecturer.Name
+                  );
+
+        public Subject ToSubject(SubjectDto dto, int userId)
             => new()
             {
                 Id = dto.Id,
                 Name = dto.Name,
-                Metadata = dto.Metadata
+                Metadata = dto.Metadata,
+                UserId = userId
             };
 
         public SubjectDto ToSubjectDto(Subject subject)
@@ -55,6 +48,20 @@ namespace Infrastructure.Services.Portal
                     Metadata: subject.Metadata
                   );
 
+        public SubjectFullDto ToSubjectFullDto(Subject subject)
+            => new()
+            {
+                Id = subject.Id,
+                Name = subject.Name,
+                Grade = subject.Grade,
+                Metadata = subject.Metadata,
+                Lecturers = subject.Lecturers
+                    .ConvertAll(ToLecturerDto),
+                Schedules = subject.Schedules
+                    .ConvertAll(ToScheduleDto),
+                Tests = subject.Tests
+                    .ConvertAll(ToTestDto)
+            };
 
         public TestDto ToTestDto(Test test)
             => new(

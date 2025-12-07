@@ -4,7 +4,7 @@ namespace Core.Interfaces
 {
     public interface IUniversityRepo
     {
-        Task<University?> GetAsync(int id);
+        Task<University?> GetByIdAsync(int id);
         Task<University?> GetByNameAsync(string name);
         Task<University> CreateAsync(University university);
         Task<University> UpdateAsync(University university);

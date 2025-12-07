@@ -1,5 +1,6 @@
 using Core.Dtos;
 using Core.Entities;
+using Core.Entities.JoinTables;
 using Core.Interfaces;
 using Core.Interfaces.Portal;
 
@@ -25,10 +26,7 @@ namespace Infrastructure.Services
                 Universities: user.UserUniversities
                     .ConvertAll(uu =>
                         new UniDto(uu.UniversityId, uu.University?.Name!)),
-                Courses: user.Courses.ConvertAll(_portalMapper.ToCourseDto),
-                SubjectEnrollments: user.SubjectEnrollments
-                    .ConvertAll(_portalMapper.ToSubjectDto),
-                TeachingSubjects: user.TeachingSubjects
+                Subjects: user.Subjects
                     .ConvertAll(_portalMapper.ToSubjectDto)
                     );
 
@@ -41,9 +39,7 @@ namespace Infrastructure.Services
                 Password = user.Password,
                 Address = user.Address,
 
-                Courses = user.Courses.ConvertAll(_portalMapper.ToCourseDto),
-                SubjectEnrollments = user.SubjectEnrollments.ConvertAll(_portalMapper.ToSubjectDto),
-                TeachingSubjects = user.TeachingSubjects.ConvertAll(_portalMapper.ToSubjectDto),
+                Subjects = user.Subjects.ConvertAll(_portalMapper.ToSubjectDto),
                 Universities = user.UserUniversities.ConvertAll(uu => _uniMapper.ToDto(uu.University!))
             };
 
@@ -60,17 +56,11 @@ namespace Infrastructure.Services
                     CountryA3 = request.Address.CountryA3
                 },
 
-                Courses = request.Courses?.ConvertAll(_portalMapper.ToCourse)
-                                ?? [],
-
                 UserUniversities = request.Universities?.ConvertAll(
                         uni => new UserUniversity { UniversityId = uni.Id, UserId = userId }) ?? [],
 
-                SubjectEnrollments = request.SubjectEnrollments?
-                    .ConvertAll(_portalMapper.ToSubject) ?? [],
-
-                TeachingSubjects = request.TeachingSubjects?
-                    .ConvertAll(_portalMapper.ToSubject) ?? [],
+                Subjects = request.Subjects?
+                    .ConvertAll(s => _portalMapper.ToSubject(s, userId)) ?? [],
             };
 
 

@@ -6,6 +6,11 @@ public record TestDto(
         string Name
         );
 
+public record LecturerDto(
+        int Id,
+        string Name
+        );
+
 public record TestFullDto(
         int Id,
         string Name,
@@ -18,12 +23,6 @@ public record ScheduleDto(
         DateTime Start,
         DateTime End,
         int SubjectId,
-        string? Metadata
-        );
-
-public record CourseDto(
-        int Id,
-        string Name,
         string? Metadata
         );
 
@@ -42,9 +41,15 @@ public record SubjectFullDto
     public required int? Grade { get; init; }
 
     public required List<ScheduleDto> Schedules { get; init; } = [];
-    public required List<UserDto> Students { get; init; } = [];
-    public required List<UserDto> Lecturers { get; init; } = [];
+    public required List<LecturerDto> Lecturers { get; init; } = [];
     public required List<TestDto> Tests { get; init; } = [];
 
     public string? Metadata { get; init; }
 }
+
+public record PortalDto
+{
+    public List<SubjectFullDto> Subjects { get; init; } = [];
+    public string? Metadata { get; set; }
+}
+
