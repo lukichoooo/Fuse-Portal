@@ -16,6 +16,7 @@ public class MyContext(DbContextOptions<MyContext> options) : DbContext(options)
     public DbSet<Subject> Subjects { get; set; }
     public DbSet<Schedule> Schedules { get; set; }
     public DbSet<Test> Tests { get; set; }
+    public DbSet<Lecturer> Lecturers { get; set; }
 
     public DbSet<Chat> Chats { get; set; }
     public DbSet<ChatFile> ChatFiles { get; set; }

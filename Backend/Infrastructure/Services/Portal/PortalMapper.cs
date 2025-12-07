@@ -32,15 +32,6 @@ namespace Infrastructure.Services.Portal
                     Name: lecturer.Name
                   );
 
-        public Subject ToSubject(SubjectDto dto, int userId)
-            => new()
-            {
-                Id = dto.Id,
-                Name = dto.Name,
-                Metadata = dto.Metadata,
-                UserId = userId
-            };
-
         public SubjectDto ToSubjectDto(Subject subject)
             => new(
                     Id: subject.Id,
@@ -63,10 +54,46 @@ namespace Infrastructure.Services.Portal
                     .ConvertAll(ToTestDto)
             };
 
+        public Subject ToSubject(SubjectRequestDto dto, int userId)
+            => new()
+            {
+                Name = dto.Name,
+                UserId = userId,
+                Metadata = dto.Metadata,
+                Grade = dto.Grade
+            };
+
         public TestDto ToTestDto(Test test)
             => new(
                     Id: test.Id,
                     Name: test.Name
                   );
+
+        public Lecturer ToLecturer(LecturerRequestDto dto)
+            => new()
+            {
+                Name = dto.Name,
+                SubjectId = dto.SubjectId,
+            };
+
+        public Schedule ToSchedule(ScheduleRequestDto dto)
+            => new()
+            {
+                SubjectId = dto.SubjectId,
+                Start = dto.Start,
+                End = dto.End,
+                Location = dto.Location,
+                MetaData = dto.MetaData
+            };
+
+        public Test ToTest(TestRequestDto dto)
+            => new()
+            {
+                Content = dto.Content,
+                Name = dto.Name,
+                SubjectId = dto.SubjectId,
+                Date = dto.Date,
+                Metadata = dto.Metadata
+            };
     }
 }

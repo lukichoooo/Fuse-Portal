@@ -5,9 +5,18 @@ namespace Core.Interfaces.Portal
     public interface IPortalRepo
     {
         Task<List<Subject>> GetSubjectsPageForUserAsync(int userId, int? lastId, int pageSize);
-        ValueTask<Subject?> GetFullSubjectById(int subjectId, int userId);
+        ValueTask<Subject?> GetFullSubjectByIdAsync(int subjectId, int userId);
 
-        Task<Subject> AddSubjectForUser(Subject subject);
+        Task<Subject> AddSubjectForUserAsync(Subject subject);
         Task<Subject> RemoveSubjectById(int subjectId, int userId);
+
+        Task<Schedule> AddScheduleForSubjectAsync(Schedule schedule, int userId);
+        Task<Schedule> RemoveScheduleByIdAsync(int scheduleId, int userId);
+
+        Task<Lecturer> AddLecturerToSubjectAsync(Lecturer lecturer, int userId);
+        Task<Lecturer> RemoveLecturerByIdAsync(int lecturerId, int userId);
+
+        Task<Test> AddTestForSubjectAsync(Test test, int userId);
+        Task<Test> RemoveTestByIdAsync(int testId, int userId);
     }
 }

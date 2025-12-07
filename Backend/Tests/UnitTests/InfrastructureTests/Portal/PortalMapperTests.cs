@@ -33,7 +33,7 @@ namespace InfrastructureTests.Portal
         [Test]
         public void ToSubject_From_SubjectDto()
         {
-            var dto = _fix.Create<SubjectDto>();
+            var dto = _fix.Create<SubjectRequestDto>();
             var userId = _fix.Create<int>();
             var res = _sut.ToSubject(dto, userId);
 
@@ -78,5 +78,36 @@ namespace InfrastructureTests.Portal
             Assert.That(res, Is.Not.Null);
             HelperMapperTest.AssertCommonPropsByName(res, subject);
         }
+
+
+        [Test]
+        public void ToLecturer_From_LecturerRequest()
+        {
+            var request = _fix.Create<LecturerRequestDto>();
+            var res = _sut.ToLecturer(request);
+            Assert.That(res, Is.Not.Null);
+            HelperMapperTest.AssertCommonPropsByName(res, request);
+        }
+
+
+
+        [Test]
+        public void ToSchedule_From_ScheduleRequestDto()
+        {
+            var request = _fix.Create<ScheduleRequestDto>();
+            var res = _sut.ToSchedule(request);
+            Assert.That(res, Is.Not.Null);
+            HelperMapperTest.AssertCommonPropsByName(res, request);
+        }
+
+        [Test]
+        public void ToTest_From_TestRequestDto()
+        {
+            var request = _fix.Create<TestRequestDto>();
+            var res = _sut.ToTest(request);
+            Assert.That(res, Is.Not.Null);
+            HelperMapperTest.AssertCommonPropsByName(res, request);
+        }
+
     }
 }

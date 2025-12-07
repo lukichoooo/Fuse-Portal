@@ -10,7 +10,7 @@ namespace Infrastructure.Repos
     {
         private readonly MyContext _context = context;
 
-        public async Task<Subject> AddSubjectForUser(Subject subject)
+        public async Task<Subject> AddSubjectForUserAsync(Subject subject)
         {
             await _context.Subjects.AddAsync(subject);
             await _context.SaveChangesAsync();
@@ -46,11 +46,101 @@ namespace Infrastructure.Repos
                 .ToListAsync();
         }
 
-        public async ValueTask<Subject?> GetFullSubjectById(int subjectId, int userId)
+        public async ValueTask<Subject?> GetFullSubjectByIdAsync(int subjectId, int userId)
             => await _context.Subjects
                 .Include(s => s.Schedules)
                 .Include(s => s.Tests)
                 .Include(s => s.Lecturers)
                 .FirstOrDefaultAsync(s => s.UserId == userId && s.Id == subjectId);
+
+        public async Task<Schedule> AddScheduleForSubjectAsync(Schedule schedule, int userId)
+        {
+            bool subjectExists = await _context.Subjects
+                .AnyAsync(s => s.Id == schedule.SubjectId
+                        && s.UserId == userId);
+
+            if (!subjectExists)
+            {
+                throw new SubjectNotFoundException(
+                    $"Subject not found: Id={schedule.SubjectId}, UserId={userId}");
+            }
+
+            await _context.Schedules.AddAsync(schedule);
+            await _context.SaveChangesAsync();
+            return schedule;
+        }
+
+        public async Task<Schedule> RemoveScheduleByIdAsync(int scheduleId, int userId)
+        {
+            var schedule = await _context.Schedules
+                .FirstOrDefaultAsync(s => s.Id == scheduleId
+                        && s.Subject!.UserId == userId)
+                ?? throw new ScheduleNotFoundException(
+                        $"Schedule not found with Id={scheduleId}, UserId={userId}");
+
+            _context.Schedules.Remove(schedule);
+            await _context.SaveChangesAsync();
+            return schedule;
+        }
+
+        public async Task<Lecturer> AddLecturerToSubjectAsync(Lecturer lecturer, int userId)
+        {
+            bool subjectExists = await _context.Subjects
+                .AnyAsync(l => l.Id == lecturer.SubjectId
+                        && l.UserId == userId);
+
+            if (!subjectExists)
+            {
+                throw new SubjectNotFoundException(
+                    $"Subject not found: Id={lecturer.SubjectId}, UserId={userId}");
+            }
+
+            await _context.Lecturers.AddAsync(lecturer);
+            await _context.SaveChangesAsync();
+            return lecturer;
+        }
+
+        public async Task<Lecturer> RemoveLecturerByIdAsync(int lecturerId, int userId)
+        {
+            var lecturer = await _context.Lecturers
+                .FirstOrDefaultAsync(l => l.Id == lecturerId
+                        && l.Subject!.UserId == userId)
+                ?? throw new LecturerNotFoundException(
+                        $"Lecturer not found with Id={lecturerId}, UserId={userId}");
+
+            _context.Lecturers.Remove(lecturer);
+            await _context.SaveChangesAsync();
+            return lecturer;
+        }
+
+        public async Task<Test> AddTestForSubjectAsync(Test test, int userId)
+        {
+            bool subjectExists = await _context.Subjects
+                .AnyAsync(t => t.Id == test.SubjectId
+                        && t.UserId == userId);
+
+            if (!subjectExists)
+            {
+                throw new SubjectNotFoundException(
+                    $"Subject not found: Id={test.SubjectId}, UserId={userId}");
+            }
+
+            await _context.Tests.AddAsync(test);
+            await _context.SaveChangesAsync();
+            return test;
+        }
+
+        public async Task<Test> RemoveTestByIdAsync(int testId, int userId)
+        {
+            var test = await _context.Tests
+                .FirstOrDefaultAsync(t => t.Id == testId
+                        && t.Subject!.UserId == userId)
+                ?? throw new TestNotFoundException(
+                        $"Test not found with Id={testId}, UserId={userId}");
+
+            _context.Tests.Remove(test);
+            await _context.SaveChangesAsync();
+            return test;
+        }
     }
 }

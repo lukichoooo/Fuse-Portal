@@ -37,7 +37,7 @@ public class PortalController(
 
     [HttpPost]
     public async Task<ActionResult<List<SubjectFullDto>>> AddSubject(
-            [FromBody] SubjectFullDto subject
+            [FromBody] SubjectRequestDto subject
             )
         => Ok(await _service.AddSubjectForCurrentUser(subject));
 

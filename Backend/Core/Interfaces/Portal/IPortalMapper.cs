@@ -7,7 +7,7 @@ namespace Core.Interfaces.Portal
     {
         SubjectDto ToSubjectDto(Subject subject);
         SubjectFullDto ToSubjectFullDto(Subject subject);
-        Subject ToSubject(SubjectDto dto, int userId);
+        Subject ToSubject(SubjectRequestDto dto, int userId);
 
         TestDto ToTestDto(Test test);
 
@@ -15,5 +15,12 @@ namespace Core.Interfaces.Portal
 
         Schedule ToSchedule(ScheduleDto dto);
         ScheduleDto ToScheduleDto(Schedule schedule);
+
+
+        // Requests
+
+        Lecturer ToLecturer(LecturerRequestDto dto);
+        Schedule ToSchedule(ScheduleRequestDto dto);
+        Test ToTest(TestRequestDto dto);
     }
 }

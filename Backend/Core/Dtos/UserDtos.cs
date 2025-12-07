@@ -21,7 +21,7 @@ public record UserUpdateRequest
     public required string Password { get; init; }
     public required AddressDto Address { get; init; }
 
-    public required List<SubjectDto>? Subjects { get; init; }
+    public required List<SubjectRequestDto>? Subjects { get; init; }
     public required List<UniDto>? Universities { get; init; }
 }
 

@@ -50,7 +50,7 @@ namespace InfrastructureTests.Portal
             await _context.Users.AddAsync(user);
             await _context.SaveChangesAsync();
 
-            var returnValue = await _sut.AddSubjectForUser(subject);
+            var returnValue = await _sut.AddSubjectForUserAsync(subject);
             var res = await _context.Subjects
                 .FirstOrDefaultAsync(s => s.UserId == user.Id);
 
@@ -105,7 +105,7 @@ namespace InfrastructureTests.Portal
             await _context.Subjects.AddAsync(subject);
             await _context.SaveChangesAsync();
 
-            var res = await _sut.GetFullSubjectById(subject.Id, user.Id);
+            var res = await _sut.GetFullSubjectByIdAsync(subject.Id, user.Id);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Schedules, Is.Not.Empty);
@@ -144,13 +144,330 @@ namespace InfrastructureTests.Portal
         {
             const int realUserId = 5, fakeUserId = 10;
             var subject = _fix.Create<Subject>();
-            subject.UserId = realUserId;
 
             await _context.Subjects.AddAsync(subject);
+            await _context.SaveChangesAsync();
+            subject.UserId = realUserId;
             await _context.SaveChangesAsync();
 
             Assert.ThrowsAsync<SubjectNotFoundException>(async () =>
                     await _sut.RemoveSubjectById(subject.Id, fakeUserId));
+        }
+
+
+        [Test]
+        public async Task AddScheduleForSubjectAsync_Success()
+        {
+            var user = _fix.Create<User>();
+            var subject = _fix.Create<Subject>();
+
+            await _context.Users.AddAsync(user);
+            await _context.Subjects.AddAsync(subject);
+            await _context.SaveChangesAsync();
+            subject.User = null;
+            user.Subjects = [];
+            subject.UserId = user.Id;
+            await _context.SaveChangesAsync();
+
+            var schedule = _fix.Create<Schedule>();
+            schedule.Subject = null;
+            schedule.SubjectId = subject.Id;
+
+            var rv = await _sut.AddScheduleForSubjectAsync(schedule, user.Id);
+            var res = await _context.Schedules
+                .FirstOrDefaultAsync(s => s.Id == schedule.Id
+                        && s.SubjectId == subject.Id);
+
+            Assert.That(rv, Is.Not.Null);
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res, Is.EqualTo(schedule));
+            Assert.That(rv, Is.EqualTo(schedule));
+        }
+
+        [Test]
+        public async Task AddScheduleForSubjectAsync_WrongUser_Throws()
+        {
+            const int realUserId = 5, fakeUserId = 10;
+            var user = _fix.Create<User>();
+            var subject = _fix.Create<Subject>();
+
+            await _context.Users.AddAsync(user);
+            await _context.Subjects.AddAsync(subject);
+            subject.UserId = user.Id = realUserId;
+            await _context.SaveChangesAsync();
+
+            var schedule = _fix.Create<Schedule>();
+            schedule.Subject = null;
+            schedule.SubjectId = subject.Id;
+
+            Assert.ThrowsAsync<SubjectNotFoundException>(async () =>
+                    await _sut.AddScheduleForSubjectAsync(schedule, fakeUserId));
+        }
+
+
+        [Test]
+        public async Task RemoveScheduleByIdAsync_Success()
+        {
+            var user = _fix.Create<User>();
+            var subject = _fix.Create<Subject>();
+
+            await _context.Users.AddAsync(user);
+            await _context.Subjects.AddAsync(subject);
+            await _context.SaveChangesAsync();
+            subject.UserId = user.Id;
+
+            var schedule = _fix.Create<Schedule>();
+            schedule.Subject = null;
+            schedule.SubjectId = subject.Id;
+            await _context.AddAsync(schedule);
+            await _context.SaveChangesAsync();
+
+            var rv = await _sut.RemoveScheduleByIdAsync(schedule.Id, user.Id);
+            var res = await _context.Schedules
+                .FirstOrDefaultAsync(s => s.Id == schedule.Id
+                        && s.SubjectId == subject.Id);
+
+            Assert.That(rv, Is.Not.Null);
+            Assert.That(res, Is.Null);
+            Assert.That(rv, Is.EqualTo(schedule));
+        }
+
+
+
+        [Test]
+        public async Task RemoveScheduleByIdAsync_WrongUser_Throws()
+        {
+            const int realUserId = 5, fakeUserId = 10;
+            var user = _fix.Create<User>();
+            var subject = _fix.Create<Subject>();
+
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+            subject.Id = user.Id = realUserId;
+            var scheduleId = _fix.Create<int>();
+
+            Assert.ThrowsAsync<ScheduleNotFoundException>(async () =>
+                    await _sut.RemoveScheduleByIdAsync(scheduleId, fakeUserId));
+        }
+
+        [Test]
+        public async Task RemoveScheduleByIdAsync_SubjectNotFound_Throws()
+        {
+            var user = _fix.Create<User>();
+            var subject = _fix.Create<Subject>();
+
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+            subject.Id = user.Id;
+            var scheduleId = _fix.Create<int>();
+
+            Assert.ThrowsAsync<ScheduleNotFoundException>(async () =>
+                    await _sut.RemoveScheduleByIdAsync(scheduleId, user.Id));
+        }
+
+
+
+        [Test]
+        public async Task AddLecturerToSubjectAsync_Success()
+        {
+            var user = _fix.Create<User>();
+            var subject = _fix.Create<Subject>();
+
+            await _context.Users.AddAsync(user);
+            await _context.Subjects.AddAsync(subject);
+            await _context.SaveChangesAsync();
+            subject.UserId = user.Id;
+            await _context.SaveChangesAsync();
+
+            var lecturer = _fix.Create<Lecturer>();
+            lecturer.SubjectId = subject.Id;
+            lecturer.Subject = null;
+
+            var rv = await _sut.AddLecturerToSubjectAsync(lecturer, user.Id);
+            var res = await _context.Lecturers
+                .FirstOrDefaultAsync(l => l.Id == lecturer.Id
+                        && l.SubjectId == subject.Id);
+
+            Assert.That(rv, Is.Not.Null);
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res, Is.EqualTo(lecturer));
+            Assert.That(rv, Is.EqualTo(lecturer));
+        }
+
+
+        [Test]
+        public async Task AddLecturerToSubjectAsync_WrongUser_Throws()
+        {
+            const int realUserId = 5, fakeUserId = 10;
+            var user = _fix.Create<User>();
+            var subject = _fix.Create<Subject>();
+
+            await _context.Users.AddAsync(user);
+            await _context.Subjects.AddAsync(subject);
+            subject.UserId = user.Id = realUserId;
+            await _context.SaveChangesAsync();
+
+            var lecturer = _fix.Create<Lecturer>();
+            lecturer.SubjectId = subject.Id;
+            lecturer.Subject = null;
+
+            Assert.ThrowsAsync<SubjectNotFoundException>(async () =>
+                     await _sut.AddLecturerToSubjectAsync(lecturer, fakeUserId));
+        }
+
+
+        [Test]
+        public async Task RemoveLecturerByIdAsync_Success()
+        {
+            var user = _fix.Create<User>();
+            var subject = _fix.Create<Subject>();
+
+            await _context.Users.AddAsync(user);
+            await _context.Subjects.AddAsync(subject);
+            await _context.SaveChangesAsync();
+            subject.UserId = user.Id;
+            await _context.SaveChangesAsync();
+
+            var lecturer = _fix.Create<Lecturer>();
+            lecturer.SubjectId = subject.Id;
+            lecturer.Subject = null;
+            await _context.AddAsync(lecturer);
+            await _context.SaveChangesAsync();
+
+            var rv = await _sut.RemoveLecturerByIdAsync(lecturer.Id, user.Id);
+            var res = await _context.Lecturers
+                .FirstOrDefaultAsync(l => l.Id == lecturer.Id
+                        && l.SubjectId == subject.Id);
+
+            Assert.That(rv, Is.Not.Null);
+            Assert.That(res, Is.Null);
+            Assert.That(rv, Is.EqualTo(lecturer));
+        }
+
+
+        [Test]
+        public async Task RemoveLecturerByIdAsync_SubjectNotFound_Throws()
+        {
+            var user = _fix.Create<User>();
+            var subject = _fix.Create<Subject>();
+
+            await _context.Users.AddAsync(user);
+            subject.Id = user.Id;
+            await _context.SaveChangesAsync();
+            var lecturerId = _fix.Create<int>();
+
+            Assert.ThrowsAsync<LecturerNotFoundException>(async () =>
+                    await _sut.RemoveLecturerByIdAsync(lecturerId, user.Id));
+        }
+
+
+        [Test]
+        public async Task AddTestToSubjectAsync_Success()
+        {
+            var user = _fix.Create<User>();
+            var subject = _fix.Create<Subject>();
+
+            await _context.Users.AddAsync(user);
+            await _context.Subjects.AddAsync(subject);
+            await _context.SaveChangesAsync();
+            subject.UserId = user.Id;
+            await _context.SaveChangesAsync();
+
+            var test = _fix.Create<Test>();
+            test.SubjectId = subject.Id;
+            test.Subject = null;
+
+            var rv = await _sut.AddTestForSubjectAsync(test, user.Id);
+            var res = await _context.Tests
+                .FirstOrDefaultAsync(t => t.Id == test.Id
+                        && t.SubjectId == subject.Id);
+
+            Assert.That(rv, Is.Not.Null);
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res, Is.EqualTo(test));
+            Assert.That(rv, Is.EqualTo(test));
+        }
+
+
+        [Test]
+        public async Task AddTestToSubjectAsync_SubjectNotFound_Throws()
+        {
+            const int realUserId = 5, fakeUserId = 10;
+            var user = _fix.Create<User>();
+            var subject = _fix.Create<Subject>();
+
+            await _context.Users.AddAsync(user);
+            await _context.Subjects.AddAsync(subject);
+            await _context.SaveChangesAsync();
+            subject.UserId = user.Id = realUserId;
+
+            var test = _fix.Create<Test>();
+            test.SubjectId = subject.Id;
+            test.Subject = null;
+
+            Assert.ThrowsAsync<SubjectNotFoundException>(async () =>
+                    await _sut.AddTestForSubjectAsync(test, fakeUserId));
+        }
+
+
+        [Test]
+        public async Task RemoveTestByIdAsync_Success()
+        {
+            var user = _fix.Create<User>();
+            var subject = _fix.Create<Subject>();
+
+            await _context.Users.AddAsync(user);
+            await _context.Subjects.AddAsync(subject);
+            await _context.SaveChangesAsync();
+            subject.UserId = user.Id;
+
+            var test = _fix.Create<Test>();
+            test.SubjectId = subject.Id;
+            test.Subject = null;
+            await _context.AddAsync(test);
+            await _context.SaveChangesAsync();
+
+            var rv = await _sut.RemoveTestByIdAsync(test.Id, user.Id);
+            var res = await _context.Tests
+                .FirstOrDefaultAsync(t => t.Id == test.Id
+                        && t.SubjectId == subject.Id);
+
+            Assert.That(rv, Is.Not.Null);
+            Assert.That(res, Is.Null);
+            Assert.That(rv, Is.EqualTo(test));
+        }
+
+
+        [Test]
+        public async Task RemoveTestByIdAsync_WrongUser_Throws()
+        {
+            const int realUserId = 5, fakeUserId = 10;
+            var user = _fix.Create<User>();
+            var subject = _fix.Create<Subject>();
+            subject.UserId = user.Id = realUserId;
+
+            await _context.Users.AddAsync(user);
+            await _context.Subjects.AddAsync(subject);
+            await _context.SaveChangesAsync();
+
+            var test = _fix.Create<Test>();
+            test.SubjectId = subject.Id;
+            test.Subject = null;
+            await _context.AddAsync(test);
+            await _context.SaveChangesAsync();
+
+            Assert.ThrowsAsync<TestNotFoundException>(async () =>
+                     await _sut.RemoveTestByIdAsync(test.Id, fakeUserId));
+        }
+
+        [Test]
+        public async Task RemoveTestByIdAsync_NotFound_Throws()
+        {
+            var userId = _fix.Create<int>();
+            var testId = _fix.Create<int>();
+
+            Assert.ThrowsAsync<TestNotFoundException>(async () =>
+                    await _sut.RemoveTestByIdAsync(testId, userId));
         }
 
     }

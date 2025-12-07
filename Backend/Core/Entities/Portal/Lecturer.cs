@@ -6,8 +6,10 @@ namespace Core.Entities.Portal
     {
         [Key]
         public int Id { get; set; }
+
         public required string Name { get; set; }
 
+        [Required]
         public required int SubjectId { get; set; }
         public Subject? Subject { get; set; }
     }

@@ -15,11 +15,11 @@ namespace Infrastructure.Services.Portal
         private readonly IPortalMapper _mapper = mapper;
         private readonly ICurrentContext _currentContext = currentContext;
 
-        public async Task<SubjectDto> AddSubjectForCurrentUser(SubjectDto dto)
+        public async Task<SubjectFullDto> AddSubjectForCurrentUser(SubjectRequestDto dto)
         {
             int userId = _currentContext.GetCurrentUserId();
             var subject = _mapper.ToSubject(dto, userId);
-            return _mapper.ToSubjectDto(await _repo.AddSubjectForUser(subject));
+            return _mapper.ToSubjectFullDto(await _repo.AddSubjectForUserAsync(subject));
         }
 
         public async Task<SubjectDto> RemoveSubjectById(int subjectId)
@@ -40,10 +40,57 @@ namespace Infrastructure.Services.Portal
         public async Task<SubjectFullDto> GetFullSubjectById(int subjectId)
         {
             int userId = _currentContext.GetCurrentUserId();
-            var subject = await _repo.GetFullSubjectById(subjectId, userId)
+            var subject = await _repo.GetFullSubjectByIdAsync(subjectId, userId)
                 ?? throw new SubjectNotFoundException(
                         $" subject Not Found With Id={subjectId} and UserId={userId}");
             return _mapper.ToSubjectFullDto(subject);
+        }
+
+        // TODO: Write Tests For Below
+
+        public async Task<ScheduleDto> AddScheduleForSubjectAsync(ScheduleRequestDto request)
+        {
+            int userId = _currentContext.GetCurrentUserId();
+            var schedule = _mapper.ToSchedule(request);
+            return _mapper.ToScheduleDto(await _repo.AddScheduleForSubjectAsync(
+                        schedule, userId));
+        }
+
+        public async Task<ScheduleDto> RemoveScheduleByIdAsync(int scheduleId)
+        {
+            int userId = _currentContext.GetCurrentUserId();
+            return _mapper.ToScheduleDto(await _repo.RemoveScheduleByIdAsync(
+                        scheduleId, userId));
+        }
+
+        public async Task<LecturerDto> AddLecturerToSubjectAsync(LecturerRequestDto request)
+        {
+            int userId = _currentContext.GetCurrentUserId();
+            var lecturer = _mapper.ToLecturer(request);
+            return _mapper.ToLecturerDto(await _repo.AddLecturerToSubjectAsync(
+                        lecturer, userId));
+        }
+
+        public async Task<LecturerDto> RemoveLecturerByIdAsync(int lecturerId)
+        {
+            int userId = _currentContext.GetCurrentUserId();
+            return _mapper.ToLecturerDto(await _repo.RemoveLecturerByIdAsync(
+                        lecturerId, userId));
+        }
+
+        public async Task<TestDto> AddTestForSubjectAsync(TestRequestDto request)
+        {
+            int userId = _currentContext.GetCurrentUserId();
+            var test = _mapper.ToTest(request);
+            return _mapper.ToTestDto(await _repo.AddTestForSubjectAsync(
+                        test, userId));
+        }
+
+        public async Task<TestDto> RemoveTestByIdAsync(int testId)
+        {
+            int userId = _currentContext.GetCurrentUserId();
+            return _mapper.ToTestDto(await _repo.RemoveTestByIdAsync(
+                        testId, userId));
         }
     }
 }

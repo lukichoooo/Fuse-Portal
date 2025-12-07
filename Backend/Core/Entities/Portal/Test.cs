@@ -15,11 +15,10 @@ namespace Core.Entities.Portal
 
         [Required]
         public required int SubjectId { get; set; }
-        public Subject Subject { get; set; } = null!;
+        public Subject? Subject { get; set; }
 
 
-        public int? ScheduleId { get; set; }
-        public Schedule? Schedule { get; set; }
+        public DateTime? Date { get; set; }
 
         public string? Metadata { get; set; }
     }

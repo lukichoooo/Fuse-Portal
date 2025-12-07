@@ -45,10 +45,10 @@ namespace InfrastructureTests.Portal
         [Test]
         public async Task AddSubjectForCurrentUser_Success()
         {
-            var dto = _fix.Create<SubjectDto>();
+            var dto = _fix.Create<SubjectRequestDto>();
             var subject = _mapper.ToSubject(dto, DEFAULT_CONTEXT_ID);
             var repoMock = new Mock<IPortalRepo>();
-            repoMock.Setup(r => r.AddSubjectForUser(It.IsAny<Subject>()))
+            repoMock.Setup(r => r.AddSubjectForUserAsync(It.IsAny<Subject>()))
                 .ReturnsAsync((Subject s) => s);
             var sut = CreateService(repoMock.Object);
 
@@ -63,7 +63,7 @@ namespace InfrastructureTests.Portal
         [Test]
         public async Task RemoveSybjectById_Success()
         {
-            var dto = _fix.Create<SubjectDto>();
+            var dto = _fix.Create<SubjectRequestDto>();
             var subject = _mapper.ToSubject(dto, DEFAULT_CONTEXT_ID);
             var repoMock = new Mock<IPortalRepo>();
             repoMock.Setup(r => r.RemoveSubjectById(subject.Id, DEFAULT_CONTEXT_ID))
@@ -103,7 +103,7 @@ namespace InfrastructureTests.Portal
         {
             var subject = _fix.Create<Subject>();
             var repoMock = new Mock<IPortalRepo>();
-            repoMock.Setup(r => r.GetFullSubjectById(subject.Id, DEFAULT_CONTEXT_ID))
+            repoMock.Setup(r => r.GetFullSubjectByIdAsync(subject.Id, DEFAULT_CONTEXT_ID))
                 .ReturnsAsync(subject);
             var sut = CreateService(repoMock.Object);
 
@@ -119,12 +119,13 @@ namespace InfrastructureTests.Portal
         {
             var subject = _fix.Create<Subject>();
             var repoMock = new Mock<IPortalRepo>();
-            repoMock.Setup(r => r.GetFullSubjectById(subject.Id, DEFAULT_CONTEXT_ID))
+            repoMock.Setup(r => r.GetFullSubjectByIdAsync(subject.Id, DEFAULT_CONTEXT_ID))
                 .ReturnsAsync(() => null);
             var sut = CreateService(repoMock.Object);
 
             Assert.ThrowsAsync<SubjectNotFoundException>(async () =>
                     await sut.GetFullSubjectById(subject.Id));
         }
+
     }
 }
