@@ -21,34 +21,31 @@ namespace Infrastructure.Services.Portal
         public async Task<PortalDto> ParseAndSavePortalAsync(ParsePortalRequest request)
         {
             PortalDto portal = await _portalParser.ParsePortalHtml(request);
-            foreach (var subject in portal.Subjects)
+            foreach (var subjectFullRequest in portal.Subjects)
             {
-                var subjectRequest = _mapper.ToSubjectRequest(subject);
-                var onDbSubject = await AddSubjectForCurrentUserAsync(subjectRequest);
+                int userId = _currentContext.GetCurrentUserId();
+                var subject = _mapper.ToSubjectWithoutLists(
+                        subjectFullRequest,
+                        userId);
+                var onDbSubject = await _repo.AddSubjectForUserAsync(subject);
                 int subjectId = onDbSubject.Id;
 
-                foreach (var scheduleNoSubjectId in subject.Schedules)
+                foreach (var scheduleNoSubjectId in subjectFullRequest.Schedules)
                 {
-                    ScheduleRequestDto schedule = _mapper.ToScheduleRequest(
-                            scheduleNoSubjectId,
-                            subjectId);
-                    await AddScheduleForSubjectAsync(schedule);
+                    var schedule = _mapper.ToSchedule(scheduleNoSubjectId, subjectId);
+                    await _repo.AddScheduleForSubjectAsync(schedule, userId);
                 }
 
-                foreach (var lecturerNoSubjectId in subject.Lecturers)
+                foreach (var lecturerNoSubjectId in subjectFullRequest.Lecturers)
                 {
-                    LecturerRequestDto lecturer = _mapper.ToLecturerRequest(
-                            lecturerNoSubjectId,
-                            subjectId);
-                    await AddLecturerToSubjectAsync(lecturer);
+                    var lecturer = _mapper.ToLecturer(lecturerNoSubjectId, subjectId);
+                    await _repo.AddLecturerToSubjectAsync(lecturer, userId);
                 }
 
-                foreach (var testNoSubjectId in subject.Tests)
+                foreach (var testNoSubjectId in subjectFullRequest.Tests)
                 {
-                    TestRequestDto test = _mapper.ToTestRequest(
-                            testNoSubjectId,
-                            subjectId);
-                    await AddTestForSubjectAsync(test);
+                    var test = _mapper.ToTest(testNoSubjectId, subjectId);
+                    await _repo.AddTestForSubjectAsync(test, userId);
                 }
             }
             return portal;

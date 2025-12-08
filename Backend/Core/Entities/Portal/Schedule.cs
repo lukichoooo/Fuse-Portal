@@ -15,6 +15,6 @@ namespace Core.Entities.Portal
         public Subject? Subject { get; set; }
 
         public string? Location { get; set; }
-        public string? MetaData { get; set; }
+        public string? Metadata { get; set; }
     }
 }

@@ -24,16 +24,10 @@ namespace Core.Interfaces.Portal
         Test ToTest(TestRequestDto dto);
         TestFullDto ToTestFullDto(Test test);
 
-        SubjectRequestDto ToSubjectRequest(SubjectFullRequestDto fullRequest);
+        Subject ToSubjectWithoutLists(SubjectFullRequestDto fullRequest, int userId);
 
-        ScheduleRequestDto ToScheduleRequest(
-                ScheduleRequestDtoNoSubjectId dto,
-                int subjectId);
-        LecturerRequestDto ToLecturerRequest(
-                LecturerRequestDtoNoSubjectId dto,
-                int subjectId);
-        TestRequestDto ToTestRequest(
-                TestRequestDtoNoSubjectId dto,
-                int subjectId);
+        Schedule ToSchedule(ScheduleRequestDtoNoSubjectId dto, int subjectId);
+        Lecturer ToLecturer(LecturerRequestDtoNoSubjectId dto, int subjectId);
+        Test ToTest(TestRequestDtoNoSubjectId dto, int subjectId);
     }
 }

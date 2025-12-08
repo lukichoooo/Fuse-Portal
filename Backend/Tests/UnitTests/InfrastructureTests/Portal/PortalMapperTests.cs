@@ -119,12 +119,17 @@ namespace InfrastructureTests.Portal
         }
 
         [Test]
-        public void ToSubjectRequest_From_SubjectFullrequestDto()
+        public void ToSubjectWithoutLists_From_SubjectFullrequestDto()
         {
             var fullRequest = _fix.Create<SubjectFullRequestDto>();
-            var res = _sut.ToSubjectRequest(fullRequest);
+            var userId = _fix.Create<int>();
+            var res = _sut.ToSubjectWithoutLists(fullRequest, userId);
+
             Assert.That(res, Is.Not.Null);
-            HelperMapperTest.AssertCommonPropsByName(res, fullRequest);
+            Assert.That(res.Name, Is.EqualTo(fullRequest.Name));
+            Assert.That(res.Grade, Is.EqualTo(fullRequest.Grade));
+            Assert.That(res.Metadata, Is.EqualTo(fullRequest.Metadata));
+            Assert.That(res.UserId, Is.EqualTo(userId));
         }
 
 
@@ -133,7 +138,7 @@ namespace InfrastructureTests.Portal
         {
             var requestNoId = _fix.Create<ScheduleRequestDtoNoSubjectId>();
             var subjectId = _fix.Create<int>();
-            var res = _sut.ToScheduleRequest(requestNoId, subjectId);
+            var res = _sut.ToSchedule(requestNoId, subjectId);
             Assert.That(res, Is.Not.Null);
             Assert.That(res.SubjectId, Is.EqualTo(subjectId));
             HelperMapperTest.AssertCommonPropsByName(res, requestNoId);
@@ -144,7 +149,7 @@ namespace InfrastructureTests.Portal
         {
             var requestNoId = _fix.Create<LecturerRequestDtoNoSubjectId>();
             var subjectId = _fix.Create<int>();
-            var res = _sut.ToLecturerRequest(requestNoId, subjectId);
+            var res = _sut.ToLecturer(requestNoId, subjectId);
             Assert.That(res, Is.Not.Null);
             Assert.That(res.SubjectId, Is.EqualTo(subjectId));
             HelperMapperTest.AssertCommonPropsByName(res, requestNoId);
@@ -155,7 +160,7 @@ namespace InfrastructureTests.Portal
         {
             var requestNoId = _fix.Create<TestRequestDtoNoSubjectId>();
             var subjectId = _fix.Create<int>();
-            var res = _sut.ToTestRequest(requestNoId, subjectId);
+            var res = _sut.ToTest(requestNoId, subjectId);
             Assert.That(res, Is.Not.Null);
             Assert.That(res.SubjectId, Is.EqualTo(subjectId));
             HelperMapperTest.AssertCommonPropsByName(res, requestNoId);

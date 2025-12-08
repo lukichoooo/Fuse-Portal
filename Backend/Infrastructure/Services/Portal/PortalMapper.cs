@@ -13,7 +13,7 @@ namespace Infrastructure.Services.Portal
                 Id = dto.Id,
                 Start = dto.Start,
                 End = dto.End,
-                MetaData = dto.Metadata,
+                Metadata = dto.Metadata,
                 SubjectId = dto.SubjectId
             };
 
@@ -23,7 +23,7 @@ namespace Infrastructure.Services.Portal
                     Start: schedule.Start,
                     End: schedule.End,
                     SubjectId: schedule.SubjectId,
-                    Metadata: schedule.MetaData
+                    Metadata: schedule.Metadata
                 );
 
         public LecturerDto ToLecturerDto(Lecturer lecturer)
@@ -77,7 +77,7 @@ namespace Infrastructure.Services.Portal
                 Start = dto.Start,
                 End = dto.End,
                 Location = dto.Location,
-                MetaData = dto.Metadata
+                Metadata = dto.Metadata
             };
 
         public TestDto ToTestDto(Test test)
@@ -105,16 +105,17 @@ namespace Infrastructure.Services.Portal
                     Metadata: test.Metadata
                   );
 
-        public SubjectRequestDto ToSubjectRequest(SubjectFullRequestDto fullRequest)
+        public Subject ToSubjectWithoutLists(SubjectFullRequestDto fullRequest, int userId)
             => new()
             {
                 Name = fullRequest.Name,
+                Metadata = fullRequest.Metadata,
                 Grade = fullRequest.Grade,
-                Metadata = fullRequest.Metadata
+                UserId = userId,
             };
 
 
-        public ScheduleRequestDto ToScheduleRequest(
+        public Schedule ToSchedule(
                 ScheduleRequestDtoNoSubjectId dto,
                 int subjectId)
             => new()
@@ -127,7 +128,7 @@ namespace Infrastructure.Services.Portal
             };
 
 
-        public LecturerRequestDto ToLecturerRequest(
+        public Lecturer ToLecturer(
                 LecturerRequestDtoNoSubjectId dto,
                 int subjectId)
             => new()
@@ -137,7 +138,7 @@ namespace Infrastructure.Services.Portal
             };
 
 
-        public TestRequestDto ToTestRequest(
+        public Test ToTest(
                 TestRequestDtoNoSubjectId dto,
                 int subjectId)
             => new()

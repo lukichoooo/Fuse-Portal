@@ -6,6 +6,7 @@ using Core.Interfaces.Auth;
 using Core.Interfaces.Portal;
 using Infrastructure.Services.Portal;
 using Moq;
+using NPOI.SS.Formula.Functions;
 
 namespace InfrastructureTests.Portal
 {
@@ -263,7 +264,44 @@ namespace InfrastructureTests.Portal
         [Test]
         public async Task ParseAndSavePortalAsync_Success()
         {
-            throw new NotImplementedException();
+            var fixture = new Fixture() { RepeatCount = 100 };
+            var parsePortalRequest = fixture.Create<ParsePortalRequest>();
+            var portalDto = _fix.Create<PortalDto>();
+            var parserMock = new Mock<IPortalParser>();
+            parserMock.Setup(p => p.ParsePortalHtml(parsePortalRequest))
+                .ReturnsAsync(portalDto);
+            var repoMock = new Mock<IPortalRepo>();
+            repoMock.Setup(r => r.AddSubjectForUserAsync(It.IsAny<Subject>()))
+                .ReturnsAsync((Subject s) => s);
+            var sut = CreateService(
+                    repo: repoMock.Object,
+                    portalParser: parserMock.Object);
+
+            var res = await sut.ParseAndSavePortalAsync(parsePortalRequest);
+
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res, Is.EqualTo(portalDto));
+
+            repoMock.Verify(r => r.AddSubjectForUserAsync(It.IsAny<Subject>()),
+                    Times.Exactly(portalDto.Subjects.Count));
+
+            int schedulesCount = portalDto.Subjects.Sum(s => s.Schedules.Count);
+            repoMock.Verify(r => r.AddScheduleForSubjectAsync(
+                        It.IsAny<Schedule>(),
+                        DEFAULT_CONTEXT_ID),
+                    Times.Exactly(schedulesCount));
+
+            int lecturerCount = portalDto.Subjects.Sum(s => s.Lecturers.Count);
+            repoMock.Verify(r => r.AddLecturerToSubjectAsync(
+                        It.IsAny<Lecturer>(),
+                        DEFAULT_CONTEXT_ID),
+                    Times.Exactly(lecturerCount));
+
+            int testCount = portalDto.Subjects.Sum(s => s.Tests.Count);
+            repoMock.Verify(r => r.AddTestForSubjectAsync(
+                        It.IsAny<Test>(),
+                        DEFAULT_CONTEXT_ID),
+                    Times.Exactly(testCount));
         }
 
     }
