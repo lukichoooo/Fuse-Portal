@@ -7,18 +7,20 @@ using Core.Dtos;
 using Core.Exceptions;
 using Core.Interfaces.LLM;
 using Core.Interfaces.Convo.FileServices;
+using Core.Interfaces.Auth;
 
 namespace InfrastructureTests.Convo
 {
     [TestFixture]
     public class ChatServiceTests
     {
-        private static readonly Fixture _globalFixture = new();
+        private static readonly Fixture _fix = new();
+        private const int DEFAULT_CONTEXT_ID = 2142321;
 
         [OneTimeSetUp]
         public void BeforeAll()
         {
-            _globalFixture.Behaviors.Add(new OmitOnRecursionBehavior());
+            _fix.Behaviors.Add(new OmitOnRecursionBehavior());
         }
 
 
@@ -27,27 +29,23 @@ namespace InfrastructureTests.Convo
         private IChatService CreateService(
                 IChatRepo? repo = null,
                 ILLMService? LLMservice = null,
-                IFileProcessingService? fileService = null)
+                IFileProcessingService? fileService = null,
+                ICurrentContext? currContext = null)
         {
             repo ??= new Mock<IChatRepo>().Object;
             LLMservice ??= new Mock<ILLMService>().Object;
             fileService ??= new Mock<IFileProcessingService>().Object;
-            return new ChatService(repo, LLMservice, _mapper, fileService);
+            if (currContext is null)
+            {
+                var mock = new Mock<ICurrentContext>();
+                mock.Setup(c => c.GetCurrentUserId())
+                    .Returns(DEFAULT_CONTEXT_ID);
+                currContext = mock.Object;
+            }
+
+            return new ChatService(repo, LLMservice, _mapper, fileService, currContext);
         }
 
-        private static Chat CreateChatById(int id)
-            => _globalFixture.Build<Chat>()
-            .With(c => c.Messages, [])
-            .With(c => c.Id, id)
-            .Create();
-
-        private static Message CreateMessageById(int id)
-            => _globalFixture.Build<Message>()
-            .With(c => c.Chat, CreateChatById(id))
-            .With(c => c.Files, [])
-            .With(c => c.ChatId, id)
-            .With(c => c.Id, id)
-            .Create();
 
         [TestCase(0)]
         [TestCase(3)]
@@ -62,7 +60,8 @@ namespace InfrastructureTests.Convo
                 .CreateMany()
                 .ToList();
             var mock = new Mock<IChatRepo>();
-            mock.Setup(r => r.GetAllChatsPageAsync(It.IsAny<int>(), It.IsAny<int>()))
+            mock.Setup(r => r.GetAllChatsForUserPageAsync(It.IsAny<int>(), It.IsAny<int>(),
+                        DEFAULT_CONTEXT_ID))
                 .ReturnsAsync(chats);
             var service = CreateService(mock.Object);
 
@@ -76,80 +75,67 @@ namespace InfrastructureTests.Convo
 
         [TestCase(0)]
         [TestCase(3)]
-        public async Task GetFullChatPageAsync_Success(int repeat)
+        public async Task GetChatWithMessagesPageAsync_Success(int repeat)
         {
             var fixture = new Fixture() { RepeatCount = repeat };
             fixture.Behaviors.Add(new OmitOnRecursionBehavior());
 
             const int lastId = -1, pageSize = 16;
             int chatId = fixture.Create<int>();
-            var chat = CreateChatById(chatId);
+            var chat = _fix.Build<Chat>()
+                .With(c => c.UserId, DEFAULT_CONTEXT_ID)
+                .With(c => c.Id, chatId)
+                .Create();
             var messages = fixture.Build<Message>()
-                .With(m => m.Files, [])
                 .With(m => m.Chat, chat)
+                .With(m => m.ChatId, chatId)
                 .CreateMany()
                 .ToList();
+            chat.Messages = messages;
             var mock = new Mock<IChatRepo>();
-            mock.Setup(r => r.GetChatByIdAsync(chatId))
-                .Returns(new ValueTask<Chat?>(Task.FromResult<Chat?>(chat)));
-            mock.Setup(r => r.GetMessagesForChat(chatId, It.IsAny<int>(), It.IsAny<int>()))
-                .ReturnsAsync(messages);
+            mock.Setup(r => r.GetChatWithMessagesPageAsync(chatId, It.IsAny<int>(),
+                        It.IsAny<int>(), DEFAULT_CONTEXT_ID))
+                .ReturnsAsync(chat);
             var service = CreateService(mock.Object);
 
-            ChatFullDto res = await service.GetFullChatPageAsync(chatId, lastId, pageSize);
+            ChatFullDto res = await service.GetChatWithMessagesPageAsync(chatId, lastId, pageSize);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Messages.ConvertAll(d => d.Id),
                     Is.EquivalentTo(messages.ConvertAll(d => d.Id)));
-            mock.Verify(r => r.GetChatByIdAsync(chatId), Times.Once());
-            mock.Verify(r =>
-                    r.GetMessagesForChat(chatId, It.IsAny<int>(), It.IsAny<int>()),
-                    Times.Once());
-        }
-
-
-        [Test]
-        public async Task GetFullChatPageAsync_NotFound_Throws()
-        {
-            const int lastId = -1, pageSize = 16;
-            int chatId = _globalFixture.Create<int>();
-            var mock = new Mock<IChatRepo>();
-            mock.Setup(r => r.GetChatByIdAsync(chatId))
-                .Returns(new ValueTask<Chat?>(Task.FromResult<Chat?>(null)));
-            var service = CreateService(mock.Object);
-
-            Assert.ThrowsAsync<ChatNotFoundException>(async () =>
-                    await service.GetFullChatPageAsync(chatId, lastId, pageSize));
-            mock.Verify(r => r.GetChatByIdAsync(chatId), Times.Once());
-            mock.Verify(r =>
-                    r.GetMessagesForChat(chatId, It.IsAny<int>(), It.IsAny<int>()),
-                    Times.Never());
         }
 
         [Test]
         public async Task DeleteMessageByIdAsync_Success()
         {
-            int msgId = _globalFixture.Create<int>();
-            var msg = CreateMessageById(msgId);
+            int msgId = _fix.Create<int>();
+            var msg = _fix.Build<Message>()
+                .With(m => m.Id, msgId)
+                .Create();
             var mock = new Mock<IChatRepo>();
-            mock.Setup(r => r.DeleteMessageByIdAsync(msgId))
+            mock.Setup(r => r.DeleteMessageByIdAsync(msgId, DEFAULT_CONTEXT_ID))
                 .ReturnsAsync(msg);
             var service = CreateService(mock.Object);
 
             var res = await service.DeleteMessageByIdAsync(msgId);
 
             Assert.That(res, Is.Not.Null);
-            mock.Verify(r => r.DeleteMessageByIdAsync(msgId), Times.Once());
+            mock.Verify(r => r.DeleteMessageByIdAsync(
+                        msgId,
+                        DEFAULT_CONTEXT_ID),
+                    Times.Once());
         }
 
 
         [Test]
         public async Task DeleteMessageByIdAsync_NotFound_Throws()
         {
-            int msgId = _globalFixture.Create<int>();
-            var msg = CreateMessageById(msgId);
+            int msgId = _fix.Create<int>();
+            var msg = _fix.Build<Message>()
+                .With(m => m.Id, msgId)
+                .Create();
             var mock = new Mock<IChatRepo>();
-            mock.Setup(r => r.DeleteMessageByIdAsync(msgId))
+            mock.Setup(r => r.DeleteMessageByIdAsync(msgId, DEFAULT_CONTEXT_ID))
                 .ThrowsAsync(new MessageNotFoundException());
             var service = CreateService(mock.Object);
 
@@ -161,13 +147,16 @@ namespace InfrastructureTests.Convo
         [Test]
         public async Task CreateNewChat()
         {
-            var chatId = _globalFixture.Create<int>();
-            var request = _globalFixture.Create<CreateChatRequest>();
-            var chat = CreateChatById(chatId);
+            var chatId = _fix.Create<int>();
+            var request = _fix.Create<CreateChatRequest>();
+            var chat = _fix.Build<Chat>()
+                .With(c => c.UserId, DEFAULT_CONTEXT_ID)
+                .With(c => c.Id, chatId)
+                .Create();
             chat.Name = request.ChatName;
 
             var repoMock = new Mock<IChatRepo>();
-            repoMock.Setup(r => r.CreateNewChatAsync(chat.Name))
+            repoMock.Setup(r => r.CreateNewChatAsync(It.IsAny<Chat>()))
                 .ReturnsAsync(chat);
 
             var LLMServiceMock = new Mock<ILLMService>();
@@ -182,14 +171,14 @@ namespace InfrastructureTests.Convo
         [Test]
         public async Task SendMessage_Success_NoFiles()
         {
-            var cm = _globalFixture.Create<ClientMessage>();
+            var cm = _fix.Create<ClientMessage>();
 
-            var response = _globalFixture.Create<MessageDto>();
+            var response = _fix.Create<MessageDto>();
             var LLMServiceMock = new Mock<ILLMService>();
             LLMServiceMock.Setup(s => s.SendMessageAsync(It.IsAny<MessageDto>()))
                 .ReturnsAsync(response);
 
-            int msgId = _globalFixture.Create<int>();
+            int msgId = _fix.Create<int>();
             var repoMock = new Mock<IChatRepo>();
             repoMock.Setup(r => r.AddMessageAsync(It.IsAny<Message>()))
                 .ReturnsAsync((Message msg) => msg);
@@ -210,15 +199,15 @@ namespace InfrastructureTests.Convo
         [Test]
         public async Task SendMessage_Success_WithFiles()
         {
-            var cm = _globalFixture.Create<ClientMessage>();
-            var fileIds = _globalFixture.CreateMany<int>().ToList();
+            var cm = _fix.Create<ClientMessage>();
+            var fileIds = _fix.CreateMany<int>().ToList();
 
-            var response = _globalFixture.Create<MessageDto>();
+            var response = _fix.Create<MessageDto>();
             var LLMServiceMock = new Mock<ILLMService>();
             LLMServiceMock.Setup(s => s.SendMessageAsync(It.IsAny<MessageDto>()))
                 .ReturnsAsync(response);
 
-            int msgId = _globalFixture.Create<int>();
+            int msgId = _fix.Create<int>();
             var repoMock = new Mock<IChatRepo>();
             repoMock.Setup(r => r.AddMessageAsync(It.IsAny<Message>()))
                 .ReturnsAsync((Message msg) => msg);
@@ -246,10 +235,13 @@ namespace InfrastructureTests.Convo
 
             var fileUploads = new List<FileUpload>();
 
-            var files = _globalFixture.Build<ChatFile>()
-                .With(f => f.Message, CreateMessageById(1))
+            var files = _fix.Build<ChatFile>()
                 .CreateMany()
                 .ToList();
+            foreach (var f in files)
+            {
+                f.UserId = DEFAULT_CONTEXT_ID;
+            }
 
             var fileMock = new Mock<IFileProcessingService>();
             var fileDtos = files.ConvertAll(_mapper.ToFileDto);
@@ -278,12 +270,11 @@ namespace InfrastructureTests.Convo
         [Test]
         public async Task RemoveFileAsync_Success()
         {
-            var fileReponse = _globalFixture.Build<ChatFile>()
-                .With(cf => cf.Message, CreateMessageById(0))
-                .Create();
-            var fileId = _globalFixture.Create<int>();
+            var fileReponse = _fix.Create<ChatFile>();
+            fileReponse.UserId = DEFAULT_CONTEXT_ID;
+            var fileId = _fix.Create<int>();
             var repoMock = new Mock<IChatRepo>();
-            repoMock.Setup(r => r.RemoveFileByIdAsync(fileId))
+            repoMock.Setup(r => r.RemoveFileByIdAsync(fileId, DEFAULT_CONTEXT_ID))
                 .ReturnsAsync(fileReponse);
             var service = CreateService(repoMock.Object);
 
@@ -298,9 +289,9 @@ namespace InfrastructureTests.Convo
         [Test]
         public async Task RemoveFileAsync_NotFound_Throws()
         {
-            var fileId = _globalFixture.Create<int>();
+            var fileId = _fix.Create<int>();
             var repoMock = new Mock<IChatRepo>();
-            repoMock.Setup(r => r.RemoveFileByIdAsync(fileId))
+            repoMock.Setup(r => r.RemoveFileByIdAsync(fileId, DEFAULT_CONTEXT_ID))
                 .ThrowsAsync(new FileNotFoundException());
             var service = CreateService(repoMock.Object);
 

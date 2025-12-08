@@ -8,15 +8,15 @@ namespace Core.Entities.Convo
         public int Id { get; set; }
 
         [Required]
-        public string Name { get; set; } = null!;
+        public required string Name { get; set; } = "New Chat";
 
         public string? LastResponseId { get; set; }
 
         [Required]
-        public int UserId { get; set; }
+        public required int UserId { get; set; }
 
         [Required]
-        public User User { get; set; } = null!;
+        public User? User { get; set; }
 
         public List<Message> Messages { get; set; } = [];
     }

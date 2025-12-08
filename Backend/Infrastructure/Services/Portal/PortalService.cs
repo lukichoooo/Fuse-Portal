@@ -18,9 +18,9 @@ namespace Infrastructure.Services.Portal
         private readonly IPortalParser _portalParser = portalParser;
 
 
-        public async Task<PortalDto> ParseAndSavePortalAsync(ParsePortalRequest request)
+        public async Task<PortalParserDto> ParseAndSavePortalAsync(ParsePortalRequest request)
         {
-            PortalDto portal = await _portalParser.ParsePortalHtml(request);
+            PortalParserDto portal = await _portalParser.ParsePortalHtml(request);
             foreach (var subjectFullRequest in portal.Subjects)
             {
                 int userId = _currentContext.GetCurrentUserId();

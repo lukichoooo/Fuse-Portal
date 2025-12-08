@@ -7,7 +7,7 @@ namespace Core.Interfaces.Convo
         Task<List<ChatDto>> GetAllChatsPageAsync(int? lastId, int pageSize);
         Task<ChatDto> CreateNewChatAsync(CreateChatRequest request);
 
-        Task<ChatFullDto> GetFullChatPageAsync(int chatId, int? lastId, int pageSize);
+        Task<ChatFullDto> GetChatWithMessagesPageAsync(int chatId, int? lastId, int pageSize);
 
         Task<MessageDto> SendMessageAsync(MessageRequest messageRequest);
         Task<List<int>> UploadFilesAsync(List<FileUpload> files);

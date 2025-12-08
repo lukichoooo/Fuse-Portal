@@ -51,7 +51,7 @@ namespace PresentationTests
         {
             var chat = _gloablFixture.Create<ChatFullDto>();
             var mock = new Mock<IChatService>();
-            mock.Setup(s => s.GetFullChatPageAsync(chat.Id, lastId, It.IsAny<int>()))
+            mock.Setup(s => s.GetChatWithMessagesPageAsync(chat.Id, lastId, It.IsAny<int>()))
                 .ReturnsAsync(chat);
             var sut = CreateController(mock.Object);
 
@@ -69,7 +69,7 @@ namespace PresentationTests
         {
             var chat = _gloablFixture.Create<ChatFullDto>();
             var mock = new Mock<IChatService>();
-            mock.Setup(s => s.GetFullChatPageAsync(chat.Id, lastId, It.IsAny<int>()))
+            mock.Setup(s => s.GetChatWithMessagesPageAsync(chat.Id, lastId, It.IsAny<int>()))
                 .ThrowsAsync(new ChatNotFoundException());
             var sut = CreateController(mock.Object);
 

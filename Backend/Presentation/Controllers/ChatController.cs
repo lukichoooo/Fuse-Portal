@@ -35,7 +35,7 @@ namespace Presentation.Controllers
             [FromQuery] int? lastId,
             [FromQuery] int? pageSize
             )
-            => Ok(await _service.GetFullChatPageAsync(
+            => Ok(await _service.GetChatWithMessagesPageAsync(
                         chatId,
                         lastId,
                         pageSize ?? _settings.BigPageSize));

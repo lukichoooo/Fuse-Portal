@@ -4,18 +4,19 @@ namespace Core.Interfaces.Convo
 {
     public interface IChatRepo
     {
-        ValueTask<Chat?> GetChatByIdAsync(int chatId);
-        Task<Chat> CreateNewChatAsync(string chatName);
-        Task<List<Chat>> GetAllChatsPageAsync(int? lastId, int pageSize);
-        Task<Chat> UpdateChatLastResponseIdAsync(int chatId, string newResponseId);
+        ValueTask<Chat?> GetChatByIdAsync(int chatId, int userId);
+        Task<Chat> CreateNewChatAsync(Chat chat);
+        Task<List<Chat>> GetAllChatsForUserPageAsync(int? lastId, int pageSize, int userId);
+        Task<Chat> UpdateChatLastResponseIdAsync(int chatId, string newResponseId, int userId);
 
-        Task<List<Message>> GetMessagesForChat(int chatId, int? lastId, int pageSize);
+        Task<Chat> GetChatWithMessagesPageAsync(int chatId, int? lastId, int pageSize, int userId);
         Task<Message> AddMessageAsync(Message msg);
-        Task<Message> DeleteMessageByIdAsync(int msgId);
+        Task<Message> DeleteMessageByIdAsync(int msgId, int userId);
 
-        ValueTask<ChatFile?> GetFileByIdAsync(int fileId);
+        ValueTask<ChatFile?> GetFileByIdAsync(int fileId, int userId);
         Task<List<ChatFile>> AddFilesAsync(List<ChatFile> files);
-        Task<ChatFile> RemoveFileByIdAsync(int fileId);
+        Task<ChatFile> RemoveFileByIdAsync(int fileId, int userId);
+        Task<ChatFile> AddStoredFileToMessage(int fileId, int messageId, int userId);
     }
 
 }

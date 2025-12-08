@@ -6,11 +6,12 @@ namespace Infrastructure.Services
 {
     public class ChatMapper : IChatMapper
     {
-        public Chat ToChat(ChatDto dto)
+        public Chat ToChat(ChatDto dto, int userId)
             => new()
             {
                 Id = dto.Id,
                 Name = dto.Name,
+                UserId = userId
             };
 
         public ChatDto ToChatDto(Chat chat)
@@ -26,14 +27,14 @@ namespace Infrastructure.Services
                     Messages: chat.Messages.ConvertAll(ToMessageDto)
                   );
 
-        public Message ToMessage(MessageDto dto)
+        public Message ToMessage(MessageDto dto, int userId)
             => new()
             {
                 Id = dto.Id,
                 Text = dto.Text,
                 CreatedAt = dto.CreatedAt,
                 ChatId = dto.ChatId,
-                Files = dto.Files.ConvertAll(f => ToChatFile(f))
+                Files = dto.Files.ConvertAll(f => ToChatFile(f, userId))
             };
 
 
@@ -52,12 +53,12 @@ namespace Infrastructure.Services
 
         // From Client
 
-        public Message ToMessage(ClientMessage cm, List<FileDto>? files = null)
+        public Message ToMessage(ClientMessage cm, int userId, List<FileDto>? files = null)
             => new()
             {
                 Text = cm.Text,
                 ChatId = cm.ChatId,
-                Files = files?.ConvertAll(f => ToChatFile(f)) ?? []
+                Files = files?.ConvertAll(f => ToChatFile(f, userId)) ?? []
             };
 
         public MessageDto ToMessageDto(ClientMessage cm, List<FileDto>? files = null)
@@ -68,12 +69,13 @@ namespace Infrastructure.Services
                 Files = files ?? []
             };
 
-        public ChatFile ToChatFile(FileDto dto, int? messageId = null)
+        public ChatFile ToChatFile(FileDto dto, int userId, int? messageId = null)
             => new()
             {
                 Text = dto.Text,
                 Name = dto.Name,
-                MessageId = messageId
+                MessageId = messageId,
+                UserId = userId
             };
 
 

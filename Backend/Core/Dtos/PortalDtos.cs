@@ -117,7 +117,7 @@ public record SubjectFullRequestDto
     public required List<TestRequestDtoNoSubjectId> Tests { get; init; } = [];
 }
 
-public record PortalDto
+public record PortalParserDto
 {
     public List<SubjectFullRequestDto> Subjects { get; init; } = [];
     public string? Metadata { get; set; }

@@ -1,5 +1,6 @@
 using AutoFixture;
 using Core.Entities.Convo;
+using Core.Interfaces.Auth;
 using Core.Interfaces.Convo;
 using Core.Interfaces.LLM.Cache;
 using Infrastructure.Services.LLM.Cache;
@@ -10,24 +11,37 @@ namespace InfrastructureTests.LLM.Cache
     [TestFixture]
     public class ChatMetadataServiceTests
     {
-        private readonly Fixture _globalFixture = new();
+        private const int DEFAULT_CONTEXT_ID = 2343291;
+        private readonly Fixture _fix = new();
 
         [SetUp]
         public void BeforeAll()
         {
-            _globalFixture.Behaviors.Add(new OmitOnRecursionBehavior());
+            _fix.Behaviors.Add(new OmitOnRecursionBehavior());
         }
 
-        private static IChatMetadataService CreateService(IChatRepo repo, IChatMetadataCache cache)
-            => new ChatMetadataService(repo, cache);
+        private static IChatMetadataService CreateService(
+                IChatRepo repo,
+                IChatMetadataCache cache,
+                ICurrentContext? currentContext = null)
+        {
+            if (currentContext is null)
+            {
+                var mock = new Mock<ICurrentContext>();
+                mock.Setup(c => c.GetCurrentUserId())
+                        .Returns(DEFAULT_CONTEXT_ID);
+                currentContext = mock.Object;
+            }
+            return new ChatMetadataService(repo, cache, currentContext);
+        }
 
 
 
         [Test]
         public async Task GetLastResponseIdAsync_Success()
         {
-            int chatId = _globalFixture.Create<int>();
-            var lastResponseId = _globalFixture.Create<string>();
+            int chatId = _fix.Create<int>();
+            var lastResponseId = _fix.Create<string>();
 
             var cacheMock = new Mock<IChatMetadataCache>();
             cacheMock.Setup(c => c.GetValueAsync(chatId))
@@ -39,14 +53,15 @@ namespace InfrastructureTests.LLM.Cache
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res, Is.EqualTo(lastResponseId));
-            repoMock.Verify(r => r.GetChatByIdAsync(chatId), Times.Never());
+            repoMock.Verify(r => r.GetChatByIdAsync(chatId, DEFAULT_CONTEXT_ID),
+                    Times.Never());
             cacheMock.Verify(r => r.GetValueAsync(chatId), Times.Once());
         }
 
         [Test]
         public async Task GetLastResponseIdAsync_NotCached_Success()
         {
-            var chat = _globalFixture.Build<Chat>()
+            var chat = _fix.Build<Chat>()
                 .With(c => c.Messages, [])
                 .Create();
             int chatId = chat.Id;
@@ -55,7 +70,7 @@ namespace InfrastructureTests.LLM.Cache
             cacheMock.Setup(c => c.GetValueAsync(chatId))
                     .ReturnsAsync(() => null);
             var repoMock = new Mock<IChatRepo>();
-            repoMock.Setup(r => r.GetChatByIdAsync(chatId))
+            repoMock.Setup(r => r.GetChatByIdAsync(chatId, DEFAULT_CONTEXT_ID))
                 .ReturnsAsync(chat);
             var service = CreateService(repoMock.Object, cacheMock.Object);
 
@@ -63,7 +78,8 @@ namespace InfrastructureTests.LLM.Cache
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res, Is.EqualTo(chat.LastResponseId));
-            repoMock.Verify(r => r.GetChatByIdAsync(chatId), Times.Once());
+            repoMock.Verify(r => r.GetChatByIdAsync(chatId, DEFAULT_CONTEXT_ID),
+                    Times.Once());
             cacheMock.Verify(r => r.GetValueAsync(chatId), Times.Once());
         }
 
@@ -71,7 +87,7 @@ namespace InfrastructureTests.LLM.Cache
         [Test]
         public async Task GetLastResponseIdAsync_NotAnywhere_Null()
         {
-            int chatId = _globalFixture.Create<int>();
+            int chatId = _fix.Create<int>();
 
             var cacheMock = new Mock<IChatMetadataCache>();
             var repoMock = new Mock<IChatRepo>();
@@ -80,7 +96,8 @@ namespace InfrastructureTests.LLM.Cache
             var res = await service.GetLastResponseIdAsync(chatId);
 
             Assert.That(res, Is.Null);
-            repoMock.Verify(r => r.GetChatByIdAsync(chatId), Times.Once());
+            repoMock.Verify(r => r.GetChatByIdAsync(chatId, DEFAULT_CONTEXT_ID),
+                    Times.Once());
             cacheMock.Verify(r => r.GetValueAsync(chatId), Times.Once());
         }
 
@@ -89,23 +106,25 @@ namespace InfrastructureTests.LLM.Cache
         [Test]
         public async Task SetLastResponseIdAsync_Success()
         {
-            int chatId = _globalFixture.Create<int>();
-            var chat = _globalFixture.Build<Chat>()
+            int chatId = _fix.Create<int>();
+            var chat = _fix.Build<Chat>()
                 .With(c => c.Messages, [])
                 .Create();
-            var lastResponseId = _globalFixture.Create<string>();
+            var lastResponseId = _fix.Create<string>();
 
             var cacheMock = new Mock<IChatMetadataCache>();
             cacheMock.Setup(c => c.SetValueAsync(chatId, lastResponseId))
                 .Returns(Task.CompletedTask);
             var repoMock = new Mock<IChatRepo>();
-            repoMock.Setup(r => r.UpdateChatLastResponseIdAsync(chatId, lastResponseId))
+            repoMock.Setup(r => r.UpdateChatLastResponseIdAsync(
+                        chatId, lastResponseId, DEFAULT_CONTEXT_ID))
                 .ReturnsAsync(chat);
             var service = CreateService(repoMock.Object, cacheMock.Object);
 
             await service.SetLastResponseIdAsync(chatId, lastResponseId);
 
-            repoMock.Verify(r => r.UpdateChatLastResponseIdAsync(chatId, lastResponseId),
+            repoMock.Verify(r => r.UpdateChatLastResponseIdAsync(
+                        chatId, lastResponseId, DEFAULT_CONTEXT_ID),
                     Times.Once());
             cacheMock.Verify(c => c.SetValueAsync(chatId, lastResponseId),
                     Times.Once());

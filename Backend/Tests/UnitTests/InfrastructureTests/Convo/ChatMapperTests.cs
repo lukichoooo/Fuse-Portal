@@ -30,7 +30,7 @@ namespace InfrastructureTests.LLM
         public void ToChat_From_Dto()
         {
             var dto = _globalFixture.Create<ChatDto>();
-            Chat res = _mapper.ToChat(dto);
+            Chat res = _mapper.ToChat(dto, 1);
 
             Assert.That(res, Is.Not.Null);
             HelperMapperTest.AssertCommonPropsByName(dto, res);
@@ -67,7 +67,7 @@ namespace InfrastructureTests.LLM
                 .With(d => d.Files, fixture.CreateMany<FileDto>().ToList())
                 .Create();
 
-            Message res = _mapper.ToMessage(dto);
+            Message res = _mapper.ToMessage(dto, 1);
 
             Assert.That(res, Is.Not.Null);
             HelperMapperTest.AssertCommonPropsByName(dto, res);
@@ -128,11 +128,11 @@ namespace InfrastructureTests.LLM
         [Test]
         public void ToMessage_From_ClientMessage()
         {
-            var cm = _globalFixture.Create<ClientMessage>();
-            Message res = _mapper.ToMessage(cm);
+            var clientMessage = _globalFixture.Create<ClientMessage>();
+            Message res = _mapper.ToMessage(clientMessage, 1);
 
             Assert.That(res, Is.Not.Null);
-            HelperMapperTest.AssertCommonPropsByName(cm, res);
+            HelperMapperTest.AssertCommonPropsByName(clientMessage, res);
             Assert.That(res.Files, Is.Not.Null);
         }
 
@@ -154,7 +154,7 @@ namespace InfrastructureTests.LLM
         public void ToChatFile_From_FileDto()
         {
             var dto = _globalFixture.Create<FileDto>();
-            ChatFile res = _mapper.ToChatFile(dto);
+            ChatFile res = _mapper.ToChatFile(dto, 1);
 
             Assert.That(res, Is.Not.Null);
             HelperMapperTest.AssertCommonPropsByName(dto, res);

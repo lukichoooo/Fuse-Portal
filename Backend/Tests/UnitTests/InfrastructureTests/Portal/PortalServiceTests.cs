@@ -42,7 +42,7 @@ namespace InfrastructureTests.Portal
             }
             if (portalParser is null)
             {
-                var portalDto = _fix.Create<PortalDto>();
+                var portalDto = _fix.Create<PortalParserDto>();
                 var mock = new Mock<IPortalParser>();
                 mock.Setup(c => c.ParsePortalHtml(It.IsAny<ParsePortalRequest>()))
                     .ReturnsAsync(portalDto);
@@ -266,7 +266,7 @@ namespace InfrastructureTests.Portal
         {
             var fixture = new Fixture() { RepeatCount = 100 };
             var parsePortalRequest = fixture.Create<ParsePortalRequest>();
-            var portalDto = _fix.Create<PortalDto>();
+            var portalDto = _fix.Create<PortalParserDto>();
             var parserMock = new Mock<IPortalParser>();
             parserMock.Setup(p => p.ParsePortalHtml(parsePortalRequest))
                 .ReturnsAsync(portalDto);

@@ -8,13 +8,16 @@ namespace Core.Entities.Convo
         public int Id { get; set; }
 
         [Required]
-        public string Name { get; set; } = null!;
+        public required string Name { get; set; } = null!;
 
         [Required]
-        public string Text { get; set; } = null!;
+        public required string Text { get; set; } = null!;
+
+        [Required]
+        public required int UserId { get; set; }
+        public User? User { get; set; }
 
         public int? MessageId { get; set; }
-
-        public Message Message { get; set; } = null!;
+        public Message? Message { get; set; }
     }
 }

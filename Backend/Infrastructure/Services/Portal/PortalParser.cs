@@ -5,7 +5,7 @@ namespace Infrastructure.Services.LLM.LMStudio
 {
     public class PortalParser() : IPortalParser
     {
-        public Task<PortalDto> ParsePortalHtml(ParsePortalRequest request)
+        public Task<PortalParserDto> ParsePortalHtml(ParsePortalRequest request)
         {
             throw new NotImplementedException();
         }

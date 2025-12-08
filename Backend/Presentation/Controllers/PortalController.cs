@@ -19,9 +19,12 @@ public class PortalController(
     private readonly ControllerSettings _settings = options.Value;
 
     [HttpPost("parse")]
-    public async Task<ActionResult<PortalDto>> AddLecturerAsync(
+    public async Task<ActionResult> AddLecturerAsync(
             [FromBody] ParsePortalRequest request)
-        => Ok(await _service.ParseAndSavePortalAsync(request));
+    {
+        await _service.ParseAndSavePortalAsync(request);
+        return Ok();
+    }
 
     [HttpGet("subjects")]
     public async Task<ActionResult<List<SubjectDto>>> GetSubjectsPageAsync(

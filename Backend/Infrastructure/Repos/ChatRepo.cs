@@ -17,9 +17,12 @@ namespace Infrastructure.Repos
             return msg;
         }
 
-        public async Task<Message> DeleteMessageByIdAsync(int msgId)
+        public async Task<Message> DeleteMessageByIdAsync(int msgId, int userId)
         {
-            var msg = await _context.Messages.FindAsync(msgId)
+            var msg = await _context.Messages
+                .Include(m => m.Chat)
+                .FirstOrDefaultAsync(m => m.Id == msgId
+                        && m.Chat.UserId == userId)
                 ?? throw new MessageNotFoundException($" No message found with Id={msgId}");
             _context.Remove(msg);
 
@@ -27,48 +30,80 @@ namespace Infrastructure.Repos
             return msg;
         }
 
-        public ValueTask<Chat?> GetChatByIdAsync(int chatId)
-            => _context.Chats.FindAsync(chatId);
+        public async ValueTask<Chat?> GetChatByIdAsync(int chatId, int userId)
+            => await _context.Chats
+            .FirstOrDefaultAsync(c => c.Id == chatId
+                    && c.UserId == userId);
 
-        public Task<List<Chat>> GetAllChatsPageAsync(int? lastId, int pageSize)
+        public Task<List<Chat>> GetAllChatsForUserPageAsync(
+                int? lastChatId,
+                int pageSize,
+                int userId)
         {
-            IQueryable<Chat> query = _context.Chats;
-            if (lastId is not null)
-                query = query.Where(c => c.Id > lastId);
+            IQueryable<Chat> chats = _context.Chats
+                .Where(c => c.UserId == userId);
 
-            return query
+            if (lastChatId is not null)
+            {
+                chats = chats
+                    .Where(c => c.Id > lastChatId);
+            }
+
+            return chats
                 .OrderBy(c => c.Id)
                 .Take(pageSize)
                 .ToListAsync();
         }
 
 
-        public Task<List<Message>> GetMessagesForChat(int chatId, int? lastId, int pageSize)
-        {
-            IQueryable<Message> query = _context.Messages
-                .Where(m => m.ChatId == chatId);
-            if (lastId is not null)
-                query = query.Where(m => m.Id > lastId);
 
-            return query
-                    .OrderBy(m => m.Id)
-                    .Take(pageSize)
-                    .ToListAsync();
+        public async Task<Chat> GetChatWithMessagesPageAsync(
+            int chatId,
+            int? lastMsgId,
+            int pageSize,
+            int userId)
+        {
+            var chat = await _context.Chats
+                .Where(c => c.Id == chatId && c.UserId == userId)
+                .FirstOrDefaultAsync()
+                ?? throw new ChatNotFoundException($"Chat not found with Id={chatId}");
+
+            IQueryable<Message> query = _context.Messages
+                .Where(m => m.ChatId == chat.Id);
+
+            if (lastMsgId is not null)
+            {
+                query = query
+                    .Where(m => m.Id > lastMsgId);
+            }
+
+            chat.Messages = await query
+                .OrderBy(m => m.Id)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return chat;
         }
 
-        public async Task<Chat> UpdateChatLastResponseIdAsync(int chatId, string newLastResponseId)
+
+
+        public async Task<Chat> UpdateChatLastResponseIdAsync(
+                int chatId,
+                string newLastResponseId,
+                int userId)
         {
-            var chat = await _context.Chats.FindAsync(chatId)
-                ?? throw new ChatNotFoundException($" No Chat found with Id={chatId}");
+            var chat = await _context.Chats
+                .FirstOrDefaultAsync(c => c.Id == chatId
+                        && c.UserId == userId)
+                ?? throw new ChatNotFoundException($" No Chat found with Id={chatId}, userId={userId}");
             chat.LastResponseId = newLastResponseId;
 
             await _context.SaveChangesAsync();
             return chat;
         }
 
-        public async Task<Chat> CreateNewChatAsync(string chatName)
+        public async Task<Chat> CreateNewChatAsync(Chat chat)
         {
-            var chat = new Chat { Name = chatName };
             await _context.Chats.AddAsync(chat);
             await _context.SaveChangesAsync();
             return chat;
@@ -81,17 +116,33 @@ namespace Infrastructure.Repos
             return files;
         }
 
-        public async Task<ChatFile> RemoveFileByIdAsync(int fileId)
+        public async Task<ChatFile> RemoveFileByIdAsync(int fileId, int userId)
         {
-            var file = await _context.ChatFiles.FindAsync(fileId)
-                ?? throw new FileNotFoundException($"File with Id={fileId} Not Found");
+            var file = await _context.ChatFiles
+                .FirstOrDefaultAsync(f => f.Id == fileId && f.UserId == userId)
+                ?? throw new FileNotFoundException($"File with Id={fileId}, userId={userId} Not Found");
             _context.Remove(file);
             await _context.SaveChangesAsync();
             return file;
         }
 
-        public ValueTask<ChatFile?> GetFileByIdAsync(int fileId)
-            => _context.ChatFiles.FindAsync(fileId);
+        public async ValueTask<ChatFile?> GetFileByIdAsync(int fileId, int userId)
+            => await _context.ChatFiles
+            .FirstOrDefaultAsync(f => f.Id == fileId
+                    && f.UserId == userId);
 
+        public async Task<ChatFile> AddStoredFileToMessage(
+                int fileId,
+                int messageId,
+                int userId)
+        {
+            var file = await _context.ChatFiles
+                    .FirstOrDefaultAsync(f => f.Id == fileId
+                            && f.UserId == userId)
+                ?? throw new FileNotFoundException($"File not found With Id={fileId}");
+            file.MessageId = messageId;
+            await _context.SaveChangesAsync();
+            return file;
+        }
     }
 }
