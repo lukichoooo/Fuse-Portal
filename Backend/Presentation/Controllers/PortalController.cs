@@ -18,6 +18,11 @@ public class PortalController(
     private readonly IPortalService _service = service;
     private readonly ControllerSettings _settings = options.Value;
 
+    [HttpPost("parse")]
+    public async Task<ActionResult<PortalDto>> AddLecturerAsync(
+            [FromBody] ParsePortalRequest request)
+        => Ok(await _service.ParseAndSavePortalAsync(request));
+
     [HttpGet("subjects")]
     public async Task<ActionResult<List<SubjectDto>>> GetSubjectsPageAsync(
             [FromQuery] int? lastSubjectId,

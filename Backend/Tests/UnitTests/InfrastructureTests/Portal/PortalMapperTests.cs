@@ -118,5 +118,48 @@ namespace InfrastructureTests.Portal
             HelperMapperTest.AssertCommonPropsByName(res, test);
         }
 
+        [Test]
+        public void ToSubjectRequest_From_SubjectFullrequestDto()
+        {
+            var fullRequest = _fix.Create<SubjectFullRequestDto>();
+            var res = _sut.ToSubjectRequest(fullRequest);
+            Assert.That(res, Is.Not.Null);
+            HelperMapperTest.AssertCommonPropsByName(res, fullRequest);
+        }
+
+
+        [Test]
+        public void ToScheduleRequest_From_ScheduleRequestDtoNoSubjectId()
+        {
+            var requestNoId = _fix.Create<ScheduleRequestDtoNoSubjectId>();
+            var subjectId = _fix.Create<int>();
+            var res = _sut.ToScheduleRequest(requestNoId, subjectId);
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res.SubjectId, Is.EqualTo(subjectId));
+            HelperMapperTest.AssertCommonPropsByName(res, requestNoId);
+        }
+
+        [Test]
+        public void ToLecturerRequest_From_LecturerRequestDtoNoSubjectId()
+        {
+            var requestNoId = _fix.Create<LecturerRequestDtoNoSubjectId>();
+            var subjectId = _fix.Create<int>();
+            var res = _sut.ToLecturerRequest(requestNoId, subjectId);
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res.SubjectId, Is.EqualTo(subjectId));
+            HelperMapperTest.AssertCommonPropsByName(res, requestNoId);
+        }
+
+        [Test]
+        public void ToTestRequest_From_TestRequestDtoNoSubjectId()
+        {
+            var requestNoId = _fix.Create<TestRequestDtoNoSubjectId>();
+            var subjectId = _fix.Create<int>();
+            var res = _sut.ToTestRequest(requestNoId, subjectId);
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res.SubjectId, Is.EqualTo(subjectId));
+            HelperMapperTest.AssertCommonPropsByName(res, requestNoId);
+        }
+
     }
 }

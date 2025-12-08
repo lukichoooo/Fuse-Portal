@@ -104,5 +104,49 @@ namespace Infrastructure.Services.Portal
                     Date: test.Date,
                     Metadata: test.Metadata
                   );
+
+        public SubjectRequestDto ToSubjectRequest(SubjectFullRequestDto fullRequest)
+            => new()
+            {
+                Name = fullRequest.Name,
+                Grade = fullRequest.Grade,
+                Metadata = fullRequest.Metadata
+            };
+
+
+        public ScheduleRequestDto ToScheduleRequest(
+                ScheduleRequestDtoNoSubjectId dto,
+                int subjectId)
+            => new()
+            {
+                Start = dto.Start,
+                End = dto.End,
+                Metadata = dto.Metadata,
+                Location = dto.Location,
+                SubjectId = subjectId
+            };
+
+
+        public LecturerRequestDto ToLecturerRequest(
+                LecturerRequestDtoNoSubjectId dto,
+                int subjectId)
+            => new()
+            {
+                Name = dto.Name,
+                SubjectId = subjectId
+            };
+
+
+        public TestRequestDto ToTestRequest(
+                TestRequestDtoNoSubjectId dto,
+                int subjectId)
+            => new()
+            {
+                Name = dto.Name,
+                Date = dto.Date,
+                Content = dto.Content,
+                Metadata = dto.Metadata,
+                SubjectId = subjectId
+            };
     }
 }

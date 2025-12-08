@@ -6,7 +6,6 @@ using Core.Interfaces.Auth;
 using Core.Interfaces.Portal;
 using Infrastructure.Services.Portal;
 using Moq;
-using NUnit.Framework.Internal.Execution;
 
 namespace InfrastructureTests.Portal
 {
@@ -28,7 +27,8 @@ namespace InfrastructureTests.Portal
 
         private IPortalService CreateService(
                 IPortalRepo? repo = null,
-                ICurrentContext? currentContext = null
+                ICurrentContext? currentContext = null,
+                IPortalParser? portalParser = null
                 )
         {
             repo ??= new Mock<IPortalRepo>().Object;
@@ -39,7 +39,19 @@ namespace InfrastructureTests.Portal
                     .Returns(DEFAULT_CONTEXT_ID);
                 currentContext = mock.Object;
             }
-            return new PortalService(repo, _mapper, currentContext);
+            if (portalParser is null)
+            {
+                var portalDto = _fix.Create<PortalDto>();
+                var mock = new Mock<IPortalParser>();
+                mock.Setup(c => c.ParsePortalHtml(It.IsAny<ParsePortalRequest>()))
+                    .ReturnsAsync(portalDto);
+                portalParser = mock.Object;
+            }
+            return new PortalService(
+                    repo,
+                    _mapper,
+                    currentContext,
+                    portalParser);
         }
 
 
@@ -246,6 +258,12 @@ namespace InfrastructureTests.Portal
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Name, Is.EqualTo(test.Name));
             Assert.That(res.Content, Is.EqualTo(test.Content));
+        }
+
+        [Test]
+        public async Task ParseAndSavePortalAsync_Success()
+        {
+            throw new NotImplementedException();
         }
 
     }

@@ -46,6 +46,7 @@ public record SubjectFullDto
     public string? Metadata { get; init; }
 }
 
+// Requests
 
 public record LecturerRequestDto
 {
@@ -71,6 +72,31 @@ public record TestRequestDto
     public string? Metadata { get; set; }
 }
 
+// Without Ids 
+
+
+public record LecturerRequestDtoNoSubjectId
+{
+    public required string Name { get; set; }
+}
+
+public record ScheduleRequestDtoNoSubjectId
+{
+    public required DateTime Start { get; set; }
+    public required DateTime End { get; set; }
+    public string? Location { get; set; }
+    public string? Metadata { get; set; }
+}
+
+public record TestRequestDtoNoSubjectId
+{
+    public required string Name { get; set; } = null!;
+    public required string Content { get; set; } = null!;
+    public DateTime? Date { get; set; }
+    public string? Metadata { get; set; }
+}
+
+// subject
 
 public record SubjectRequestDto
 {
@@ -79,9 +105,26 @@ public record SubjectRequestDto
     public string? Metadata { get; init; }
 }
 
+
+public record SubjectFullRequestDto
+{
+    public required string Name { get; init; } = null!;
+    public required int? Grade { get; init; }
+    public string? Metadata { get; init; }
+
+    public required List<ScheduleRequestDtoNoSubjectId> Schedules { get; init; } = [];
+    public required List<LecturerRequestDtoNoSubjectId> Lecturers { get; init; } = [];
+    public required List<TestRequestDtoNoSubjectId> Tests { get; init; } = [];
+}
+
 public record PortalDto
 {
-    public List<SubjectFullDto> Subjects { get; init; } = [];
+    public List<SubjectFullRequestDto> Subjects { get; init; } = [];
     public string? Metadata { get; set; }
 }
+
+public record ParsePortalRequest(
+        List<string> HtmlPages,
+        string? MetaData
+        );
 

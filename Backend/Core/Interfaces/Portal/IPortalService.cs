@@ -4,6 +4,8 @@ namespace Core.Interfaces.Portal
 {
     public interface IPortalService
     {
+        Task<PortalDto> ParseAndSavePortalAsync(ParsePortalRequest request);
+
         Task<List<SubjectDto>> GetSubjectsPageForCurrentUserAsync(int? lastSubjectId, int pageSize);
         Task<SubjectFullDto> GetFullSubjectByIdAsync(int subjectId);
 
@@ -18,7 +20,6 @@ namespace Core.Interfaces.Portal
 
         Task<TestDto> AddTestForSubjectAsync(TestRequestDto request);
         Task<TestDto> RemoveTestByIdAsync(int testId);
-
         Task<TestFullDto> GetFullTestByIdAsync(int testId);
     }
 }

@@ -4,6 +4,6 @@ namespace Core.Interfaces.Portal
 {
     public interface IPortalParser
     {
-        Task<PortalDto> ParsePortalHtml(string stringHtml);
+        Task<PortalDto> ParsePortalHtml(ParsePortalRequest request);
     }
 }

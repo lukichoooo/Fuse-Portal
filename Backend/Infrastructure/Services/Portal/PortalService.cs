@@ -8,12 +8,51 @@ namespace Infrastructure.Services.Portal
     public class PortalService(
             IPortalRepo repo,
             IPortalMapper mapper,
-            ICurrentContext currentContext
+            ICurrentContext currentContext,
+            IPortalParser portalParser
             ) : IPortalService
     {
         private readonly IPortalRepo _repo = repo;
         private readonly IPortalMapper _mapper = mapper;
         private readonly ICurrentContext _currentContext = currentContext;
+        private readonly IPortalParser _portalParser = portalParser;
+
+
+        public async Task<PortalDto> ParseAndSavePortalAsync(ParsePortalRequest request)
+        {
+            PortalDto portal = await _portalParser.ParsePortalHtml(request);
+            foreach (var subject in portal.Subjects)
+            {
+                var subjectRequest = _mapper.ToSubjectRequest(subject);
+                var onDbSubject = await AddSubjectForCurrentUserAsync(subjectRequest);
+                int subjectId = onDbSubject.Id;
+
+                foreach (var scheduleNoSubjectId in subject.Schedules)
+                {
+                    ScheduleRequestDto schedule = _mapper.ToScheduleRequest(
+                            scheduleNoSubjectId,
+                            subjectId);
+                    await AddScheduleForSubjectAsync(schedule);
+                }
+
+                foreach (var lecturerNoSubjectId in subject.Lecturers)
+                {
+                    LecturerRequestDto lecturer = _mapper.ToLecturerRequest(
+                            lecturerNoSubjectId,
+                            subjectId);
+                    await AddLecturerToSubjectAsync(lecturer);
+                }
+
+                foreach (var testNoSubjectId in subject.Tests)
+                {
+                    TestRequestDto test = _mapper.ToTestRequest(
+                            testNoSubjectId,
+                            subjectId);
+                    await AddTestForSubjectAsync(test);
+                }
+            }
+            return portal;
+        }
 
         public async Task<SubjectFullDto> AddSubjectForCurrentUserAsync(SubjectRequestDto dto)
         {
@@ -73,7 +112,7 @@ namespace Infrastructure.Services.Portal
         {
             int userId = _currentContext.GetCurrentUserId();
             return _mapper.ToLecturerDto(await _repo.RemoveLecturerByIdAsync(
-                        lecturerId, userId));
+                                    lecturerId, userId));
         }
 
         public async Task<TestDto> AddTestForSubjectAsync(TestRequestDto request)

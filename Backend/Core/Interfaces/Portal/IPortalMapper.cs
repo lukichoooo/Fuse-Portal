@@ -23,5 +23,17 @@ namespace Core.Interfaces.Portal
         Schedule ToSchedule(ScheduleRequestDto dto);
         Test ToTest(TestRequestDto dto);
         TestFullDto ToTestFullDto(Test test);
+
+        SubjectRequestDto ToSubjectRequest(SubjectFullRequestDto fullRequest);
+
+        ScheduleRequestDto ToScheduleRequest(
+                ScheduleRequestDtoNoSubjectId dto,
+                int subjectId);
+        LecturerRequestDto ToLecturerRequest(
+                LecturerRequestDtoNoSubjectId dto,
+                int subjectId);
+        TestRequestDto ToTestRequest(
+                TestRequestDtoNoSubjectId dto,
+                int subjectId);
     }
 }
