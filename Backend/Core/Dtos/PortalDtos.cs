@@ -36,9 +36,7 @@ public record SubjectDto(
 public record SubjectFullDto
 {
     public required int Id { get; init; }
-
     public required string Name { get; init; } = null!;
-
     public required int? Grade { get; init; }
 
     public required List<ScheduleDto> Schedules { get; init; } = [];

@@ -19,11 +19,19 @@ namespace InfrastructureTests.LLM.LMStudio
             ChatRoute = "/v1/chat/completions",
 
             Model = "qwen2.5-7b-instruct",
-            SystemPrompt = "never talk about LMStudioMapper",
 
             Temperature = 0.7f,
             MaxTokens = 2048,
             Stream = false
+        };
+
+        private readonly LLMInputSettings _inputSettings = new()
+        {
+            SystemPromptDelimiter = "---RULES---",
+            UserInputDelimiter = "---USER INPUT---",
+            FileNameDelimiter = "---FILE NAME---",
+            FileContentDelimiter = "---FILE CONTENT---",
+            SystemPrompt = "you are a cool guy with black glasses"
         };
 
         private readonly Fixture _globalFixture = new();
@@ -36,7 +44,8 @@ namespace InfrastructureTests.LLM.LMStudio
             mock.Setup(g => g.GenerateInput(It.IsAny<MessageDto>(), It.IsAny<string>()))
                 .Returns("INPUT");
             var options = Options.Create(_settings);
-            _mapper = new LMStudioMapper(options, mock.Object);
+            var inputOptions = Options.Create(_inputSettings);
+            _mapper = new LMStudioMapper(options, inputOptions, mock.Object);
         }
 
         private ILLMService CreateService(ILMStudioApi api, IChatMetadataService metadataService)

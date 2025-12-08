@@ -6,9 +6,13 @@ using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Services.LLM.LMStudio
 {
-    public class LMStudioMapper(IOptions<LMStudioApiSettings> options, ILLMInputGenerator requestGenerator) : ILMStudioMapper
+    public class LMStudioMapper(
+            IOptions<LMStudioApiSettings> apiOptions,
+            IOptions<LLMInputSettings> inputOptions,
+            ILLMInputGenerator requestGenerator) : ILMStudioMapper
     {
-        private readonly LMStudioApiSettings _settings = options.Value;
+        private readonly LLMInputSettings _inputSettings = inputOptions.Value;
+        private readonly LMStudioApiSettings _apiSettings = apiOptions.Value;
         private readonly ILLMInputGenerator _requestGenerator = requestGenerator;
 
         public MessageDto ToMessageDto(LMStudioResponse response, int chatId)
@@ -27,8 +31,8 @@ namespace Infrastructure.Services.LLM.LMStudio
         {
             return new()
             {
-                Model = _settings.Model,
-                Input = _requestGenerator.GenerateInput(msg, _settings.SystemPrompt),
+                Model = _apiSettings.Model,
+                Input = _requestGenerator.GenerateInput(msg, _inputSettings.SystemPrompt),
                 PreviousResponseId = previousResponseId
             };
         }

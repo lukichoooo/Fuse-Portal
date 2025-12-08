@@ -16,7 +16,8 @@ namespace InfrastructureTests.LLM
             SystemPromptDelimiter = "---RULES---",
             UserInputDelimiter = "---USER INPUT---",
             FileNameDelimiter = "---FILE NAME---",
-            FileContentDelimiter = "---FILE CONTENT---"
+            FileContentDelimiter = "---FILE CONTENT---",
+            SystemPrompt = "you are a cool guy with black glasses"
         };
         private ILLMInputGenerator _generator;
 

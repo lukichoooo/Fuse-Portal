@@ -11,17 +11,25 @@ namespace InfrastructureTests.LLM
     [TestFixture]
     public class LMStudioMapperTests
     {
-        private readonly LMStudioApiSettings _settings = new()
+        private readonly LMStudioApiSettings _apiSettings = new()
         {
             URL = "asdadjaod",
             ChatRoute = "/v1/chat/completions",
 
             Model = "qwen2.5-7b-instruct",
-            SystemPrompt = "never talk about LMStudioMapper",
 
             Temperature = 0.7f,
             MaxTokens = 2048,
             Stream = false
+        };
+
+        private readonly LLMInputSettings _inputSettings = new()
+        {
+            SystemPromptDelimiter = "---RULES---",
+            UserInputDelimiter = "---USER INPUT---",
+            FileNameDelimiter = "---FILE NAME---",
+            FileContentDelimiter = "---FILE CONTENT---",
+            SystemPrompt = "you are a cool guy with black glasses"
         };
 
         private readonly Fixture _globalFixture = new();
@@ -33,8 +41,9 @@ namespace InfrastructureTests.LLM
             var mock = new Mock<ILLMInputGenerator>();
             mock.Setup(g => g.GenerateInput(It.IsAny<MessageDto>(), It.IsAny<string>()))
                 .Returns("INPUT");
-            var options = Options.Create(_settings);
-            _mapper = new LMStudioMapper(options, mock.Object);
+            var apiOptions = Options.Create(_apiSettings);
+            var inputOptions = Options.Create(_inputSettings);
+            _mapper = new LMStudioMapper(apiOptions, inputOptions, mock.Object);
         }
 
         [Test]
@@ -60,7 +69,7 @@ namespace InfrastructureTests.LLM
             var res = _mapper.ToRequest(msg, prevResponseId);
 
             Assert.That(res, Is.Not.Null);
-            Assert.That(res.Model, Is.EqualTo(_settings.Model));
+            Assert.That(res.Model, Is.EqualTo(_apiSettings.Model));
             Assert.That(res.Input, Is.Not.Null);
             Assert.That(res.Input, Is.Not.Empty);
             Assert.That(res.PreviousResponseId, Is.EqualTo(prevResponseId));
