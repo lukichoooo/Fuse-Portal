@@ -5,10 +5,10 @@ namespace Core.Interfaces.Portal
     public interface IPortalService
     {
         Task<List<SubjectDto>> GetSubjectsPageForCurrentUserAsync(int? lastSubjectId, int pageSize);
-        Task<SubjectFullDto> GetFullSubjectById(int subjectId);
+        Task<SubjectFullDto> GetFullSubjectByIdAsync(int subjectId);
 
-        Task<SubjectFullDto> AddSubjectForCurrentUser(SubjectRequestDto dto);
-        Task<SubjectDto> RemoveSubjectById(int subjectId);
+        Task<SubjectFullDto> AddSubjectForCurrentUserAsync(SubjectRequestDto dto);
+        Task<SubjectDto> RemoveSubjectByIdAsync(int subjectId);
 
         Task<ScheduleDto> AddScheduleForSubjectAsync(ScheduleRequestDto request);
         Task<ScheduleDto> RemoveScheduleByIdAsync(int scheduleId);
@@ -18,5 +18,7 @@ namespace Core.Interfaces.Portal
 
         Task<TestDto> AddTestForSubjectAsync(TestRequestDto request);
         Task<TestDto> RemoveTestByIdAsync(int testId);
+
+        Task<TestFullDto> GetFullTestByIdAsync(int testId);
     }
 }

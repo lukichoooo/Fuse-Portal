@@ -18,5 +18,7 @@ namespace Core.Interfaces.Portal
 
         Task<Test> AddTestForSubjectAsync(Test test, int userId);
         Task<Test> RemoveTestByIdAsync(int testId, int userId);
+
+        Task<Test> GetFullTestByIdAsync(int testId, int userId);
     }
 }

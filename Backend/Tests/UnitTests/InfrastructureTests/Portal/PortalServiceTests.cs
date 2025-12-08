@@ -6,6 +6,7 @@ using Core.Interfaces.Auth;
 using Core.Interfaces.Portal;
 using Infrastructure.Services.Portal;
 using Moq;
+using NUnit.Framework.Internal.Execution;
 
 namespace InfrastructureTests.Portal
 {
@@ -52,7 +53,7 @@ namespace InfrastructureTests.Portal
                 .ReturnsAsync((Subject s) => s);
             var sut = CreateService(repoMock.Object);
 
-            var res = await sut.AddSubjectForCurrentUser(dto);
+            var res = await sut.AddSubjectForCurrentUserAsync(dto);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Name, Is.EqualTo(dto.Name));
@@ -70,7 +71,7 @@ namespace InfrastructureTests.Portal
                 .ReturnsAsync(subject);
             var sut = CreateService(repoMock.Object);
 
-            var res = await sut.RemoveSubjectById(subject.Id);
+            var res = await sut.RemoveSubjectByIdAsync(subject.Id);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Name, Is.EqualTo(dto.Name));
@@ -107,7 +108,7 @@ namespace InfrastructureTests.Portal
                 .ReturnsAsync(subject);
             var sut = CreateService(repoMock.Object);
 
-            var res = await sut.GetFullSubjectById(subject.Id);
+            var res = await sut.GetFullSubjectByIdAsync(subject.Id);
 
             Assert.That(res, Is.Not.Null);
             HelperMapperTest.AssertCommonPropsByName(res, subject);
@@ -124,7 +125,127 @@ namespace InfrastructureTests.Portal
             var sut = CreateService(repoMock.Object);
 
             Assert.ThrowsAsync<SubjectNotFoundException>(async () =>
-                    await sut.GetFullSubjectById(subject.Id));
+                    await sut.GetFullSubjectByIdAsync(subject.Id));
+        }
+
+        [Test]
+        public async Task AddScheduleForSubjectAsync_Success()
+        {
+            var request = _fix.Create<ScheduleRequestDto>();
+            var repoMock = new Mock<IPortalRepo>();
+            repoMock.Setup(r => r.AddScheduleForSubjectAsync(
+                        It.IsAny<Schedule>(), DEFAULT_CONTEXT_ID))
+                .ReturnsAsync((Schedule s, int _) => s);
+            var sut = CreateService(repoMock.Object);
+
+            var res = await sut.AddScheduleForSubjectAsync(request);
+
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res.Metadata, Is.EqualTo(request.Metadata));
+        }
+
+
+        [Test]
+        public async Task RemoveScheduleById_Success()
+        {
+            var schedule = _fix.Create<Schedule>();
+            var repoMock = new Mock<IPortalRepo>();
+            repoMock.Setup(r => r.RemoveScheduleByIdAsync(
+                        schedule.Id, DEFAULT_CONTEXT_ID))
+                .ReturnsAsync(schedule);
+            var sut = CreateService(repoMock.Object);
+
+            var res = await sut.RemoveScheduleByIdAsync(schedule.Id);
+
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res.Id, Is.EqualTo(schedule.Id));
+        }
+
+
+        [Test]
+        public async Task AddLecturerToSubject_Success()
+        {
+            var request = _fix.Create<LecturerRequestDto>();
+            var repoMock = new Mock<IPortalRepo>();
+            repoMock.Setup(r => r.AddLecturerToSubjectAsync(
+                        It.IsAny<Lecturer>(), DEFAULT_CONTEXT_ID))
+                .ReturnsAsync((Lecturer l, int _) => l);
+            var sut = CreateService(repoMock.Object);
+
+            var res = await sut.AddLecturerToSubjectAsync(request);
+
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res.Name, Is.EqualTo(request.Name));
+        }
+
+        [Test]
+        public async Task RemoveLecturerByIdAsync_Success()
+        {
+            var lecturerId = _fix.Create<int>();
+            var lecturer = _fix.Create<Lecturer>();
+            var repoMock = new Mock<IPortalRepo>();
+            repoMock.Setup(r => r.RemoveLecturerByIdAsync(
+                        lecturerId, DEFAULT_CONTEXT_ID))
+                .ReturnsAsync(lecturer);
+            var sut = CreateService(repoMock.Object);
+
+            var res = await sut.RemoveLecturerByIdAsync(lecturerId);
+
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res.Name, Is.EqualTo(lecturer.Name));
+        }
+
+
+        [Test]
+        public async Task AddTestForSubjectAsync_Success()
+        {
+            var request = _fix.Create<TestRequestDto>();
+            var repoMock = new Mock<IPortalRepo>();
+            repoMock.Setup(r => r.AddTestForSubjectAsync(
+                        It.IsAny<Test>(), DEFAULT_CONTEXT_ID))
+                .ReturnsAsync((Test t, int _) => t);
+            var sut = CreateService(repoMock.Object);
+
+            var res = await sut.AddTestForSubjectAsync(request);
+
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res.Name, Is.EqualTo(request.Name));
+        }
+
+
+        [Test]
+        public async Task RemoveTestByIdAsync_Success()
+        {
+            var test = _fix.Create<Test>();
+            var repoMock = new Mock<IPortalRepo>();
+            repoMock.Setup(r => r.RemoveTestByIdAsync(
+                        test.Id, DEFAULT_CONTEXT_ID))
+                .ReturnsAsync(test);
+            var sut = CreateService(repoMock.Object);
+
+            var res = await sut.RemoveTestByIdAsync(test.Id);
+
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res.Name, Is.EqualTo(test.Name));
+        }
+
+
+
+        [Test]
+        public async Task GetFullTestByIdAsync_Success()
+        {
+            var test = _fix.Create<Test>();
+            var repoMock = new Mock<IPortalRepo>();
+            repoMock.Setup(r => r.GetFullTestByIdAsync(
+                        test.Id, DEFAULT_CONTEXT_ID))
+                .ReturnsAsync(test);
+            var sut = CreateService(repoMock.Object);
+
+            var res = await sut.GetFullTestByIdAsync(test.Id);
+
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res.Name, Is.EqualTo(test.Name));
+            Assert.That(res.Content, Is.EqualTo(test.Content));
         }
 
     }

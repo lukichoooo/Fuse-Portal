@@ -6,6 +6,7 @@ using Core.Interfaces.Convo.FileServices;
 using Core.Interfaces.LLM;
 using Core.Interfaces.LLM.Cache;
 using Core.Interfaces.LLM.LMStudio;
+using Core.Interfaces.Portal;
 using Infrastructure.Contexts;
 using Infrastructure.Repos;
 using Infrastructure.Services;
@@ -15,6 +16,7 @@ using Infrastructure.Services.Convo.Ocr;
 using Infrastructure.Services.LLM;
 using Infrastructure.Services.LLM.Cache;
 using Infrastructure.Services.LLM.LMStudio;
+using Infrastructure.Services.Portal;
 using IronOcr;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -32,12 +34,14 @@ public static class DependencyInjection
         services.AddScoped<IUserRepo, UserRepo>();
         services.AddScoped<IUniversityRepo, UniversityRepo>();
         services.AddScoped<IChatRepo, ChatRepo>();
+        services.AddScoped<IPortalRepo, PortalRepo>();
 
         // Mappers
         services.AddScoped<IUserMapper, UserMapper>();
         services.AddScoped<IUniversityMapper, UniversityMapper>();
         services.AddScoped<IChatMapper, ChatMapper>();
         services.AddScoped<ILMStudioMapper, LMStudioMapper>();
+        services.AddScoped<IPortalMapper, PortalMapper>();
 
         // Services
         services.AddScoped<IUserService, UserService>();
@@ -46,6 +50,7 @@ public static class DependencyInjection
         services.AddScoped<IChatMetadataService, ChatMetadataService>();
         services.AddScoped<IChatMetadataCache, ChatMetadataCache>();
         services.AddScoped<IFileTextParser, FileTextParser>();
+        services.AddScoped<IPortalService, PortalService>();
 
         // LLM
         services.AddScoped<ILLMService, LMStudioLLMService>();
@@ -72,6 +77,7 @@ public static class DependencyInjection
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddSingleton<IEncryptor, Encryptor>();
         services.AddSingleton<ICurrentContext, CurrentContext>();
+        services.AddScoped<IAuthMapper, AuthMapper>();
 
         return services;
     }

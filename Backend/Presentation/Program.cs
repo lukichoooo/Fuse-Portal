@@ -1,4 +1,5 @@
 
+using System.Diagnostics;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
@@ -62,6 +63,9 @@ builder.Services.AddValidatorsFromAssemblyContaining<CreateChatRequestValidator>
 builder.Services.AddValidatorsFromAssemblyContaining<MessageRequestValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<ClientMessageValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<AddressValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<ScheduleRequestDtoValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<LecturerRequestDtoValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<TestRequestDtoValidator>();
 builder.Services.AddFluentValidationAutoValidation();
 
 
@@ -104,6 +108,27 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// TODO: remove thing below
+using (var scope = app.Services.CreateScope())
+{
+    var ctx = scope.ServiceProvider.GetRequiredService<MyContext>();
+    Console.WriteLine("=== CASCADE PATHS ===");
+    var cascades = ctx.Model.GetEntityTypes()
+        .SelectMany(t => t.GetForeignKeys())
+        .Where(fk => fk.DeleteBehavior == DeleteBehavior.Cascade)
+        .Select(fk => new
+        {
+            Dependent = fk.DeclaringEntityType.ClrType.Name,
+            Principal = fk.PrincipalEntityType.ClrType.Name,
+            FK = string.Join(",", fk.Properties.Select(p => p.Name))
+        })
+        .ToList();
+
+    foreach (var c in cascades)
+        Console.WriteLine($"{c.Dependent} -> {c.Principal} ({c.FK})");
+}
+
 
 app.Run();
 

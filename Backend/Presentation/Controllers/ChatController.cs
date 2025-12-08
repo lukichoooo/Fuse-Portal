@@ -68,7 +68,6 @@ namespace Presentation.Controllers
             => Ok(await _service.UploadFilesAsync(await HelperFilesToStream(Files)));
 
 
-
         // Helper
 
         private static async Task<List<FileUpload>> HelperFilesToStream(IFormFileCollection formFiles)

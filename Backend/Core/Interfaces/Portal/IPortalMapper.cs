@@ -22,5 +22,6 @@ namespace Core.Interfaces.Portal
         Lecturer ToLecturer(LecturerRequestDto dto);
         Schedule ToSchedule(ScheduleRequestDto dto);
         Test ToTest(TestRequestDto dto);
+        TestFullDto ToTestFullDto(Test test);
     }
 }

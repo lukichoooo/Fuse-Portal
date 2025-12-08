@@ -9,7 +9,6 @@ using Presentation.Controllers;
 
 namespace PresentationTests
 {
-    // TODO
     public class UserUniversityControllerTests
     {
         private readonly Fixture _fix = new();

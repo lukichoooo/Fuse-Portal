@@ -432,8 +432,7 @@ namespace InfrastructureTests.Portal
                 .FirstOrDefaultAsync(t => t.Id == test.Id
                         && t.SubjectId == subject.Id);
 
-            Assert.That(rv, Is.Not.Null);
-            Assert.That(res, Is.Null);
+            Assert.That(rv, Is.Not.Null); Assert.That(res, Is.Null);
             Assert.That(rv, Is.EqualTo(test));
         }
 
@@ -468,6 +467,63 @@ namespace InfrastructureTests.Portal
 
             Assert.ThrowsAsync<TestNotFoundException>(async () =>
                     await _sut.RemoveTestByIdAsync(testId, userId));
+        }
+
+
+        [Test]
+        public async Task GetFullTestByIdAsync_Success()
+        {
+            var user = _fix.Create<User>();
+            var subject = _fix.Create<Subject>();
+
+            await _context.Users.AddAsync(user);
+            await _context.Subjects.AddAsync(subject);
+            await _context.SaveChangesAsync();
+            subject.UserId = user.Id;
+
+            var test = _fix.Create<Test>();
+            test.SubjectId = subject.Id;
+            test.Subject = null;
+            await _context.AddAsync(test);
+            await _context.SaveChangesAsync();
+
+            var res = await _sut.GetFullTestByIdAsync(test.Id, user.Id);
+
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res, Is.EqualTo(test));
+        }
+
+
+        [Test]
+        public async Task GetFullTestByIdAsync_WrongUser_Throws()
+        {
+            const int realUserId = 5, fakeUserId = 10;
+            var user = _fix.Create<User>();
+            var subject = _fix.Create<Subject>();
+            subject.UserId = user.Id = realUserId;
+
+            await _context.Users.AddAsync(user);
+            await _context.Subjects.AddAsync(subject);
+            await _context.SaveChangesAsync();
+
+            var test = _fix.Create<Test>();
+            test.SubjectId = subject.Id;
+            test.Subject = null;
+            await _context.AddAsync(test);
+            await _context.SaveChangesAsync();
+
+            Assert.ThrowsAsync<TestNotFoundException>(async () =>
+                     await _sut.GetFullTestByIdAsync(test.Id, fakeUserId));
+        }
+
+        [Test]
+        public async Task GetFullTestByIdAsync_NotFound_Throws()
+        {
+            var userId = _fix.Create<int>();
+            var testId = _fix.Create<int>();
+
+            Assert.ThrowsAsync<TestNotFoundException>(async () =>
+                    await _sut.GetFullTestByIdAsync(testId, userId));
         }
 
     }

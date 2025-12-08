@@ -90,7 +90,6 @@ namespace InfrastructureTests.Portal
         }
 
 
-
         [Test]
         public void ToSchedule_From_ScheduleRequestDto()
         {
@@ -107,6 +106,16 @@ namespace InfrastructureTests.Portal
             var res = _sut.ToTest(request);
             Assert.That(res, Is.Not.Null);
             HelperMapperTest.AssertCommonPropsByName(res, request);
+        }
+
+
+        [Test]
+        public void ToTestFullDto_From_Test()
+        {
+            var test = _fix.Create<Test>();
+            var res = _sut.ToTestFullDto(test);
+            Assert.That(res, Is.Not.Null);
+            HelperMapperTest.AssertCommonPropsByName(res, test);
         }
 
     }

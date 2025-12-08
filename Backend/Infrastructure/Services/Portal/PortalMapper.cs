@@ -63,12 +63,6 @@ namespace Infrastructure.Services.Portal
                 Grade = dto.Grade
             };
 
-        public TestDto ToTestDto(Test test)
-            => new(
-                    Id: test.Id,
-                    Name: test.Name
-                  );
-
         public Lecturer ToLecturer(LecturerRequestDto dto)
             => new()
             {
@@ -83,8 +77,14 @@ namespace Infrastructure.Services.Portal
                 Start = dto.Start,
                 End = dto.End,
                 Location = dto.Location,
-                MetaData = dto.MetaData
+                MetaData = dto.Metadata
             };
+
+        public TestDto ToTestDto(Test test)
+            => new(
+                    Id: test.Id,
+                    Name: test.Name
+                  );
 
         public Test ToTest(TestRequestDto dto)
             => new()
@@ -95,5 +95,14 @@ namespace Infrastructure.Services.Portal
                 Date = dto.Date,
                 Metadata = dto.Metadata
             };
+
+        public TestFullDto ToTestFullDto(Test test)
+            => new(
+                    Id: test.Id,
+                    Name: test.Name,
+                    Content: test.Content,
+                    Date: test.Date,
+                    Metadata: test.Metadata
+                  );
     }
 }

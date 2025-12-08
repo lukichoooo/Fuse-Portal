@@ -142,5 +142,12 @@ namespace Infrastructure.Repos
             await _context.SaveChangesAsync();
             return test;
         }
+
+        public async Task<Test> GetFullTestByIdAsync(int testId, int userId)
+            => await _context.Tests
+                .FirstOrDefaultAsync(t => t.Id == testId
+                        && t.Subject!.UserId == userId)
+                ?? throw new TestNotFoundException(
+                        $"Test not found with Id={testId}, UserId={userId}");
     }
 }

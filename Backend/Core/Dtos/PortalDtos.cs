@@ -15,7 +15,7 @@ public record TestFullDto(
         int Id,
         string Name,
         string Content,
-        DateTime Date,
+        DateTime? Date,
         string? Metadata
         );
 
@@ -61,7 +61,7 @@ public record ScheduleRequestDto
     public required DateTime End { get; set; }
     public required int SubjectId { get; set; }
     public string? Location { get; set; }
-    public string? MetaData { get; set; }
+    public string? Metadata { get; set; }
 }
 
 public record TestRequestDto

@@ -19,8 +19,11 @@ public class UniversityRepo(MyContext context) : IUniversityRepo
 
     public async Task<University> DeleteByIdAsync(int id)
     {
-        var uni = await _context.Universities.FindAsync(id)
+        var uni = await _context.Universities
+            .Include(uni => uni.UserUniversities)
+            .FirstOrDefaultAsync(uni => uni.Id == id)
             ?? throw new UniversityNotFoundException($"University Not Found With Id {id}");
+        _context.UserUniversities.RemoveRange(uni.UserUniversities);
         _context.Universities.Remove(uni);
         await _context.SaveChangesAsync();
         return uni;

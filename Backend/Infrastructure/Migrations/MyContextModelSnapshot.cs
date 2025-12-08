@@ -118,7 +118,22 @@ namespace Infrastructure.Migrations
                     b.ToTable("Messages");
                 });
 
-            modelBuilder.Entity("Core.Entities.Course", b =>
+            modelBuilder.Entity("Core.Entities.JoinTables.UserUniversity", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UniversityId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId", "UniversityId");
+
+                    b.HasIndex("UniversityId");
+
+                    b.ToTable("UserUniversities");
+                });
+
+            modelBuilder.Entity("Core.Entities.Portal.Lecturer", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -126,16 +141,18 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("MetaData")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("SubjectId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Courses");
+                    b.HasIndex("SubjectId");
+
+                    b.ToTable("Lecturers");
                 });
 
             modelBuilder.Entity("Core.Entities.Portal.Schedule", b =>
@@ -165,7 +182,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("SubjectId");
 
-                    b.ToTable("Schedule");
+                    b.ToTable("Schedules");
                 });
 
             modelBuilder.Entity("Core.Entities.Portal.Subject", b =>
@@ -186,9 +203,14 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Subject");
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Subjects");
                 });
 
             modelBuilder.Entity("Core.Entities.Portal.Test", b =>
@@ -203,6 +225,9 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("Date")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Metadata")
                         .HasColumnType("nvarchar(max)");
 
@@ -210,19 +235,14 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("ScheduleId")
-                        .HasColumnType("int");
-
                     b.Property<int>("SubjectId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ScheduleId");
-
                     b.HasIndex("SubjectId");
 
-                    b.ToTable("Test");
+                    b.ToTable("Tests");
                 });
 
             modelBuilder.Entity("Core.Entities.University", b =>
@@ -280,66 +300,6 @@ namespace Infrastructure.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("CourseUser", b =>
-                {
-                    b.Property<int>("CoursesId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UsersId")
-                        .HasColumnType("int");
-
-                    b.HasKey("CoursesId", "UsersId");
-
-                    b.HasIndex("UsersId");
-
-                    b.ToTable("CourseUser");
-                });
-
-            modelBuilder.Entity("SubjectUser", b =>
-                {
-                    b.Property<int>("StudentsId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SubjectEnrollmentsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("StudentsId", "SubjectEnrollmentsId");
-
-                    b.HasIndex("SubjectEnrollmentsId");
-
-                    b.ToTable("SubjectUser");
-                });
-
-            modelBuilder.Entity("SubjectUser1", b =>
-                {
-                    b.Property<int>("LecturersId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TeachingSubjectsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("LecturersId", "TeachingSubjectsId");
-
-                    b.HasIndex("TeachingSubjectsId");
-
-                    b.ToTable("SubjectUser1");
-                });
-
-            modelBuilder.Entity("UniversityUser", b =>
-                {
-                    b.Property<int>("UniversitiesId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UsersId")
-                        .HasColumnType("int");
-
-                    b.HasKey("UniversitiesId", "UsersId");
-
-                    b.HasIndex("UsersId");
-
-                    b.ToTable("UniversityUser");
-                });
-
             modelBuilder.Entity("Core.Entities.Convo.Chat", b =>
                 {
                     b.HasOne("Core.Entities.User", "User")
@@ -354,8 +314,9 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Core.Entities.Convo.ChatFile", b =>
                 {
                     b.HasOne("Core.Entities.Convo.Message", "Message")
-                        .WithMany()
-                        .HasForeignKey("MessageId");
+                        .WithMany("Files")
+                        .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Message");
                 });
@@ -371,6 +332,36 @@ namespace Infrastructure.Migrations
                     b.Navigation("Chat");
                 });
 
+            modelBuilder.Entity("Core.Entities.JoinTables.UserUniversity", b =>
+                {
+                    b.HasOne("Core.Entities.University", "University")
+                        .WithMany("UserUniversities")
+                        .HasForeignKey("UniversityId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Core.Entities.User", "User")
+                        .WithMany("UserUniversities")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("University");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Core.Entities.Portal.Lecturer", b =>
+                {
+                    b.HasOne("Core.Entities.Portal.Subject", "Subject")
+                        .WithMany("Lecturers")
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Subject");
+                });
+
             modelBuilder.Entity("Core.Entities.Portal.Schedule", b =>
                 {
                     b.HasOne("Core.Entities.Portal.Subject", "Subject")
@@ -382,19 +373,24 @@ namespace Infrastructure.Migrations
                     b.Navigation("Subject");
                 });
 
+            modelBuilder.Entity("Core.Entities.Portal.Subject", b =>
+                {
+                    b.HasOne("Core.Entities.User", "User")
+                        .WithMany("Subjects")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Core.Entities.Portal.Test", b =>
                 {
-                    b.HasOne("Core.Entities.Portal.Schedule", "Schedule")
-                        .WithMany()
-                        .HasForeignKey("ScheduleId");
-
                     b.HasOne("Core.Entities.Portal.Subject", "Subject")
                         .WithMany("Tests")
                         .HasForeignKey("SubjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Schedule");
 
                     b.Navigation("Subject");
                 });
@@ -421,81 +417,37 @@ namespace Infrastructure.Migrations
                     b.Navigation("Address");
                 });
 
-            modelBuilder.Entity("CourseUser", b =>
-                {
-                    b.HasOne("Core.Entities.Course", null)
-                        .WithMany()
-                        .HasForeignKey("CoursesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Core.Entities.User", null)
-                        .WithMany()
-                        .HasForeignKey("UsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("SubjectUser", b =>
-                {
-                    b.HasOne("Core.Entities.User", null)
-                        .WithMany()
-                        .HasForeignKey("StudentsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Core.Entities.Portal.Subject", null)
-                        .WithMany()
-                        .HasForeignKey("SubjectEnrollmentsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("SubjectUser1", b =>
-                {
-                    b.HasOne("Core.Entities.User", null)
-                        .WithMany()
-                        .HasForeignKey("LecturersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Core.Entities.Portal.Subject", null)
-                        .WithMany()
-                        .HasForeignKey("TeachingSubjectsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("UniversityUser", b =>
-                {
-                    b.HasOne("Core.Entities.University", null)
-                        .WithMany()
-                        .HasForeignKey("UniversitiesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Core.Entities.User", null)
-                        .WithMany()
-                        .HasForeignKey("UsersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Core.Entities.Convo.Chat", b =>
                 {
                     b.Navigation("Messages");
                 });
 
+            modelBuilder.Entity("Core.Entities.Convo.Message", b =>
+                {
+                    b.Navigation("Files");
+                });
+
             modelBuilder.Entity("Core.Entities.Portal.Subject", b =>
                 {
+                    b.Navigation("Lecturers");
+
                     b.Navigation("Schedules");
 
                     b.Navigation("Tests");
                 });
 
+            modelBuilder.Entity("Core.Entities.University", b =>
+                {
+                    b.Navigation("UserUniversities");
+                });
+
             modelBuilder.Entity("Core.Entities.User", b =>
                 {
                     b.Navigation("Chats");
+
+                    b.Navigation("Subjects");
+
+                    b.Navigation("UserUniversities");
                 });
 #pragma warning restore 612, 618
         }

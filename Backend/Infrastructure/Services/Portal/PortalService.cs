@@ -15,14 +15,14 @@ namespace Infrastructure.Services.Portal
         private readonly IPortalMapper _mapper = mapper;
         private readonly ICurrentContext _currentContext = currentContext;
 
-        public async Task<SubjectFullDto> AddSubjectForCurrentUser(SubjectRequestDto dto)
+        public async Task<SubjectFullDto> AddSubjectForCurrentUserAsync(SubjectRequestDto dto)
         {
             int userId = _currentContext.GetCurrentUserId();
             var subject = _mapper.ToSubject(dto, userId);
             return _mapper.ToSubjectFullDto(await _repo.AddSubjectForUserAsync(subject));
         }
 
-        public async Task<SubjectDto> RemoveSubjectById(int subjectId)
+        public async Task<SubjectDto> RemoveSubjectByIdAsync(int subjectId)
         {
             int userId = _currentContext.GetCurrentUserId();
             return _mapper.ToSubjectDto(await _repo.RemoveSubjectById(subjectId, userId));
@@ -37,7 +37,7 @@ namespace Infrastructure.Services.Portal
                 .ConvertAll(_mapper.ToSubjectDto);
         }
 
-        public async Task<SubjectFullDto> GetFullSubjectById(int subjectId)
+        public async Task<SubjectFullDto> GetFullSubjectByIdAsync(int subjectId)
         {
             int userId = _currentContext.GetCurrentUserId();
             var subject = await _repo.GetFullSubjectByIdAsync(subjectId, userId)
@@ -45,8 +45,6 @@ namespace Infrastructure.Services.Portal
                         $" subject Not Found With Id={subjectId} and UserId={userId}");
             return _mapper.ToSubjectFullDto(subject);
         }
-
-        // TODO: Write Tests For Below
 
         public async Task<ScheduleDto> AddScheduleForSubjectAsync(ScheduleRequestDto request)
         {
@@ -90,6 +88,13 @@ namespace Infrastructure.Services.Portal
         {
             int userId = _currentContext.GetCurrentUserId();
             return _mapper.ToTestDto(await _repo.RemoveTestByIdAsync(
+                        testId, userId));
+        }
+
+        public async Task<TestFullDto> GetFullTestByIdAsync(int testId)
+        {
+            int userId = _currentContext.GetCurrentUserId();
+            return _mapper.ToTestFullDto(await _repo.GetFullTestByIdAsync(
                         testId, userId));
         }
     }
