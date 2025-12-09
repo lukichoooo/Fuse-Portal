@@ -6,7 +6,6 @@ using Core.Interfaces.Auth;
 using Core.Interfaces.Portal;
 using Infrastructure.Services.Portal;
 using Moq;
-using NPOI.SS.Formula.Functions;
 
 namespace InfrastructureTests.Portal
 {
@@ -44,7 +43,7 @@ namespace InfrastructureTests.Portal
             {
                 var portalDto = _fix.Create<PortalParserResponseDto>();
                 var mock = new Mock<IPortalParser>();
-                mock.Setup(c => c.ParsePortalHtml(It.IsAny<PortalParserRequestDto>()))
+                mock.Setup(c => c.ParsePortalHtml(It.IsAny<string>()))
                     .ReturnsAsync(portalDto);
                 portalParser = mock.Object;
             }
@@ -265,10 +264,10 @@ namespace InfrastructureTests.Portal
         public async Task ParseAndSavePortalAsync_Success()
         {
             var fixture = new Fixture() { RepeatCount = 100 };
-            var parsePortalRequest = fixture.Create<PortalParserRequestDto>();
+            var htmlPage = fixture.Create<string>();
             var portalDto = _fix.Create<PortalParserResponseDto>();
             var parserMock = new Mock<IPortalParser>();
-            parserMock.Setup(p => p.ParsePortalHtml(parsePortalRequest))
+            parserMock.Setup(p => p.ParsePortalHtml(htmlPage))
                 .ReturnsAsync(portalDto);
             var repoMock = new Mock<IPortalRepo>();
             repoMock.Setup(r => r.AddSubjectForUserAsync(It.IsAny<Subject>()))
@@ -277,7 +276,7 @@ namespace InfrastructureTests.Portal
                     repo: repoMock.Object,
                     portalParser: parserMock.Object);
 
-            var res = await sut.ParseAndSavePortalAsync(parsePortalRequest);
+            var res = await sut.ParseAndSavePortalAsync(htmlPage);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res, Is.EqualTo(portalDto));

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Core.Dtos;
 using Core.Exceptions;
 using Core.Interfaces.Auth;
@@ -18,11 +19,20 @@ namespace Infrastructure.Services.Portal
         private readonly IPortalParser _portalParser = portalParser;
 
 
-        public async Task<PortalParserResponseDto> ParseAndSavePortalAsync(PortalParserRequestDto request)
+        public async Task<PortalParserResponseDto> ParseAndSavePortalAsync(string HtmlPage)
         {
-            PortalParserResponseDto portal = await _portalParser.ParsePortalHtml(request);
+            PortalParserResponseDto portal = await _portalParser.ParsePortalHtml(HtmlPage);
+
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true // pretty print
+            };
+            Console.WriteLine(JsonSerializer.Serialize(portal, options));
+
+
             foreach (var subjectFullRequest in portal.Subjects)
             {
+                Console.WriteLine(subjectFullRequest.Name);
                 int userId = _currentContext.GetCurrentUserId();
                 var subject = _mapper.ToSubjectWithoutLists(
                         subjectFullRequest,

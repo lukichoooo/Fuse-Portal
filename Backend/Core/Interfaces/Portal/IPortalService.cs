@@ -4,7 +4,7 @@ namespace Core.Interfaces.Portal
 {
     public interface IPortalService
     {
-        Task<PortalParserResponseDto> ParseAndSavePortalAsync(PortalParserRequestDto request);
+        Task<PortalParserResponseDto> ParseAndSavePortalAsync(string HtmlPage);
 
         Task<List<SubjectDto>> GetSubjectsPageForCurrentUserAsync(int? lastSubjectId, int pageSize);
         Task<SubjectFullDto> GetFullSubjectByIdAsync(int subjectId);

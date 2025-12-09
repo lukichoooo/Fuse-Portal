@@ -1,3 +1,4 @@
+using System.Text;
 using Core.Dtos;
 using Core.Dtos.Settings.Presentation;
 using Core.Interfaces.Portal;
@@ -18,11 +19,11 @@ public class PortalController(
     private readonly IPortalService _service = service;
     private readonly ControllerSettings _settings = options.Value;
 
-    [HttpPost("parse")]
-    public async Task<ActionResult> AddLecturerAsync(
-            [FromBody] PortalParserRequestDto request)
+    [HttpPost("upload-html")]
+    public async Task<ActionResult> AddLecturerAsync()
     {
-        await _service.ParseAndSavePortalAsync(request);
+        var rawHtmlPage = await Request.GetRawBodyAsync();
+        await _service.ParseAndSavePortalAsync(rawHtmlPage);
         return Ok();
     }
 
@@ -83,4 +84,32 @@ public class PortalController(
     public async Task<ActionResult<TestFullDto>> GetTestByIdAsync(
             [FromRoute] int testId)
         => Ok(await _service.GetFullTestByIdAsync(testId));
+
+}
+
+public static class PortalControllerExtensions
+{
+    // Helper
+    public static async Task<string> GetRawBodyAsync(
+        this HttpRequest request,
+        Encoding? encoding = null)
+    {
+        if (!request.Body.CanSeek)
+        {
+            // We only do this if the stream isn't *already* seekable,
+            // as EnableBuffering will create a new stream instance
+            // each time it's called
+            request.EnableBuffering();
+        }
+
+        request.Body.Position = 0;
+
+        var reader = new StreamReader(request.Body, encoding ?? Encoding.UTF8);
+
+        var body = await reader.ReadToEndAsync().ConfigureAwait(false);
+
+        request.Body.Position = 0;
+
+        return body;
+    }
 }

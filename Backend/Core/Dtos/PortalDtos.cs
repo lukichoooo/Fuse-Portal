@@ -123,7 +123,4 @@ public record PortalParserResponseDto
     public string? Metadata { get; set; }
 }
 
-public record PortalParserRequestDto(
-        string HtmlPage
-        );
 

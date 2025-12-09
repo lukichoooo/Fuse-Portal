@@ -45,10 +45,10 @@ Your sole purpose is to parse raw HTML from a university portal and convert it i
   ""metadata"": ""string""
 }";
 
-        public async Task<PortalParserResponseDto> ParsePortalHtml(PortalParserRequestDto request)
+        public async Task<PortalParserResponseDto> ParsePortalHtml(string HtmlPage)
         {
             LMStudioRequest lmStudioRequest = _mapper.ToRequest(
-                   html: request.HtmlPage,
+                   html: HtmlPage,
                     rulesPrompt: rulesPrompt);
 
             LMStudioResponse response = await _api.SendMessageAsync(

@@ -61,7 +61,7 @@ namespace InfrastructureTests.LLM.LMStudio
                         It.IsAny<string>()))
                 .Returns(lmsRequest);
 
-            var request = _fix.Create<PortalParserRequestDto>();
+            var request = _fix.Create<string>();
             var sut = CreateSut(apiMock.Object, mapperMock.Object);
 
             var res = await sut.ParsePortalHtml(request);

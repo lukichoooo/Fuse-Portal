@@ -41,25 +41,28 @@ namespace Infrastructure.Services.LLM.LMStudio
             var json = JsonSerializer.Serialize(request, _serializerOptions);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            _logger.LogInformation("sending to content LLM --- \n {json}", json);
+            _logger.LogInformation("sending to content LLM --- \n {}", json);
 
-            var res = await _client.PostAsync(settings.ChatRoute, content);
+            var result = await _client.PostAsync(settings.ChatRoute, content);
 
-            if (!res.IsSuccessStatusCode)
+            if (!result.IsSuccessStatusCode)
             {
-                var body = await res.Content.ReadAsStringAsync();
-                _logger.LogError("LMStudio returned {StatusCode}: {Body}", res.StatusCode, body);
+                var body = await result.Content.ReadAsStringAsync();
+                _logger.LogError("LMStudio returned {StatusCode}: {Body}", result.StatusCode, body);
                 throw new LMStudioApiException(
-                    $"LMStudio API returned {res.StatusCode}: {body}",
-                    (int)res.StatusCode
+                    $"LMStudio API returned {result.StatusCode}: {body}",
+                    (int)result.StatusCode
                 );
             }
 
             // Deserialize directly from stream
-            return await res.Content.ReadFromJsonAsync<LMStudioResponse>(_serializerOptions)
+            var response = await result.Content.ReadFromJsonAsync<LMStudioResponse>(_serializerOptions)
                    ?? throw new LMStudioApiException("LMStudio returned empty response");
-        }
 
+            _logger.LogInformation("Text from LLM --- \n {}", response.Output[0].Content[0].Text);
+
+            return response;
+        }
 
     }
 
