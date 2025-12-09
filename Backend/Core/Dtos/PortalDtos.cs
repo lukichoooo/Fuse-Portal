@@ -117,14 +117,13 @@ public record SubjectFullRequestDto
     public required List<TestRequestDtoNoSubjectId> Tests { get; init; } = [];
 }
 
-public record PortalParserDto
+public record PortalParserResponseDto
 {
     public List<SubjectFullRequestDto> Subjects { get; init; } = [];
     public string? Metadata { get; set; }
 }
 
-public record ParsePortalRequest(
-        List<string> HtmlPages,
-        string? MetaData
+public record PortalParserRequestDto(
+        string HtmlPage
         );
 

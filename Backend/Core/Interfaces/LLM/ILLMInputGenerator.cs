@@ -4,6 +4,7 @@ namespace Core.Interfaces.LLM
 {
     public interface ILLMInputGenerator
     {
-        string GenerateInput(MessageDto msg, string rules = "");
+        string GenerateInput(MessageDto msg, string? rules);
+        string GenerateInput(string text, string? rules);
     }
 }

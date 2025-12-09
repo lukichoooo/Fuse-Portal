@@ -1,6 +1,7 @@
 using AutoFixture;
 using Core.Dtos;
 using Core.Dtos.Settings;
+using Core.Dtos.Settings.Infrastructure;
 using Core.Interfaces.LLM;
 using Core.Interfaces.LLM.Cache;
 using Core.Interfaces.LLM.LMStudio;
@@ -11,9 +12,15 @@ using Moq;
 namespace InfrastructureTests.LLM.LMStudio
 {
     [TestFixture]
-    public class LMStudioLLMServiceTests
+    public class LMStudioChatServiceTests
     {
-        private readonly LMStudioApiSettings _settings = new()
+        private readonly LLMApiSettingKeys _settingKeys = new()
+        {
+            Chat = "chat",
+            Parser = "parsar"
+        };
+
+        private readonly LLMApiSettings _apiSettings = new()
         {
             URL = "asdadjaod",
             ChatRoute = "/v1/chat/completions",
@@ -25,41 +32,51 @@ namespace InfrastructureTests.LLM.LMStudio
             Stream = false
         };
 
-        private readonly LLMInputSettings _inputSettings = new()
-        {
-            SystemPromptDelimiter = "---RULES---",
-            UserInputDelimiter = "---USER INPUT---",
-            FileNameDelimiter = "---FILE NAME---",
-            FileContentDelimiter = "---FILE CONTENT---",
-            SystemPrompt = "you are a cool guy with black glasses"
-        };
 
-        private readonly Fixture _globalFixture = new();
+        private readonly Fixture _fix = new();
         private LMStudioMapper _mapper;
 
         [OneTimeSetUp]
         public void BeforeAll()
         {
-            var mock = new Mock<ILLMInputGenerator>();
-            mock.Setup(g => g.GenerateInput(It.IsAny<MessageDto>(), It.IsAny<string>()))
+            var inputGenMock = new Mock<ILLMInputGenerator>();
+            inputGenMock.Setup(g => g.GenerateInput(It.IsAny<MessageDto>(), It.IsAny<string>()))
                 .Returns("INPUT");
-            var options = Options.Create(_settings);
-            var inputOptions = Options.Create(_inputSettings);
-            _mapper = new LMStudioMapper(options, inputOptions, mock.Object);
+            var keyOptions = Options.Create(_settingKeys);
+
+            var settingsChooserMock = new Mock<ILLMApiSettingsChooser>();
+            settingsChooserMock.Setup(s => s.GetSettings(It.IsAny<string>()))
+                .Returns(_apiSettings);
+
+
+            _mapper = new LMStudioMapper(
+                    inputGenMock.Object,
+                    settingsChooserMock.Object,
+                    keyOptions
+                    );
+
         }
 
-        private ILLMService CreateService(ILMStudioApi api, IChatMetadataService metadataService)
-            => new LMStudioLLMService(api, _mapper, metadataService);
+        private ILLMChatService CreateService(ILMStudioApi api, IChatMetadataService metadataService)
+        {
+            var settingKeys = _fix.Create<LLMApiSettingKeys>();
+            var keyOptionsMock = new Mock<IOptions<LLMApiSettingKeys>>();
+            keyOptionsMock.Setup(x => x.Value)
+                .Returns(settingKeys);
+            return new LMStudioChatService(api, _mapper, metadataService, keyOptionsMock.Object);
+        }
 
         [Test]
         public async Task SendMessageAsync_Success()
         {
-            var msg = _globalFixture.Create<MessageDto>();
-            var request = _globalFixture.Create<LMStudioRequest>();
-            var response = _globalFixture.Create<LMStudioResponse>();
+            var msg = _fix.Create<MessageDto>();
+            var request = _fix.Create<LMStudioRequest>();
+            var response = _fix.Create<LMStudioResponse>();
 
             var apiMock = new Mock<ILMStudioApi>();
-            apiMock.Setup(a => a.SendMessageAsync(It.IsAny<LMStudioRequest>()))
+            apiMock.Setup(a => a.SendMessageAsync(
+                        It.IsAny<LMStudioRequest>(),
+                        It.IsAny<string>()))
                 .ReturnsAsync(response);
 
             var dataServiceMock = new Mock<IChatMetadataService>();
@@ -74,7 +91,9 @@ namespace InfrastructureTests.LLM.LMStudio
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.ChatId, Is.EqualTo(msg.ChatId));
-            apiMock.Verify(a => a.SendMessageAsync(It.IsAny<LMStudioRequest>()),
+            apiMock.Verify(a => a.SendMessageAsync(
+                        It.IsAny<LMStudioRequest>(),
+                        It.IsAny<string>()),
                         Times.Once());
             dataServiceMock.Verify(a => a.GetLastResponseIdAsync(It.IsAny<int>()),
                         Times.Once());
@@ -87,12 +106,14 @@ namespace InfrastructureTests.LLM.LMStudio
         [Test]
         public async Task SendMessageAsync_NullLastResponseId_Success()
         {
-            var msg = _globalFixture.Create<MessageDto>();
-            var request = _globalFixture.Create<LMStudioRequest>();
-            var response = _globalFixture.Create<LMStudioResponse>();
+            var msg = _fix.Create<MessageDto>();
+            var request = _fix.Create<LMStudioRequest>();
+            var response = _fix.Create<LMStudioResponse>();
 
             var apiMock = new Mock<ILMStudioApi>();
-            apiMock.Setup(a => a.SendMessageAsync(It.IsAny<LMStudioRequest>()))
+            apiMock.Setup(a => a.SendMessageAsync(
+                        It.IsAny<LMStudioRequest>(),
+                        It.IsAny<string>()))
                 .ReturnsAsync(response);
 
             var dataServiceMock = new Mock<IChatMetadataService>();
@@ -107,7 +128,9 @@ namespace InfrastructureTests.LLM.LMStudio
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.ChatId, Is.EqualTo(msg.ChatId));
-            apiMock.Verify(a => a.SendMessageAsync(It.IsAny<LMStudioRequest>()),
+            apiMock.Verify(a => a.SendMessageAsync(
+                        It.IsAny<LMStudioRequest>(),
+                        It.IsAny<string>()),
                         Times.Once());
             dataServiceMock.Verify(a => a.GetLastResponseIdAsync(It.IsAny<int>()),
                         Times.Once());

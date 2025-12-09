@@ -1,14 +1,17 @@
 namespace Core.Dtos.Settings
 {
-    public class LMStudioApiSettings
+    public record LLMApiSettings
     {
-        public string URL { get; set; } = null!;
-        public string ChatRoute { get; set; } = null!;
+        public required string URL { get; init; }
+        public required string ChatRoute { get; init; }
 
-        public string Model { get; set; } = null!;
+        public required string Model { get; init; }
 
-        public float Temperature { get; set; }
-        public int MaxTokens { get; set; }
-        public bool Stream { get; set; }
+        public float Temperature { get; init; }
+        public int MaxTokens { get; init; }
+        public int ContextWindow { get; init; }
+        public bool Stream { get; init; }
+
+        public string? ResponseFormatType { get; init; }
     }
 }

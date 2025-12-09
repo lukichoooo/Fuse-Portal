@@ -3,7 +3,9 @@ using System.Text.Json;
 using AutoFixture;
 using Core.Dtos;
 using Core.Dtos.Settings;
+using Core.Dtos.Settings.Infrastructure;
 using Core.Exceptions;
+using Core.Interfaces.LLM;
 using Infrastructure.Services.LLM.LMStudio;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -18,9 +20,9 @@ public class LMStudioApiTests
     private Fixture _fixture;
     private Mock<HttpMessageHandler> _httpMessageHandlerMock;
     private Mock<ILogger<LMStudioApi>> _loggerMock;
-    private Mock<IOptions<LMStudioApiSettings>> _optionsMock;
     private JsonSerializerOptions _serializerOptions;
-    private LMStudioApiSettings _settings;
+    private LLMApiSettings _apiSettings;
+    private LLMApiSettingKeys _settingKeys;
 
     private LMStudioApi _sut = null!;
 
@@ -36,13 +38,11 @@ public class LMStudioApiTests
 
         _loggerMock = new Mock<ILogger<LMStudioApi>>();
 
-        _settings = _fixture.Build<LMStudioApiSettings>()
+        _apiSettings = _fixture.Build<LLMApiSettings>()
                             .With(x => x.URL, "http://localhost:1234")
                             .With(x => x.ChatRoute, "/v1/chat/completions")
                             .Create();
-
-        _optionsMock = new Mock<IOptions<LMStudioApiSettings>>();
-        _optionsMock.Setup(x => x.Value).Returns(_settings);
+        _settingKeys = _fixture.Create<LLMApiSettingKeys>();
 
         _httpMessageHandlerMock = new Mock<HttpMessageHandler>();
     }
@@ -50,12 +50,16 @@ public class LMStudioApiTests
     private void CreateSut()
     {
         var httpClient = new HttpClient(_httpMessageHandlerMock.Object);
+        var settingsChooserMock = new Mock<ILLMApiSettingsChooser>();
+        settingsChooserMock.Setup(s => s.GetSettings(It.IsAny<string>()))
+            .Returns(_apiSettings);
+
 
         _sut = new LMStudioApi(
             httpClient,
-            _optionsMock.Object,
             _loggerMock.Object,
-            _serializerOptions
+            _serializerOptions,
+            settingsChooserMock.Object
         );
     }
 
@@ -82,7 +86,7 @@ public class LMStudioApiTests
             })
             .Verifiable();
 
-        var result = await _sut.SendMessageAsync(request);
+        var result = await _sut.SendMessageAsync(request, _settingKeys.Chat);
 
         Assert.That(result, Is.Not.Null);
         Assert.That(result.Id, Is.EqualTo(expectedResponse.Id));
@@ -118,7 +122,7 @@ public class LMStudioApiTests
             });
 
         var ex = Assert.ThrowsAsync<LMStudioApiException>(async () =>
-            await _sut.SendMessageAsync(request));
+            await _sut.SendMessageAsync(request, _settingKeys.Chat));
 
         Assert.That(ex.Message, Does.Contain(errorContent));
 
@@ -152,7 +156,7 @@ public class LMStudioApiTests
             });
 
         var ex = Assert.ThrowsAsync<LMStudioApiException>(async () =>
-            await _sut.SendMessageAsync(request));
+            await _sut.SendMessageAsync(request, _settingKeys.Chat));
 
         Assert.That(ex.Message, Is.EqualTo("LMStudio returned empty response"));
     }

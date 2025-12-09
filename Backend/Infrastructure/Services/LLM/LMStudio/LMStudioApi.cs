@@ -2,43 +2,48 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using Core.Dtos;
-using Core.Dtos.Settings;
 using Core.Exceptions;
+using Core.Interfaces.LLM;
 using Core.Interfaces.LLM.LMStudio;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Services.LLM.LMStudio
 {
     public class LMStudioApi : ILMStudioApi
     {
-        private readonly ILogger<LMStudioApi> _logger;
-        private readonly LMStudioApiSettings _settings;
-        private readonly HttpClient _client;
         private readonly JsonSerializerOptions _serializerOptions;
+        private readonly ILogger<LMStudioApi> _logger;
+        private readonly HttpClient _client;
+        private readonly ILLMApiSettingsChooser _apiSettingsChooser;
 
         public LMStudioApi(
                 HttpClient client,
-                IOptions<LMStudioApiSettings> options,
                 ILogger<LMStudioApi> logger,
-                JsonSerializerOptions serializerOptions
+                JsonSerializerOptions serializerOptions,
+                ILLMApiSettingsChooser apiSettingsChooser
                 )
         {
-            _settings = options.Value;
             _client = client;
-            _client.BaseAddress = new Uri(_settings.URL);
             _logger = logger;
             _serializerOptions = serializerOptions;
+            _apiSettingsChooser = apiSettingsChooser;
         }
 
 
-        public async Task<LMStudioResponse> SendMessageAsync(LMStudioRequest request)
+        public async Task<LMStudioResponse> SendMessageAsync(
+                LMStudioRequest request,
+                string settingsKey
+                )
         {
+            var settings = _apiSettingsChooser.GetSettings(settingsKey);
+            _client.BaseAddress = new Uri(settings.URL);
+
             var json = JsonSerializer.Serialize(request, _serializerOptions);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
+
             _logger.LogInformation("sending to content LLM --- \n {json}", json);
 
-            var res = await _client.PostAsync(_settings.ChatRoute, content);
+            var res = await _client.PostAsync(settings.ChatRoute, content);
 
             if (!res.IsSuccessStatusCode)
             {
@@ -54,7 +59,6 @@ namespace Infrastructure.Services.LLM.LMStudio
             return await res.Content.ReadFromJsonAsync<LMStudioResponse>(_serializerOptions)
                    ?? throw new LMStudioApiException("LMStudio returned empty response");
         }
-
 
 
     }

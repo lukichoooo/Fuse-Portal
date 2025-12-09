@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using Core.Dtos;
 using Core.Dtos.Settings;
+using Core.Dtos.Settings.Infrastructure;
 using Core.Dtos.Settings.Presentation;
 using Core.Settings;
 using FluentValidation;
@@ -49,13 +50,22 @@ builder.Services.AddDbContext<MyContext>(options =>
 // get Settings from Appsettings
 builder.Services.Configure<ValidatorSettings>(builder.Configuration.GetSection("ValidatorSettings"));
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
-builder.Services.Configure<LMStudioApiSettings>(builder.Configuration.GetSection("LMStudioApiSettings"));
-builder.Services.Configure<LLMInputSettings>(builder.Configuration.GetSection("LMStudioApiSettings"));
-builder.Services.Configure<LLMInputSettings>(builder.Configuration.GetSection("LLMInputSettings"));
 builder.Services.Configure<EncryptorSettings>(builder.Configuration.GetSection("EncryptorSettings"));
-builder.Services.Configure<FileProcessingSettings>(builder.Configuration.GetSection("FileProcessingSettings"));
-builder.Services.Configure<IronTesseractSettings>(builder.Configuration.GetSection("IronTesseractSettings"));
 builder.Services.Configure<ControllerSettings>(builder.Configuration.GetSection("ControllerSettings"));
+
+// LLM
+builder.Services.Configure<LLMApiSettingKeys>(builder.Configuration.GetSection("LLMApiSettingKeys"));
+
+builder.Services.Configure<LLMApiSettings>("ParserModel",
+    builder.Configuration.GetSection("LLMApiSettings:ParserModel"));
+builder.Services.Configure<LLMApiSettings>("ChatModel",
+    builder.Configuration.GetSection("LLMApiSettings:ChatModel"));
+
+builder.Services.Configure<LLMInputSettings>(builder.Configuration.GetSection("LLMInputSettings"));
+
+// ORC
+builder.Services.Configure<IronTesseractSettings>(builder.Configuration.GetSection("IronTesseractSettings"));
+builder.Services.Configure<FileProcessingSettings>(builder.Configuration.GetSection("FileProcessingSettings"));
 
 // Validaton
 builder.Services.AddValidatorsFromAssemblyContaining<LoginRequestValidator>();

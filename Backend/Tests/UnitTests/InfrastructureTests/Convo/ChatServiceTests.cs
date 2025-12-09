@@ -28,12 +28,12 @@ namespace InfrastructureTests.Convo
 
         private IChatService CreateService(
                 IChatRepo? repo = null,
-                ILLMService? LLMservice = null,
+                ILLMChatService? LLMservice = null,
                 IFileProcessingService? fileService = null,
                 ICurrentContext? currContext = null)
         {
             repo ??= new Mock<IChatRepo>().Object;
-            LLMservice ??= new Mock<ILLMService>().Object;
+            LLMservice ??= new Mock<ILLMChatService>().Object;
             fileService ??= new Mock<IFileProcessingService>().Object;
             if (currContext is null)
             {
@@ -159,7 +159,7 @@ namespace InfrastructureTests.Convo
             repoMock.Setup(r => r.CreateNewChatAsync(It.IsAny<Chat>()))
                 .ReturnsAsync(chat);
 
-            var LLMServiceMock = new Mock<ILLMService>();
+            var LLMServiceMock = new Mock<ILLMChatService>();
             var service = CreateService(repoMock.Object, LLMServiceMock.Object);
 
             var res = await service.CreateNewChatAsync(request);
@@ -174,7 +174,7 @@ namespace InfrastructureTests.Convo
             var cm = _fix.Create<ClientMessage>();
 
             var response = _fix.Create<MessageDto>();
-            var LLMServiceMock = new Mock<ILLMService>();
+            var LLMServiceMock = new Mock<ILLMChatService>();
             LLMServiceMock.Setup(s => s.SendMessageAsync(It.IsAny<MessageDto>()))
                 .ReturnsAsync(response);
 
@@ -203,7 +203,7 @@ namespace InfrastructureTests.Convo
             var fileIds = _fix.CreateMany<int>().ToList();
 
             var response = _fix.Create<MessageDto>();
-            var LLMServiceMock = new Mock<ILLMService>();
+            var LLMServiceMock = new Mock<ILLMChatService>();
             LLMServiceMock.Setup(s => s.SendMessageAsync(It.IsAny<MessageDto>()))
                 .ReturnsAsync(response);
 

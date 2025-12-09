@@ -20,7 +20,7 @@ public class PortalController(
 
     [HttpPost("parse")]
     public async Task<ActionResult> AddLecturerAsync(
-            [FromBody] ParsePortalRequest request)
+            [FromBody] PortalParserRequestDto request)
     {
         await _service.ParseAndSavePortalAsync(request);
         return Ok();

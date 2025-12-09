@@ -10,23 +10,37 @@ namespace Infrastructure.Services.LLM
     {
         private readonly LLMInputSettings _settings = options.Value;
 
-        public string GenerateInput(MessageDto msg, string rules = "")
+        public string GenerateInput(MessageDto msg, string? rules)
         {
+
             var sb = new StringBuilder();
 
             if (!string.IsNullOrWhiteSpace(rules))
-                sb.AppendLine($"{_settings.SystemPromptDelimiter}\n{rules}");
+                sb.AppendLine($"{_settings.RulesPromptDelimiter}\n{rules}");
 
             if (!string.IsNullOrWhiteSpace(msg.Text))
                 sb.AppendLine($"{_settings.UserInputDelimiter}\n{msg.Text}");
 
-            foreach (var (name, content) in msg.Files)
+            foreach (var (fileName, content) in msg.Files)
             {
-                sb.AppendLine($"{_settings.FileNameDelimiter}\n{name}");
+                sb.AppendLine($"{_settings.FileNameDelimiter}\n{fileName}");
                 sb.AppendLine($"{_settings.FileContentDelimiter}\n{content}");
             }
 
             return sb.ToString().Trim();
+        }
+
+        public string GenerateInput(string htmlString, string? rules)
+        {
+            var sb = new StringBuilder();
+
+            if (!string.IsNullOrWhiteSpace(rules))
+                sb.AppendLine($"{_settings.RulesPromptDelimiter}\n{rules}");
+
+            if (!string.IsNullOrWhiteSpace(htmlString))
+                sb.AppendLine($"{_settings.FileContentDelimiter}\n{htmlString}");
+
+            return sb.ToString();
         }
     }
 }

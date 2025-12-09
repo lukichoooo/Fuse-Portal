@@ -1,6 +1,7 @@
 using AutoFixture;
 using Core.Dtos;
 using Core.Dtos.Settings;
+using Core.Dtos.Settings.Infrastructure;
 using Core.Interfaces.LLM;
 using Infrastructure.Services.LLM.LMStudio;
 using Microsoft.Extensions.Options;
@@ -11,7 +12,8 @@ namespace InfrastructureTests.LLM
     [TestFixture]
     public class LMStudioMapperTests
     {
-        private readonly LMStudioApiSettings _apiSettings = new()
+
+        private readonly LLMApiSettings _apiSettings = new()
         {
             URL = "asdadjaod",
             ChatRoute = "/v1/chat/completions",
@@ -23,34 +25,50 @@ namespace InfrastructureTests.LLM
             Stream = false
         };
 
+        private readonly LLMApiSettingKeys _apiSettingKeys = new()
+        {
+            Parser = "parser",
+            Chat = "chat",
+        };
+
         private readonly LLMInputSettings _inputSettings = new()
         {
-            SystemPromptDelimiter = "---RULES---",
             UserInputDelimiter = "---USER INPUT---",
             FileNameDelimiter = "---FILE NAME---",
             FileContentDelimiter = "---FILE CONTENT---",
-            SystemPrompt = "you are a cool guy with black glasses"
+            RulesPromptDelimiter = "---RULES---"
         };
 
-        private readonly Fixture _globalFixture = new();
+        private readonly Fixture _fix = new();
         private LMStudioMapper _mapper;
 
         [OneTimeSetUp]
         public void BeforeAll()
         {
-            var mock = new Mock<ILLMInputGenerator>();
-            mock.Setup(g => g.GenerateInput(It.IsAny<MessageDto>(), It.IsAny<string>()))
+            var generatorMock = new Mock<ILLMInputGenerator>();
+            generatorMock.Setup(g => g.GenerateInput(It.IsAny<MessageDto>(), It.IsAny<string>()))
                 .Returns("INPUT");
-            var apiOptions = Options.Create(_apiSettings);
+            generatorMock.Setup(g => g.GenerateInput(It.IsAny<string>(), It.IsAny<string>()))
+                .Returns("INPUT");
+
+            var settingsChooserMock = new Mock<ILLMApiSettingsChooser>();
+            settingsChooserMock.Setup(s => s.GetSettings(It.IsAny<string>()))
+                .Returns(_apiSettings);
+
+            var keyOptions = Options.Create(_apiSettingKeys);
             var inputOptions = Options.Create(_inputSettings);
-            _mapper = new LMStudioMapper(apiOptions, inputOptions, mock.Object);
+
+            _mapper = new LMStudioMapper(
+                    generatorMock.Object,
+                    settingsChooserMock.Object,
+                    keyOptions);
         }
 
         [Test]
         public void ToMessageDto_From_Response()
         {
-            var chatId = _globalFixture.Create<int>();
-            var response = _globalFixture.Create<LMStudioResponse>();
+            var chatId = _fix.Create<int>();
+            var response = _fix.Create<LMStudioResponse>();
             var res = _mapper.ToMessageDto(response, chatId);
 
             Assert.That(res, Is.Not.Null);
@@ -60,12 +78,11 @@ namespace InfrastructureTests.LLM
         }
 
 
-
         [TestCase("siudahdiudw")]
         [TestCase(null)]
         public void ToRequest_From_MessageDto(string? prevResponseId)
         {
-            var msg = _globalFixture.Create<MessageDto>();
+            var msg = _fix.Create<MessageDto>();
             var res = _mapper.ToRequest(msg, prevResponseId);
 
             Assert.That(res, Is.Not.Null);
@@ -73,6 +90,18 @@ namespace InfrastructureTests.LLM
             Assert.That(res.Input, Is.Not.Null);
             Assert.That(res.Input, Is.Not.Empty);
             Assert.That(res.PreviousResponseId, Is.EqualTo(prevResponseId));
+        }
+
+        [Test]
+        public void ToRequest_From_Text()
+        {
+            var text = _fix.Create<string>();
+            var res = _mapper.ToRequest(text);
+
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res.Model, Is.EqualTo(_apiSettings.Model));
+            Assert.That(res.Input, Is.Not.Null);
+            Assert.That(res.Input, Is.Not.Empty);
         }
     }
 }

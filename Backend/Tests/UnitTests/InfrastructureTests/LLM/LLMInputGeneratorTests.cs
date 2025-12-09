@@ -10,15 +10,15 @@ namespace InfrastructureTests.LLM
     [TestFixture]
     public class LLMInputGeneratorTests
     {
-        private readonly Fixture _globalFixture = new();
+        private readonly Fixture _fix = new();
         private readonly LLMInputSettings _settings = new()
         {
-            SystemPromptDelimiter = "---RULES---",
+            RulesPromptDelimiter = "---RULES---",
             UserInputDelimiter = "---USER INPUT---",
             FileNameDelimiter = "---FILE NAME---",
             FileContentDelimiter = "---FILE CONTENT---",
-            SystemPrompt = "you are a cool guy with black glasses"
         };
+
         private ILLMInputGenerator _generator;
 
         [SetUp]
@@ -28,13 +28,18 @@ namespace InfrastructureTests.LLM
             _generator = new LLMInputGenerator(options);
         }
 
-        private void AssertFields(string res, bool hasRule, bool hasInput, bool hasFile)
+        private void AssertFields(
+                string res,
+                bool hasRule = false,
+                bool hasUserInput = false,
+                bool hasFile = false,
+                bool hasFileName = false)
         {
             Assert.Multiple(() =>
             {
-                Assert.That(res.Contains(_settings.SystemPromptDelimiter), Is.EqualTo(hasRule));
-                Assert.That(res.Contains(_settings.UserInputDelimiter), Is.EqualTo(hasInput));
-                Assert.That(res.Contains(_settings.FileNameDelimiter), Is.EqualTo(hasFile));
+                Assert.That(res.Contains(_settings.RulesPromptDelimiter), Is.EqualTo(hasRule));
+                Assert.That(res.Contains(_settings.UserInputDelimiter), Is.EqualTo(hasUserInput));
+                Assert.That(res.Contains(_settings.FileNameDelimiter), Is.EqualTo(hasFileName));
                 Assert.That(res.Contains(_settings.FileContentDelimiter), Is.EqualTo(hasFile));
             });
 
@@ -43,37 +48,56 @@ namespace InfrastructureTests.LLM
         [Test]
         public void GenerateInput_WithRules_ReturnsExpectedString()
         {
-            var dto = _globalFixture.Build<MessageDto>()
+            var dto = _fix.Build<MessageDto>()
                 .With(m => m.Files, [])
                 .Create();
 
             const string rules = "Do this carefully";
             string res = _generator.GenerateInput(dto, rules);
-            AssertFields(res, hasRule: true, hasInput: true, hasFile: false);
+            AssertFields(res, hasRule: true, hasUserInput: true);
         }
 
         [Test]
         public void GenerateInput_WithFiles_ReturnsExpectedString()
         {
-            var files = _globalFixture.CreateMany<FileDto>()
+            var files = _fix.CreateMany<FileDto>()
                 .ToList();
-            var dto = _globalFixture.Build<MessageDto>()
+            var dto = _fix.Build<MessageDto>()
                 .With(m => m.Files, files)
                 .Create();
 
-            string res = _generator.GenerateInput(dto);
-            AssertFields(res, hasRule: false, hasInput: true, hasFile: true);
+            string res = _generator.GenerateInput(dto, null);
+            AssertFields(res, hasUserInput: true, hasFile: true, hasFileName: true);
         }
 
         [Test]
         public void GenerateInput_WithoutRulesOrFiles_ReturnsUserInputOnly()
         {
-            var dto = _globalFixture.Build<MessageDto>()
+            var dto = _fix.Build<MessageDto>()
                 .With(m => m.Files, [])
                 .Create();
 
-            string res = _generator.GenerateInput(dto);
-            AssertFields(res, hasRule: false, hasInput: true, hasFile: false);
+            string res = _generator.GenerateInput(dto, null);
+            AssertFields(res, hasUserInput: true);
+        }
+
+        [Test]
+        public void GenerateInput_Html_NoRule()
+        {
+            var html = _fix.Create<string>();
+
+            string res = _generator.GenerateInput(html, null);
+            AssertFields(res, hasFile: true);
+        }
+
+        [Test]
+        public void GenerateInput_Html_WithRule()
+        {
+            var html = _fix.Create<string>();
+            var rule = _fix.Create<string>();
+
+            string res = _generator.GenerateInput(html, rule);
+            AssertFields(res, hasRule: true, hasFile: true);
         }
     }
 }

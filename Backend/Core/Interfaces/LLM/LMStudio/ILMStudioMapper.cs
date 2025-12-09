@@ -5,6 +5,9 @@ namespace Core.Interfaces.LLM.LMStudio
     public interface ILMStudioMapper
     {
         MessageDto ToMessageDto(LMStudioResponse response, int chatId);
-        LMStudioRequest ToRequest(MessageDto msg, string? previousResponseId = null);
+        LMStudioRequest ToRequest(MessageDto msg, string? previousResponseId = null, string? rulesPrompt = null);
+
+        LMStudioRequest ToRequest(string html, string? rulesPrompt = null);
+        string ToOutputText(LMStudioResponse response);
     }
 }

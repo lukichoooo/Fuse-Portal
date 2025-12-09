@@ -1,6 +1,5 @@
 using Core.Dtos;
 using Core.Entities.Convo;
-using Core.Exceptions;
 using Core.Interfaces.Auth;
 using Core.Interfaces.Convo;
 using Core.Interfaces.Convo.FileServices;
@@ -10,7 +9,7 @@ namespace Infrastructure.Services
 {
     public class ChatService(
             IChatRepo repo,
-            ILLMService LLMService,
+            ILLMChatService LLMService,
             IChatMapper mapper,
             IFileProcessingService fileService,
             ICurrentContext currentContext
@@ -18,7 +17,7 @@ namespace Infrastructure.Services
     {
         private readonly IChatRepo _repo = repo;
         private readonly IChatMapper _mapper = mapper;
-        private readonly ILLMService _LLMService = LLMService;
+        private readonly ILLMChatService _LLMService = LLMService;
         private readonly IFileProcessingService _fileService = fileService;
         private readonly ICurrentContext _currentContext = currentContext;
 
@@ -81,8 +80,8 @@ namespace Infrastructure.Services
             {
                 await _repo.AddStoredFileToMessage(message.Id, fileId, userId);
             }
-            var response = await _LLMService
-                .SendMessageAsync(_mapper.ToMessageDto(clientMessage, fileDtos));
+            var response = await _LLMService.SendMessageAsync(
+                    _mapper.ToMessageDto(clientMessage, fileDtos));
             await _repo.AddMessageAsync(_mapper.ToMessage(response, userId));
 
             return response;

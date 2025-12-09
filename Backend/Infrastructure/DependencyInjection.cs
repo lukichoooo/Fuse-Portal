@@ -53,7 +53,7 @@ public static class DependencyInjection
         services.AddScoped<IPortalService, PortalService>();
 
         // LLM
-        services.AddScoped<ILLMService, LMStudioLLMService>();
+        services.AddScoped<ILLMChatService, LMStudioChatService>();
 
         // ORC
         services.AddSingleton(new IronTesseract

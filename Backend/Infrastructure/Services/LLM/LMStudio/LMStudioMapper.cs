@@ -1,19 +1,28 @@
 using Core.Dtos;
-using Core.Dtos.Settings;
+using Core.Dtos.Settings.Infrastructure;
 using Core.Interfaces.LLM;
 using Core.Interfaces.LLM.LMStudio;
 using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Services.LLM.LMStudio
 {
-    public class LMStudioMapper(
-            IOptions<LMStudioApiSettings> apiOptions,
-            IOptions<LLMInputSettings> inputOptions,
-            ILLMInputGenerator requestGenerator) : ILMStudioMapper
+    public class LMStudioMapper : ILMStudioMapper
     {
-        private readonly LLMInputSettings _inputSettings = inputOptions.Value;
-        private readonly LMStudioApiSettings _apiSettings = apiOptions.Value;
-        private readonly ILLMInputGenerator _requestGenerator = requestGenerator;
+
+        private readonly LLMApiSettingKeys _keySettings;
+        private readonly ILLMApiSettingsChooser _settingsChooser;
+        private readonly ILLMInputGenerator _inputGenerator;
+
+        public LMStudioMapper(
+                ILLMInputGenerator inputGenerator,
+                ILLMApiSettingsChooser apiSettingsChooser,
+                IOptions<LLMApiSettingKeys> keyOptions
+                )
+        {
+            _inputGenerator = inputGenerator;
+            _settingsChooser = apiSettingsChooser;
+            _keySettings = keyOptions.Value;
+        }
 
         public MessageDto ToMessageDto(LMStudioResponse response, int chatId)
             => new()
@@ -27,14 +36,28 @@ namespace Infrastructure.Services.LLM.LMStudio
                 Files = []
             };
 
-        public LMStudioRequest ToRequest(MessageDto msg, string? previousResponseId = null)
-        {
-            return new()
+        public LMStudioRequest ToRequest(
+                MessageDto msg,
+                string? previousResponseId = null,
+                string? rulesPrompt = null)
+            => new()
             {
-                Model = _apiSettings.Model,
-                Input = _requestGenerator.GenerateInput(msg, _inputSettings.SystemPrompt),
+                Model = _settingsChooser.GetSettings(_keySettings.Chat).Model,
+                Input = _inputGenerator.GenerateInput(msg, rulesPrompt),
                 PreviousResponseId = previousResponseId
             };
-        }
+
+        public LMStudioRequest ToRequest(
+                string html,
+                string? rulesPrompt = null)
+            => new()
+            {
+                Model = _settingsChooser.GetSettings(_keySettings.Parser).Model,
+                Input = _inputGenerator.GenerateInput(html, rulesPrompt),
+            };
+
+        public string ToOutputText(LMStudioResponse response)
+            => response.Output[0].Content[0].Text;
+
     }
 }
