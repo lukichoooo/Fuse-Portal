@@ -25,6 +25,8 @@ namespace Core.Entities
         [Required]
         public required Address Address { get; set; } = null!;
 
+
+        public List<ChatFile> ChatFiles { get; set; } = [];
         public List<UserUniversity> UserUniversities { get; set; } = [];
         public List<Subject> Subjects { get; set; } = [];
 

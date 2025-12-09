@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(MyContext))]
-    [Migration("20251208134543_Initial")]
+    [Migration("20251209141425_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -89,9 +89,14 @@ namespace Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("MessageId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("ChatFiles");
                 });
@@ -172,7 +177,7 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Location")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("MetaData")
+                    b.Property<string>("Metadata")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("Start")
@@ -321,7 +326,15 @@ namespace Infrastructure.Migrations
                         .HasForeignKey("MessageId")
                         .OnDelete(DeleteBehavior.Cascade);
 
+                    b.HasOne("Core.Entities.User", "User")
+                        .WithMany("ChatFiles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Message");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Core.Entities.Convo.Message", b =>
@@ -446,6 +459,8 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Core.Entities.User", b =>
                 {
+                    b.Navigation("ChatFiles");
+
                     b.Navigation("Chats");
 
                     b.Navigation("Subjects");

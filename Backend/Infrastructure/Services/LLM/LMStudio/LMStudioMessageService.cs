@@ -7,7 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace Infrastructure.Services.LLM.LMStudio
 {
-    public class LMStudioChatService(
+    public class LMStudioMessageService(
             ILMStudioApi api,
             ILMStudioMapper mapper,
             IChatMetadataService metadataService,

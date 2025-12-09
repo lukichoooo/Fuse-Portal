@@ -51,6 +51,13 @@ public class MyContext(DbContextOptions<MyContext> options) : DbContext(options)
             .HasForeignKey(c => c.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        // User -> ChatFiles
+        mb.Entity<ChatFile>()
+            .HasOne(c => c.User)
+            .WithMany(u => u.ChatFiles)
+            .HasForeignKey(c => c.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         // Chat → Messages 
         mb.Entity<Message>()
             .HasOne(m => m.Chat)

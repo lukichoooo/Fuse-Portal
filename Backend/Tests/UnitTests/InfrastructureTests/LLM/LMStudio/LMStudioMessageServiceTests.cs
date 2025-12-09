@@ -12,7 +12,7 @@ using Moq;
 namespace InfrastructureTests.LLM.LMStudio
 {
     [TestFixture]
-    public class LMStudioChatServiceTests
+    public class LMStudioMessageServiceTests
     {
         private readonly LLMApiSettingKeys _settingKeys = new()
         {
@@ -63,7 +63,7 @@ namespace InfrastructureTests.LLM.LMStudio
             var keyOptionsMock = new Mock<IOptions<LLMApiSettingKeys>>();
             keyOptionsMock.Setup(x => x.Value)
                 .Returns(settingKeys);
-            return new LMStudioChatService(api, _mapper, metadataService, keyOptionsMock.Object);
+            return new LMStudioMessageService(api, _mapper, metadataService, keyOptionsMock.Object);
         }
 
         [Test]

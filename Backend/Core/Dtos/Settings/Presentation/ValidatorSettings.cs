@@ -18,6 +18,7 @@ public class ValidatorSettings
 
     // chat
     public int ChatNameMaxLength { get; set; }
+
     public int MessageMaxLength { get; set; }
 
 

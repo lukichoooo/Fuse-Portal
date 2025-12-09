@@ -78,10 +78,11 @@ namespace Infrastructure.Services
             await _repo.AddMessageAsync(message);
             foreach (var fileId in fileIds)
             {
-                await _repo.AddStoredFileToMessage(message.Id, fileId, userId);
+                await _repo.AddStoredFileToMessage(fileId, message.Id, userId);
             }
             var response = await _LLMService.SendMessageAsync(
                     _mapper.ToMessageDto(clientMessage, fileDtos));
+
             await _repo.AddMessageAsync(_mapper.ToMessage(response, userId));
 
             return response;

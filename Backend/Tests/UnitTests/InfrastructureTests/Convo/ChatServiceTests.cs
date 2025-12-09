@@ -171,7 +171,19 @@ namespace InfrastructureTests.Convo
         [Test]
         public async Task SendMessage_Success_NoFiles()
         {
-            var cm = _fix.Create<ClientMessage>();
+            var chatid = _fix.Create<int>();
+            var text = _fix.Create<string>();
+            ClientMessage clientMessage = new()
+            {
+                Text = text,
+                ChatId = chatid
+            };
+            var fileIds = _fix.CreateMany<int>().ToList();
+            MessageRequest messageRequest = new()
+            {
+                FileIds = fileIds,
+                Message = clientMessage,
+            };
 
             var response = _fix.Create<MessageDto>();
             var LLMServiceMock = new Mock<ILLMChatService>();
@@ -184,7 +196,6 @@ namespace InfrastructureTests.Convo
                 .ReturnsAsync((Message msg) => msg);
 
             var service = CreateService(repoMock.Object, LLMServiceMock.Object);
-            var messageRequest = new MessageRequest { Message = cm, FileIds = [] };
 
             var res = await service.SendMessageAsync(messageRequest);
 
@@ -192,6 +203,12 @@ namespace InfrastructureTests.Convo
             Assert.That(res, Is.EqualTo(response));
             LLMServiceMock.Verify(s => s.SendMessageAsync(It.IsAny<MessageDto>()), Times.Once());
             repoMock.Verify(r => r.AddMessageAsync(It.IsAny<Message>()), Times.Exactly(2));
+            foreach (var fileId in fileIds)
+            {
+                repoMock.Verify(r => r.AddStoredFileToMessage(
+                            fileId, It.IsAny<int>(), DEFAULT_CONTEXT_ID),
+                        Times.Once());
+            }
         }
 
 

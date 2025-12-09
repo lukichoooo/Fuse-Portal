@@ -51,9 +51,12 @@ public static class DependencyInjection
         services.AddScoped<IChatMetadataCache, ChatMetadataCache>();
         services.AddScoped<IFileTextParser, FileTextParser>();
         services.AddScoped<IPortalService, PortalService>();
+        services.AddScoped<IPortalParser, LMStudioPortalParser>();
 
         // LLM
-        services.AddScoped<ILLMChatService, LMStudioChatService>();
+        services.AddScoped<ILLMChatService, LMStudioMessageService>();
+        services.AddScoped<ILLMInputGenerator, LLMInputGenerator>();
+        services.AddScoped<ILLMApiSettingsChooser, LLMApiSettingsChooser>();
 
         // ORC
         services.AddSingleton(new IronTesseract
@@ -63,8 +66,6 @@ public static class DependencyInjection
         services.AddSingleton<IOcrService, IronTesseractOcrService>();
         services.AddScoped<IFileProcessingService, FileProcessingService>();
 
-        // extra
-        services.AddScoped<ILLMInputGenerator, LLMInputGenerator>();
 
         // Api
         services.AddScoped<ILMStudioApi, LMStudioApi>();

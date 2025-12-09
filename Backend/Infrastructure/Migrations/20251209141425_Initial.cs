@@ -186,7 +186,7 @@ namespace Infrastructure.Migrations
                     End = table.Column<DateTime>(type: "datetime2", nullable: false),
                     SubjectId = table.Column<int>(type: "int", nullable: false),
                     Location = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    MetaData = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Metadata = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -230,6 +230,7 @@ namespace Infrastructure.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Text = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: false),
                     MessageId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -241,12 +242,23 @@ namespace Infrastructure.Migrations
                         principalTable: "Messages",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ChatFiles_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_ChatFiles_MessageId",
                 table: "ChatFiles",
                 column: "MessageId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChatFiles_UserId",
+                table: "ChatFiles",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Chats_UserId",
