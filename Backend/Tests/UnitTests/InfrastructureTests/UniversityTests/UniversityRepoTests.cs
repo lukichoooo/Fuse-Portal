@@ -75,6 +75,36 @@ namespace InfrastructureTests
         }
 
 
+
+        [TestCase(16)]
+        [TestCase(8)]
+        public async Task GetPageAsync_Paged_PagingTest(int pageSize)
+        {
+            const int n = 33;
+            int? lastId = null;
+            var unis = Enumerable.Range(1, n)
+                    .Reverse()
+                    .Select(id => HelperAutoFactory.CreateUniversity(id))
+                    .ToList();
+            await _context.AddRangeAsync(unis);
+            await _context.SaveChangesAsync();
+
+            HashSet<int> seenId = [];
+            for (int i = 0; i < n; i += pageSize)
+            {
+                var res = await _repo.GetPageAsync(lastId, pageSize);
+                Assert.That(res, Is.Not.Null);
+                foreach (var u in res)
+                {
+                    Assert.That(seenId.Contains(u.Id), Is.EqualTo(false));
+                    seenId.Add(u.Id);
+                }
+                lastId = res.Last().Id;
+            }
+            Assert.That(seenId, Has.Count.EqualTo(n));
+        }
+
+
         [Test]
         public async Task GetByIdAsync_Success()
         {
@@ -188,10 +218,76 @@ namespace InfrastructureTests
 
 
         [TestCase("luka")]
+        public async Task GetPageByNameAsync_SearchName_Success(string name)
+        {
+            const int n = 33;
+            int? lastId = null;
+            const int pageSize = 10;
+            var fixture = new Fixture();
+            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
+
+            var unis = Enumerable.Range(0, 33)
+                .ToList()
+                .ConvertAll(_ =>
+                    {
+                        var uni = fixture.Create<University>();
+                        uni.Name = name;
+                        return uni;
+                    });
+
+
+            await _context.Universities.AddRangeAsync(unis);
+            await _context.SaveChangesAsync();
+
+            HashSet<int> seenId = [];
+            for (int i = 0; i < n; i += pageSize)
+            {
+                var res = await _repo.GetPageByNameAsync(name, lastId, pageSize);
+                Assert.That(res, Is.Not.Null);
+                foreach (var u in res)
+                {
+                    Assert.That(seenId.Contains(u.Id), Is.EqualTo(false));
+                    seenId.Add(u.Id);
+                }
+                lastId = res.Last().Id;
+            }
+            Assert.That(seenId, Has.Count.EqualTo(n));
+        }
+
+
+        [TestCase(0)]
+        [TestCase(3)]
+        public async Task GetPageByName_Paged_Success(int repeatCount)
+        {
+            const int lastId = int.MinValue, pageSize = 16;
+            const string name = "";
+            var fixture = new Fixture() { RepeatCount = repeatCount };
+            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
+            var unis = fixture.CreateMany<University>().ToList();
+            await _context.Universities.AddRangeAsync(unis);
+            await _context.SaveChangesAsync();
+
+            var res = await _repo.GetPageByNameAsync(name, lastId, pageSize);
+
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res
+                    .ConvertAll(uni => uni.Name)
+                    .Order(),
+                    Is.EquivalentTo(unis
+                        .ConvertAll(uni => uni.Name)
+                        .Order()
+                        .Take(pageSize)));
+        }
+
+
+
+        [TestCase("luka")]
         [TestCase("user")]
         [TestCase("LUKAA")]
         [TestCase("")]
-        public async Task GetPageByNameAsync_SearchName_Success(string name)
+        public async Task GetPageByNameAsync_SearchName_PagingTest(string name)
         {
             const int lastId = int.MinValue, pageSize = 16;
             var fixture = new Fixture() { RepeatCount = 3 };
@@ -218,34 +314,6 @@ namespace InfrastructureTests
                     Is.EquivalentTo(expected
                         .ConvertAll(uni => uni.Name)
                         .Order()));
-        }
-
-
-
-
-        [TestCase(0)]
-        [TestCase(3)]
-        public async Task GetPageByName_Paged_Success(int repeatCount)
-        {
-            const int lastId = int.MinValue, pageSize = 16;
-            const string name = "";
-            var fixture = new Fixture() { RepeatCount = repeatCount };
-            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
-
-            var unis = fixture.CreateMany<University>().ToList();
-            await _context.Universities.AddRangeAsync(unis);
-            await _context.SaveChangesAsync();
-
-            var res = await _repo.GetPageByNameAsync(name, lastId, pageSize);
-
-            Assert.That(res, Is.Not.Null);
-            Assert.That(res
-                    .ConvertAll(uni => uni.Name)
-                    .Order(),
-                    Is.EquivalentTo(unis
-                        .ConvertAll(uni => uni.Name)
-                        .Order()
-                        .Take(pageSize)));
         }
 
         [Test]

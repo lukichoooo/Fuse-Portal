@@ -36,9 +36,9 @@ public class UserService(
 
     public async Task<UserPrivateDto> GetCurrentUserPrivateDtoAsync()
     {
-        int id = _currentContext.GetCurrentUserId();
-        var user = await _repo.GetByIdAsync(id)
-            ?? throw new UserNotFoundException($"User not found with Id={id}");
+        int userId = _currentContext.GetCurrentUserId();
+        var user = await _repo.GetByIdAsync(userId)
+            ?? throw new UserNotFoundException($"User not found with Id={userId}");
         var dto = _mapper.ToPrivateDto(user);
         dto.Password = _encryptor.Decrypt(dto.Password);
         return dto;
@@ -55,8 +55,8 @@ public class UserService(
 
     public async Task<UserDetailsDto> DeleteCurrentUserAsync()
     {
-        int id = _currentContext.GetCurrentUserId();
-        return await DeleteByIdAsync(id);
+        int userId = _currentContext.GetCurrentUserId();
+        return await DeleteByIdAsync(userId);
     }
 
     public async Task<UserDetailsDto> DeleteByIdAsync(int id)

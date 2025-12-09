@@ -85,6 +85,49 @@ namespace InfrastructureTests.Portal
                     );
         }
 
+        [TestCase(0)]
+        [TestCase(22)]
+        [TestCase(16)]
+        public async Task GetSubjectsPageForUser_PagingTest(int n)
+        {
+            const int pageSize = 16;
+            int? lastId = null;
+            const int userId = 10;
+
+
+            var fixture = new Fixture();
+            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
+            var subjects = Enumerable.Range(0, n)
+                .ToList()
+                .ConvertAll(_ =>
+                {
+                    var chat = fixture.Create<Subject>();
+                    chat.UserId = userId;
+                    chat.User = null;
+                    return chat;
+                });
+
+            await _context.Subjects.AddRangeAsync(subjects);
+            await _context.SaveChangesAsync();
+
+            HashSet<int> seenId = [];
+            for (int i = 0; i < n; i += pageSize)
+            {
+                var res = await _sut.GetSubjectsPageForUserAsync(
+                    userId, lastId, pageSize);
+                Assert.That(res, Is.Not.Null);
+                foreach (var chat in res)
+                {
+                    Assert.That(seenId.Contains(chat.Id), Is.EqualTo(false));
+                    seenId.Add(chat.Id);
+                }
+                if (res.Count > 0)
+                    lastId = res[^1].Id;
+            }
+            Assert.That(seenId, Has.Count.EqualTo(n));
+        }
+
 
 
         [Test]

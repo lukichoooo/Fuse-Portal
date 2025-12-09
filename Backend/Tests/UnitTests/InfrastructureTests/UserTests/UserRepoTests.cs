@@ -16,6 +16,7 @@ namespace InfrastructureTests.UserTests
     {
         private IUserRepo _repo;
         private MyContext _context;
+        private static readonly Fixture _fix = new();
 
         [SetUp]
         public void BeforeAll()
@@ -25,6 +26,7 @@ namespace InfrastructureTests.UserTests
                 .Options;
             _context = new MyContext(options);
             _repo = new UserRepo(_context);
+            _fix.Behaviors.Add(new OmitOnRecursionBehavior());
         }
 
         [TearDown]
@@ -53,7 +55,7 @@ namespace InfrastructureTests.UserTests
 
 
         [Test]
-        public async Task GetAllAsync_Paged_Success()
+        public async Task GetAllPageAsync_Paged_Success()
         {
             const int pageSize = 16;
             var users = Enumerable.Range(1, 25)
@@ -73,7 +75,7 @@ namespace InfrastructureTests.UserTests
 
         [TestCase(5)]
         [TestCase(20)]
-        public async Task GetAllAsync_Paged_Success_2(int lastId)
+        public async Task GetAllPageAsync_Paged_Success_2(int lastId)
         {
             const int pageSize = 16;
             var users = Enumerable.Range(1, 25)
@@ -90,8 +92,39 @@ namespace InfrastructureTests.UserTests
         }
 
 
+
+        [TestCase(16)]
+        [TestCase(8)]
+        public async Task GetAllPageAsync_Paged_PagingTest(int pageSize)
+        {
+            const int n = 33;
+            int? lastId = null;
+            var users = Enumerable.Range(1, n)
+                    .Reverse()
+                    .Select(id => HelperAutoFactory.CreateUser(id))
+                    .ToList();
+            await _context.AddRangeAsync(users);
+            await _context.SaveChangesAsync();
+
+            HashSet<int> seenId = [];
+            for (int i = 0; i < n; i += pageSize)
+            {
+                var res = await _repo.GetAllPageAsync(lastId, pageSize);
+                Assert.That(res, Is.Not.Null);
+                foreach (var u in res)
+                {
+                    Assert.That(seenId.Contains(u.Id), Is.EqualTo(false));
+                    seenId.Add(u.Id);
+                }
+                lastId = res.Last().Id;
+            }
+            Assert.That(seenId, Has.Count.EqualTo(n));
+        }
+
+
+
         [Test]
-        public async Task SearchByName_Paged_Success()
+        public async Task PageByName_Paged_Success()
         {
             const string name = "luka";
             const int pageSize = 16;
@@ -107,13 +140,45 @@ namespace InfrastructureTests.UserTests
             await _context.AddRangeAsync(users);
             await _context.SaveChangesAsync();
 
-            var res = await _repo.PageByNameAsync(name, -1, pageSize);
+            var res = await _repo.PageByNameAsync(name, null, pageSize);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res,
                     Is.EquivalentTo(users
                         .OrderBy(u => u.Id)
                         .Take(pageSize)));
+        }
+
+        [TestCase(16)]
+        [TestCase(8)]
+        public async Task PageByName_Paged_PagingTest(int pageSize)
+        {
+            const int n = 33;
+            const string name = "luka";
+            int? lastId = null;
+            var users = Enumerable.Range(1, n)
+                    .Reverse()
+                    .Select(id => HelperAutoFactory.CreateUser(id))
+                    .ToList();
+            foreach (var u in users)
+                u.Name = name;
+
+            await _context.AddRangeAsync(users);
+            await _context.SaveChangesAsync();
+
+            HashSet<int> seenId = [];
+            for (int i = 0; i < n; i += pageSize)
+            {
+                var res = await _repo.PageByNameAsync(name, lastId, pageSize);
+                Assert.That(res, Is.Not.Null);
+                foreach (var u in res)
+                {
+                    Assert.That(seenId.Contains(u.Id), Is.EqualTo(false));
+                    seenId.Add(u.Id);
+                }
+                lastId = res.Last().Id;
+            }
+            Assert.That(seenId, Has.Count.EqualTo(n));
         }
 
 

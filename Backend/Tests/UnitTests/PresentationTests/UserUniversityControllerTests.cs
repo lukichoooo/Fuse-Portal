@@ -1,6 +1,7 @@
 using AutoFixture;
 using Core.Dtos;
 using Core.Dtos.Settings.Presentation;
+using Core.Entities.JoinTables;
 using Core.Interfaces.UserUniversityTable;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -68,6 +69,56 @@ namespace PresentationTests
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Value, Is.EqualTo(unis));
+        }
+
+        [Test]
+        public async Task AddUserToUniversity_Success()
+        {
+            const int uniId = 5;
+            var expected = new UserUniversity { UserId = 10, UniversityId = uniId };
+
+            var serviceMock = new Mock<IUserUniversityService>();
+            serviceMock
+                .Setup(s => s.AddCurrentUserToUniversityAsync(uniId))
+                .ReturnsAsync(expected);
+
+            var controller = CreateController(serviceMock.Object);
+
+            var rv = await controller.AddUserToUniversityAsync(uniId);
+            var okResult = rv.Result as OkObjectResult;
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(okResult, Is.Not.Null);
+                Assert.That(okResult!.Value, Is.EqualTo(expected));
+            });
+
+            serviceMock.Verify(s => s.AddCurrentUserToUniversityAsync(uniId), Times.Once);
+        }
+
+        [Test]
+        public async Task RemoveUserFromUniversity_Success()
+        {
+            const int uniId = 5;
+            var expected = new UserUniversity { UserId = 10, UniversityId = uniId };
+
+            var serviceMock = new Mock<IUserUniversityService>();
+            serviceMock
+                .Setup(s => s.RemoveCurrentUserFromUniversityAsync(uniId))
+                .ReturnsAsync(expected);
+
+            var controller = CreateController(serviceMock.Object);
+
+            var rv = await controller.RemoveUserFromUniversityAsync(uniId);
+            var okResult = rv.Result as OkObjectResult;
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(okResult, Is.Not.Null);
+                Assert.That(okResult!.Value, Is.EqualTo(expected));
+            });
+
+            serviceMock.Verify(s => s.RemoveCurrentUserFromUniversityAsync(uniId), Times.Once);
         }
 
     }

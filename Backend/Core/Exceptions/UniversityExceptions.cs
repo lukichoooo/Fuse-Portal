@@ -15,3 +15,11 @@ public class UniversityAlreadyExists : Exception, ICustomException
     public UniversityAlreadyExists() { }
     public UniversityAlreadyExists(string? message, Exception? innerException) : base(message, innerException) { }
 }
+
+
+public class UserUniversityNotFoundException : Exception, ICustomException
+{
+    public UserUniversityNotFoundException(string message) : base(message) { }
+    public UserUniversityNotFoundException() { }
+    public UserUniversityNotFoundException(string? message, Exception? innerException) : base(message, innerException) { }
+}

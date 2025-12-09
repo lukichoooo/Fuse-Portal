@@ -1,5 +1,6 @@
 using Core.Dtos;
 using Core.Dtos.Settings.Presentation;
+using Core.Entities.JoinTables;
 using Core.Interfaces.UserUniversityTable;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -15,6 +16,20 @@ public class UserUniversityController(
 {
     private readonly IUserUniversityService _service = service;
     private readonly ControllerSettings _settings = options.Value;
+
+
+    [HttpPut("uni/{uniId}")]
+    public async Task<ActionResult<UserUniversity>> AddUserToUniversityAsync(
+            [FromRoute] int uniId
+            )
+        => Ok(await _service.AddCurrentUserToUniversityAsync(uniId));
+
+    [HttpDelete("uni/{uniId}")]
+    public async Task<ActionResult<UserUniversity>> RemoveUserFromUniversityAsync(
+            [FromRoute] int uniId
+            )
+        => Ok(await _service.RemoveCurrentUserFromUniversityAsync(uniId));
+
 
     [HttpGet("uni/{uniId:int}/users")]
     public async Task<ActionResult<List<UserDto>>> GetUsersByUniIdPageAsync(

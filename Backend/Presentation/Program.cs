@@ -49,7 +49,8 @@ builder.Services.AddDbContext<MyContext>(options =>
 // get Settings from Appsettings
 builder.Services.Configure<ValidatorSettings>(builder.Configuration.GetSection("ValidatorSettings"));
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
-builder.Services.Configure<LMStudioChatInputSettings>(builder.Configuration.GetSection("LMStudioApiSettings"));
+builder.Services.Configure<LMStudioApiSettings>(builder.Configuration.GetSection("LMStudioApiSettings"));
+builder.Services.Configure<LLMInputSettings>(builder.Configuration.GetSection("LMStudioApiSettings"));
 builder.Services.Configure<LLMInputSettings>(builder.Configuration.GetSection("LLMInputSettings"));
 builder.Services.Configure<EncryptorSettings>(builder.Configuration.GetSection("EncryptorSettings"));
 builder.Services.Configure<FileProcessingSettings>(builder.Configuration.GetSection("FileProcessingSettings"));

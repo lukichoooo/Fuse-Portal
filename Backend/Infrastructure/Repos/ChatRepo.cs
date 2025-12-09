@@ -86,7 +86,6 @@ namespace Infrastructure.Repos
         }
 
 
-
         public async Task<Chat> UpdateChatLastResponseIdAsync(
                 int chatId,
                 string newLastResponseId,

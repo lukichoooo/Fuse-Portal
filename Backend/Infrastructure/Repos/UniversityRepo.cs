@@ -52,6 +52,7 @@ public class UniversityRepo(MyContext context) : IUniversityRepo
 
         return await query
             .Where(uni => EF.Functions.Like(uni.Name, $"{name}%"))
+            .OrderBy(uni => uni.Id)
             .Take(pageSize)
             .ToListAsync();
     }

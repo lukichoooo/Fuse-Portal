@@ -196,6 +196,109 @@ namespace InfrastructureTests.Convo
             );
         }
 
+
+        [TestCase(0)]
+        [TestCase(22)]
+        [TestCase(16)]
+        public async Task GetChatWithMessagesPageAsync_PagingTest(int n)
+        {
+            const int pageSize = 16;
+            int? lastId = null;
+            const int chatId = 5;
+            const int userId = 10;
+
+
+            var fixture = new Fixture();
+            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
+            var chat = fixture.Create<Chat>();
+            chat.Id = chatId;
+            chat.Messages = [];
+            chat.UserId = userId;
+            chat.User = null;
+
+
+            var messages = Enumerable.Range(0, n)
+                .ToList()
+                .ConvertAll(_ =>
+                {
+                    var msg = fixture.Create<Message>();
+                    msg.ChatId = chat.Id;
+                    msg.Chat = chat;
+                    return msg;
+                });
+
+            await _context.Chats.AddAsync(chat);
+            await _context.SaveChangesAsync();
+
+
+            await _context.Messages.AddRangeAsync(messages);
+            await _context.SaveChangesAsync();
+
+            HashSet<int> seenId = [];
+            for (int i = 0; i < n; i += pageSize)
+            {
+                var res = await _repo.GetChatWithMessagesPageAsync(
+                    chat.Id, lastId, pageSize, userId);
+                Assert.That(res, Is.Not.Null);
+                foreach (var msg in res.Messages)
+                {
+                    Assert.That(seenId.Contains(msg.Id), Is.EqualTo(false));
+                    seenId.Add(msg.Id);
+                }
+                lastId = res.Messages.Last().Id;
+            }
+            Assert.That(seenId, Has.Count.EqualTo(n));
+        }
+
+
+        [TestCase(0)]
+        [TestCase(22)]
+        [TestCase(16)]
+        public async Task GetAllChatsForUserPage_PagingTest(int n)
+        {
+            const int pageSize = 16;
+            int? lastId = null;
+            const int userId = 10;
+
+
+            var fixture = new Fixture();
+            fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+
+
+
+            var chats = Enumerable.Range(0, n)
+                .ToList()
+                .ConvertAll(_ =>
+                {
+                    var chat = fixture.Create<Chat>();
+                    chat.Messages = [];
+                    chat.UserId = userId;
+                    chat.User = null;
+                    return chat;
+                });
+
+            await _context.Chats.AddRangeAsync(chats);
+            await _context.SaveChangesAsync();
+
+            HashSet<int> seenId = [];
+            for (int i = 0; i < n; i += pageSize)
+            {
+                var res = await _repo.GetAllChatsForUserPageAsync(
+                    lastId, pageSize, userId);
+                Assert.That(res, Is.Not.Null);
+                foreach (var chat in res)
+                {
+                    Assert.That(seenId.Contains(chat.Id), Is.EqualTo(false));
+                    seenId.Add(chat.Id);
+                }
+                lastId = res.Last().Id;
+            }
+            Assert.That(seenId, Has.Count.EqualTo(n));
+        }
+
+
+
         [Test]
         public async Task UpdateChatAsync_Success()
         {

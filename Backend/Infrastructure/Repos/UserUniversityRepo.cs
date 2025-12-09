@@ -1,5 +1,6 @@
 using Core.Entities;
 using Core.Entities.JoinTables;
+using Core.Exceptions;
 using Core.Interfaces.UserUniversityTable;
 using Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,24 @@ namespace Infrastructure.Repos
     public class UserUniversityRepo(MyContext context) : IUserUniversityRepo
     {
         private readonly MyContext _context = context;
+
+        public async Task<UserUniversity> AddUserToUniversityAsync(UserUniversity uu)
+        {
+            await _context.UserUniversities.AddAsync(uu);
+            await _context.SaveChangesAsync();
+            return uu;
+        }
+
+        public async Task<UserUniversity> RemoveUserFromUniversityAsync(int userId, int uniId)
+        {
+            var uu = await _context.UserUniversities
+                    .FirstOrDefaultAsync(uu => uu.UniversityId == uniId && uu.UserId == userId)
+                ?? throw new UserUniversityNotFoundException(
+                        $"UserUniversity Not Found UserId={userId}, UniId={uniId}");
+            _context.Remove(uu);
+            await _context.SaveChangesAsync();
+            return uu;
+        }
 
         public async Task<List<University>> GetUnisPageForUserIdAsync(int userId, int? lastUniId, int pageSize)
         {
@@ -41,6 +60,5 @@ namespace Infrastructure.Repos
                 .Select(uu => uu.User!)
                 .ToListAsync();
         }
-
     }
 }
