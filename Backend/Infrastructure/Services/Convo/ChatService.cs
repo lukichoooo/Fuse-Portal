@@ -9,7 +9,7 @@ namespace Infrastructure.Services
 {
     public class ChatService(
             IChatRepo repo,
-            ILLMChatService LLMService,
+            ILLMMessageService LLMService,
             IChatMapper mapper,
             IFileProcessingService fileService,
             ICurrentContext currentContext
@@ -17,7 +17,7 @@ namespace Infrastructure.Services
     {
         private readonly IChatRepo _repo = repo;
         private readonly IChatMapper _mapper = mapper;
-        private readonly ILLMChatService _LLMService = LLMService;
+        private readonly ILLMMessageService _LLMService = LLMService;
         private readonly IFileProcessingService _fileService = fileService;
         private readonly ICurrentContext _currentContext = currentContext;
 
@@ -60,7 +60,7 @@ namespace Infrastructure.Services
         }
 
 
-        public async Task<MessageDto> SendMessageAsync(MessageRequest messageRequest)
+        public async Task<SendMessageResponseDto> SendMessageAsync(MessageRequest messageRequest)
         {
             ClientMessage clientMessage = messageRequest.Message;
             List<int> fileIds = messageRequest.FileIds;
@@ -75,17 +75,21 @@ namespace Infrastructure.Services
 
             var message = _mapper.ToMessage(clientMessage, userId, fileDtos);
 
-            await _repo.AddMessageAsync(message);
+            var userMessage = await _repo.AddMessageAsync(message);
             foreach (var fileId in fileIds)
             {
                 await _repo.AddStoredFileToMessage(fileId, message.Id, userId);
             }
-            var response = await _LLMService.SendMessageAsync(
+            var llmResponse = await _LLMService.SendMessageAsync(
                     _mapper.ToMessageDto(clientMessage, fileDtos));
 
-            await _repo.AddMessageAsync(_mapper.ToMessage(response, userId));
+            var response = await _repo.AddMessageAsync(_mapper.ToMessage(llmResponse, userId));
 
-            return response;
+            return new()
+            {
+                Response = _mapper.ToMessageDto(response),
+                UserMessage = _mapper.ToMessageDto(userMessage),
+            };
         }
 
         public async Task<FileDto> RemoveFileAsync(int fileId)

@@ -11,12 +11,16 @@ namespace Infrastructure.Services.LLM.LMStudio
     public class LMStudioPortalParser(
             ILMStudioApi api,
             ILMStudioMapper mapper,
-            IOptions<LLMApiSettingKeys> keyOptions
+            IOptions<LLMApiSettingKeys> keyOptions,
+            IHtmlCleaner htmlCleaner,
+            JsonSerializerOptions serializerOptions
             ) : IPortalParser
     {
         private readonly ILMStudioApi _api = api;
         private readonly ILMStudioMapper _mapper = mapper;
         private readonly LLMApiSettingKeys _keySettings = keyOptions.Value;
+        private readonly JsonSerializerOptions _serializerOptions = serializerOptions;
+        private readonly IHtmlCleaner _htmlCleaner = htmlCleaner;
 
         // TODO: write in another file
         const string rulesPrompt = @"
@@ -25,10 +29,10 @@ You are a high-performance data extraction engine.
 Your sole purpose is to parse raw HTML from a university portal and convert it into a strict JSON object.
 
 ### Response Constraints
-* Output Format: RETURN ONLY JSON. Do not include markdown formatting.
-* Strict Schema: Adhere exactly to the provided JSON structure.
-* Data Types: Grade (int/null), Date (ISO 8601).
-* Missing Data: Use [] for empty lists, null for missing scalars.
+* Output must be a single valid JSON object starting with { and ending with }.
+* Do NOT include any explanations, text, headers, or markdown.
+* Escape all special characters in string fields (including newlines \n and quotes \"").
+* Follow the schema exactly.
 
 ### Target JSON Structure
 {
@@ -43,10 +47,17 @@ Your sole purpose is to parse raw HTML from a university portal and convert it i
     }
   ],
   ""metadata"": ""string""
-}";
+}
+
+### IMPORTANT
+Output must start with { and end with }. NOTHING else.
+";
+
 
         public async Task<PortalParserResponseDto> ParsePortalHtml(string HtmlPage)
         {
+            HtmlPage = _htmlCleaner.CleanHtml(HtmlPage);
+
             LMStudioRequest lmStudioRequest = _mapper.ToRequest(
                    html: HtmlPage,
                     rulesPrompt: rulesPrompt);
@@ -57,7 +68,12 @@ Your sole purpose is to parse raw HTML from a university portal and convert it i
                     );
 
             var portalJson = _mapper.ToOutputText(response);
-            return JsonSerializer.Deserialize<PortalParserResponseDto>(portalJson)
+
+            portalJson = portalJson.Trim();
+            if (portalJson.StartsWith("```")) portalJson = portalJson[3..];
+            if (portalJson.EndsWith("```")) portalJson = portalJson[..^3];
+
+            return JsonSerializer.Deserialize<PortalParserResponseDto>(portalJson, _serializerOptions)
                    ?? throw new LMStudioApiException("LMStudio returned empty response");
         }
     }

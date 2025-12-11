@@ -13,7 +13,10 @@ namespace Core.Entities.Convo
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         [Required]
-        public int ChatId { get; set; }
+        public required int ChatId { get; set; }
+
+        [Required]
+        public required bool FromUser { get; set; }
 
         public Chat Chat { get; set; } = null!;
 

@@ -52,9 +52,10 @@ public static class DependencyInjection
         services.AddScoped<IFileTextParser, FileTextParser>();
         services.AddScoped<IPortalService, PortalService>();
         services.AddScoped<IPortalParser, LMStudioPortalParser>();
+        services.AddScoped<IHtmlCleaner, HtmlCleaner>();
 
         // LLM
-        services.AddScoped<ILLMChatService, LMStudioMessageService>();
+        services.AddScoped<ILLMMessageService, LMStudioMessageService>();
         services.AddScoped<ILLMInputGenerator, LLMInputGenerator>();
         services.AddScoped<ILLMApiSettingsChooser, LLMApiSettingsChooser>();
 

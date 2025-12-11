@@ -23,16 +23,8 @@ namespace Infrastructure.Services.Portal
         {
             PortalParserResponseDto portal = await _portalParser.ParsePortalHtml(HtmlPage);
 
-            var options = new JsonSerializerOptions
-            {
-                WriteIndented = true // pretty print
-            };
-            Console.WriteLine(JsonSerializer.Serialize(portal, options));
-
-
             foreach (var subjectFullRequest in portal.Subjects)
             {
-                Console.WriteLine(subjectFullRequest.Name);
                 int userId = _currentContext.GetCurrentUserId();
                 var subject = _mapper.ToSubjectWithoutLists(
                         subjectFullRequest,

@@ -4,6 +4,7 @@ using Core.Dtos;
 using Core.Dtos.Settings.Infrastructure;
 using Core.Interfaces.LLM.LMStudio;
 using Infrastructure.Services.LLM.LMStudio;
+using Infrastructure.Services.Portal;
 using Microsoft.Extensions.Options;
 using Moq;
 
@@ -31,8 +32,15 @@ namespace InfrastructureTests.LLM.LMStudio
             ILMStudioMapper mapper
                 )
         {
+            JsonSerializerOptions jsonSerializerOptions = new()
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+                PropertyNameCaseInsensitive = true
+            };
+            HtmlCleaner cleaner = new();
+
             var keyOptions = Options.Create(_settingKeys);
-            return new(api, mapper, keyOptions);
+            return new(api, mapper, keyOptions, cleaner, jsonSerializerOptions);
         }
 
 

@@ -104,6 +104,16 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddInfrastructure();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
 
@@ -113,6 +123,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+
 app.UseRouting();
 
 app.UseAuthentication();
@@ -120,30 +131,9 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// TODO: remove thing below
-using (var scope = app.Services.CreateScope())
-{
-    var ctx = scope.ServiceProvider.GetRequiredService<MyContext>();
-    Console.WriteLine("=== CASCADE PATHS ===");
-    var cascades = ctx.Model.GetEntityTypes()
-        .SelectMany(t => t.GetForeignKeys())
-        .Where(fk => fk.DeleteBehavior == DeleteBehavior.Cascade)
-        .Select(fk => new
-        {
-            Dependent = fk.DeclaringEntityType.ClrType.Name,
-            Principal = fk.PrincipalEntityType.ClrType.Name,
-            FK = string.Join(",", fk.Properties.Select(p => p.Name))
-        })
-        .ToList();
 
-    foreach (var c in cascades)
-        Console.WriteLine($"{c.Dependent} -> {c.Principal} ({c.FK})");
-}
-
-
+app.UseCors("AllowFrontend");
 app.Run();
 
 
 
-// For Intergration Testing
-public partial class Program { }

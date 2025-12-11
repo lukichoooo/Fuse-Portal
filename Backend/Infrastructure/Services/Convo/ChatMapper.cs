@@ -34,9 +34,9 @@ namespace Infrastructure.Services
                 Text = dto.Text,
                 CreatedAt = dto.CreatedAt,
                 ChatId = dto.ChatId,
+                FromUser = dto.FromUser,
                 Files = dto.Files.ConvertAll(f => ToChatFile(f, userId))
             };
-
 
 
         public MessageDto ToMessageDto(Message msg)
@@ -45,8 +45,9 @@ namespace Infrastructure.Services
                 Id = msg.Id,
                 Text = msg.Text,
                 CreatedAt = msg.CreatedAt,
+                FromUser = msg.FromUser,
                 ChatId = msg.ChatId,
-                Files = msg.Files.ConvertAll(ToFileDto)
+                Files = msg.Files.ConvertAll(ToFileDto),
             };
 
 
@@ -58,6 +59,7 @@ namespace Infrastructure.Services
             {
                 Text = cm.Text,
                 ChatId = cm.ChatId,
+                FromUser = true,
                 Files = files?.ConvertAll(f => ToChatFile(f, userId)) ?? []
             };
 
@@ -66,6 +68,7 @@ namespace Infrastructure.Services
             {
                 Text = cm.Text,
                 ChatId = cm.ChatId,
+                FromUser = true,
                 Files = files ?? []
             };
 

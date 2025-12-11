@@ -32,6 +32,7 @@ namespace Infrastructure.Services.LLM.LMStudio
                 CreatedAt = DateTimeOffset
                         .FromUnixTimeSeconds(response.CreatedAt)
                         .UtcDateTime,
+                FromUser = false,
                 ChatId = chatId,
                 Files = []
             };

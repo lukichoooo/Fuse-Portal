@@ -1,38 +1,47 @@
-
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
-import './Header.css'
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import './Header.css';
+import AuthService from '../../services/AuthService';
 
 export default function Header() {
-    const [open, setOpen] = useState(false)
+
+    const navigate = useNavigate();
+
+    const [loggedIn, setLoggedIn] = useState(AuthService.isLoggedIn());
+
+    function handleLogoutClick() {
+        AuthService.logout();
+        navigate('/');
+        setLoggedIn(false);
+    }
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setLoggedIn(AuthService.isLoggedIn());
+        }, 1000);
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <header className="header">
             <Link to="/" className="logo">
-                <img src="/logos/fuse-portal.png" alt="Logo" className="logo-box" />
+                <img src="/logos/ruby.png" alt="Logo" className="logo-box" />
                 <span className="logo-text">Portal</span>
             </Link>
 
             <div className="header-actions">
-                <Link to="/chat" className="chat-btn">
-                    <img src="/logos/ai-chat.png" alt="Chat" className="chat-icon" />
-                    <span>Chat with AI Mentor</span>
-                </Link>
-
-                <div className="dropdown">
-                    <button className="dropdown-toggle" onClick={() => setOpen(!open)}>
-                        Menu ▾
-                    </button>
-                    {open && (
-                        <ul className="dropdown-menu">
-                            <li>Profile</li>
-                            <li>Settings</li>
-                            <li>Logout</li>
-                        </ul>
-                    )}
-                </div>
+                {!loggedIn ? (
+                    <>
+                        <Link to="/auth" className="btn">Not Logged in?</Link>
+                    </>
+                ) : (
+                    <>
+                        <Link to="/profile" className="btn">Profile</Link>
+                        <button onClick={handleLogoutClick} className="btn btn-secondary">Logout</button>
+                    </>
+                )}
             </div>
         </header>
-    )
+    );
 }
 

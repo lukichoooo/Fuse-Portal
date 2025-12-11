@@ -19,6 +19,7 @@ namespace InfrastructureTests.LLM
             ChatRoute = "/v1/chat/completions",
 
             Model = "qwen2.5-7b-instruct",
+            TimeoutMins = 1,
 
             Temperature = 0.7f,
             MaxTokens = 2048,

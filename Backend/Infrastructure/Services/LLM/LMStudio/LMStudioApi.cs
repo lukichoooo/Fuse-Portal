@@ -37,6 +37,7 @@ namespace Infrastructure.Services.LLM.LMStudio
         {
             var settings = _apiSettingsChooser.GetSettings(settingsKey);
             _client.BaseAddress = new Uri(settings.URL);
+            _client.Timeout = TimeSpan.FromMinutes(settings.TimeoutMins);
 
             var json = JsonSerializer.Serialize(request, _serializerOptions);
             var content = new StringContent(json, Encoding.UTF8, "application/json");

@@ -131,18 +131,18 @@ namespace PresentationTests
         public async Task SendMessageAsync_Success()
         {
             var request = _gloablFixture.Create<MessageRequest>();
-            var message = _gloablFixture.Create<MessageDto>();
+            var returnValue = _gloablFixture.Create<SendMessageResponseDto>();
             var mock = new Mock<IChatService>();
             mock.Setup(s => s.SendMessageAsync(request))
-                .ReturnsAsync(message);
+                .ReturnsAsync(returnValue);
             var sut = CreateController(mock.Object);
 
             var res = await sut.SendMessageAsync(request);
 
             Assert.That(res, Is.Not.Null);
             var okResult = res.Result as OkObjectResult;
-            var actual = okResult?.Value as MessageDto;
-            Assert.That(actual, Is.EqualTo(message));
+            var actual = okResult?.Value as SendMessageResponseDto;
+            Assert.That(actual, Is.EqualTo(returnValue));
         }
 
 

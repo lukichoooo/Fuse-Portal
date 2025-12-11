@@ -20,6 +20,7 @@ public record MessageDto
 {
     public int Id { get; init; }
     public required string Text { get; init; }
+    public required bool FromUser { get; init; }
     public DateTime CreatedAt { get; init; }
     public int ChatId { get; init; }
     public List<FileDto> Files { get; init; } = [];
@@ -29,6 +30,12 @@ public record ClientMessage
 {
     public required string Text { get; init; }
     public int ChatId { get; init; }
+}
+
+public record SendMessageResponseDto
+{
+    public required MessageDto UserMessage { get; set; }
+    public required MessageDto Response { get; set; }
 }
 
 public record MessageRequest

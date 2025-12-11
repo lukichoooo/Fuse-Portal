@@ -26,6 +26,7 @@ namespace InfrastructureTests.LLM.LMStudio
             ChatRoute = "/v1/chat/completions",
 
             Model = "qwen2.5-7b-instruct",
+            TimeoutMins = 1,
 
             Temperature = 0.7f,
             MaxTokens = 2048,
@@ -57,7 +58,7 @@ namespace InfrastructureTests.LLM.LMStudio
 
         }
 
-        private ILLMChatService CreateService(ILMStudioApi api, IChatMetadataService metadataService)
+        private ILLMMessageService CreateService(ILMStudioApi api, IChatMetadataService metadataService)
         {
             var settingKeys = _fix.Create<LLMApiSettingKeys>();
             var keyOptionsMock = new Mock<IOptions<LLMApiSettingKeys>>();

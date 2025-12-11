@@ -1,5 +1,4 @@
 using AutoFixture;
-using Core.Dtos;
 using Core.Entities.Convo;
 using Core.Exceptions;
 using Core.Interfaces.Convo;

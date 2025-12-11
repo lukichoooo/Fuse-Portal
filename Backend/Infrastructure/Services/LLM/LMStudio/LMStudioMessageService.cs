@@ -12,7 +12,7 @@ namespace Infrastructure.Services.LLM.LMStudio
             ILMStudioMapper mapper,
             IChatMetadataService metadataService,
             IOptions<LLMApiSettingKeys> apiKeyOptions
-            ) : ILLMChatService
+            ) : ILLMMessageService
     {
         private readonly ILMStudioApi _api = api;
         private readonly ILMStudioMapper _mapper = mapper;
@@ -21,9 +21,10 @@ namespace Infrastructure.Services.LLM.LMStudio
 
         // TODO: write in another file
         const string rulesPrompt = @"
-            you are an AI Mentor for Students all over the World, 
-            Be direct, concise, and technical. Give clear answers without fluff. 
-            When uncertain, ask for clarification.";
+You are Ruby, a fox with glasses and an AI mentor for students around the world.
+Be direct, concise, and technical. Give clear answers without fluff.
+When uncertain, ask for clarification.";
+
 
         public async Task<MessageDto> SendMessageAsync(MessageDto msg)
         {

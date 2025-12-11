@@ -28,12 +28,12 @@ namespace InfrastructureTests.Convo
 
         private IChatService CreateService(
                 IChatRepo? repo = null,
-                ILLMChatService? LLMservice = null,
+                ILLMMessageService? LLMservice = null,
                 IFileProcessingService? fileService = null,
                 ICurrentContext? currContext = null)
         {
             repo ??= new Mock<IChatRepo>().Object;
-            LLMservice ??= new Mock<ILLMChatService>().Object;
+            LLMservice ??= new Mock<ILLMMessageService>().Object;
             fileService ??= new Mock<IFileProcessingService>().Object;
             if (currContext is null)
             {
@@ -159,7 +159,7 @@ namespace InfrastructureTests.Convo
             repoMock.Setup(r => r.CreateNewChatAsync(It.IsAny<Chat>()))
                 .ReturnsAsync(chat);
 
-            var LLMServiceMock = new Mock<ILLMChatService>();
+            var LLMServiceMock = new Mock<ILLMMessageService>();
             var service = CreateService(repoMock.Object, LLMServiceMock.Object);
 
             var res = await service.CreateNewChatAsync(request);
@@ -185,10 +185,12 @@ namespace InfrastructureTests.Convo
                 Message = clientMessage,
             };
 
-            var response = _fix.Create<MessageDto>();
-            var LLMServiceMock = new Mock<ILLMChatService>();
+            var llmResponse = _fix.Build<MessageDto>()
+                .With(m => m.FromUser, false)
+                .Create();
+            var LLMServiceMock = new Mock<ILLMMessageService>();
             LLMServiceMock.Setup(s => s.SendMessageAsync(It.IsAny<MessageDto>()))
-                .ReturnsAsync(response);
+                .ReturnsAsync(llmResponse);
 
             int msgId = _fix.Create<int>();
             var repoMock = new Mock<IChatRepo>();
@@ -200,7 +202,10 @@ namespace InfrastructureTests.Convo
             var res = await service.SendMessageAsync(messageRequest);
 
             Assert.That(res, Is.Not.Null);
-            Assert.That(res, Is.EqualTo(response));
+            Assert.That(res.Response.Text, Is.EqualTo(llmResponse.Text));
+            Assert.That(res.Response.FromUser, Is.EqualTo(false));
+            Assert.That(res.UserMessage.Text, Is.EqualTo(clientMessage.Text));
+            Assert.That(res.UserMessage.FromUser, Is.EqualTo(true));
             LLMServiceMock.Verify(s => s.SendMessageAsync(It.IsAny<MessageDto>()), Times.Once());
             repoMock.Verify(r => r.AddMessageAsync(It.IsAny<Message>()), Times.Exactly(2));
             foreach (var fileId in fileIds)
@@ -220,7 +225,7 @@ namespace InfrastructureTests.Convo
             var fileIds = _fix.CreateMany<int>().ToList();
 
             var response = _fix.Create<MessageDto>();
-            var LLMServiceMock = new Mock<ILLMChatService>();
+            var LLMServiceMock = new Mock<ILLMMessageService>();
             LLMServiceMock.Setup(s => s.SendMessageAsync(It.IsAny<MessageDto>()))
                 .ReturnsAsync(response);
 
@@ -235,7 +240,8 @@ namespace InfrastructureTests.Convo
             var res = await service.SendMessageAsync(messageRequest);
 
             Assert.That(res, Is.Not.Null);
-            Assert.That(res, Is.EqualTo(response));
+            Assert.That(res.Response.Text, Is.EqualTo(response.Text));
+            Assert.That(res.UserMessage.Text, Is.EqualTo(cm.Text));
             LLMServiceMock.Verify(s => s.SendMessageAsync(It.IsAny<MessageDto>()), Times.Once());
             repoMock.Verify(r => r.AddMessageAsync(It.IsAny<Message>()), Times.Exactly(2));
         }
