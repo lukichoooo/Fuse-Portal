@@ -32,12 +32,12 @@ namespace Presentation.Controllers
         [HttpGet("{chatId}")]
         public async Task<ActionResult<ChatFullDto>> GetFullChatPageAsync(
             [FromRoute] int chatId,
-            [FromQuery] int? lastId,
+            [FromQuery] int? firstMsgId,
             [FromQuery] int? pageSize
             )
             => Ok(await _service.GetChatWithMessagesPageAsync(
                         chatId,
-                        lastId,
+                        firstMsgId,
                         pageSize ?? _settings.BigPageSize));
 
         [HttpPost]

@@ -9,7 +9,6 @@ interface Box {
 
 export default function Home() {
     const boxes: Box[] = [
-        { name: 'University Portal', route: '/uni-portal', logo: '/logos/university.png' },
         { name: 'Notifications', route: '/notifications', logo: '/logos/notifications.png' },
         { name: 'Settings', route: '/settings', logo: '/logos/settings.png' },
     ];
@@ -18,7 +17,7 @@ export default function Home() {
         <div className="home">
             <header>
                 <h1>Home</h1>
-                <p>Welcome to your professional dashboard</p>
+                <p>Welcome to your learning dashboard</p>
             </header>
 
             <Link to="/chats" className="big-box">
@@ -28,6 +27,12 @@ export default function Home() {
                 </div>
             </Link>
 
+            <Link to="/portal" className="big-box">
+                <img src="/mascot/reading-book.png" alt="Featured" />
+                <div className="big-box-text">
+                    <span>Portal</span>
+                </div>
+            </Link>
 
 
             <div className="grid">

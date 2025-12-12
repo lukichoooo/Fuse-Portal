@@ -26,7 +26,7 @@ export default function Header() {
         <header className="header">
             <Link to="/" className="logo">
                 <img src="/logos/ruby.png" alt="Logo" className="logo-box" />
-                <span className="logo-text">Portal</span>
+                <span className="logo-text">Ruby</span>
             </Link>
 
             <div className="header-actions">

@@ -49,12 +49,12 @@ namespace Infrastructure.Services.LLM.LMStudio
             };
 
         public LMStudioRequest ToRequest(
-                string html,
+                string text,
                 string? rulesPrompt = null)
             => new()
             {
                 Model = _settingsChooser.GetSettings(_keySettings.Parser).Model,
-                Input = _inputGenerator.GenerateInput(html, rulesPrompt),
+                Input = _inputGenerator.GenerateInput(text, rulesPrompt),
             };
 
         public string ToOutputText(LMStudioResponse response)

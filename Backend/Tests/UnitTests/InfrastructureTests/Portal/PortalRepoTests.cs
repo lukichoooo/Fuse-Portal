@@ -139,7 +139,7 @@ namespace InfrastructureTests.Portal
 
             subject.UserId = user.Id;
             subject.User = null;
-            subject.Tests = _fix.CreateMany<Test>().ToList();
+            subject.Syllabuses = _fix.CreateMany<Syllabus>().ToList();
             subject.Schedules = _fix.CreateMany<Schedule>().ToList();
             subject.Lecturers = _fix.CreateMany<Lecturer>().ToList();
 
@@ -152,7 +152,7 @@ namespace InfrastructureTests.Portal
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Schedules, Is.Not.Empty);
-            Assert.That(res.Tests, Is.Not.Empty);
+            Assert.That(res.Syllabuses, Is.Not.Empty);
             Assert.That(res.Lecturers, Is.Not.Empty);
         }
 
@@ -416,12 +416,12 @@ namespace InfrastructureTests.Portal
             subject.UserId = user.Id;
             await _context.SaveChangesAsync();
 
-            var test = _fix.Create<Test>();
+            var test = _fix.Create<Syllabus>();
             test.SubjectId = subject.Id;
             test.Subject = null;
 
-            var rv = await _sut.AddTestForSubjectAsync(test, user.Id);
-            var res = await _context.Tests
+            var rv = await _sut.AddSyllabusForSubjectAsync(test, user.Id);
+            var res = await _context.Sylabuses
                 .FirstOrDefaultAsync(t => t.Id == test.Id
                         && t.SubjectId == subject.Id);
 
@@ -444,12 +444,12 @@ namespace InfrastructureTests.Portal
             await _context.SaveChangesAsync();
             subject.UserId = user.Id = realUserId;
 
-            var test = _fix.Create<Test>();
+            var test = _fix.Create<Syllabus>();
             test.SubjectId = subject.Id;
             test.Subject = null;
 
             Assert.ThrowsAsync<SubjectNotFoundException>(async () =>
-                    await _sut.AddTestForSubjectAsync(test, fakeUserId));
+                    await _sut.AddSyllabusForSubjectAsync(test, fakeUserId));
         }
 
 
@@ -464,14 +464,14 @@ namespace InfrastructureTests.Portal
             await _context.SaveChangesAsync();
             subject.UserId = user.Id;
 
-            var test = _fix.Create<Test>();
+            var test = _fix.Create<Syllabus>();
             test.SubjectId = subject.Id;
             test.Subject = null;
             await _context.AddAsync(test);
             await _context.SaveChangesAsync();
 
-            var rv = await _sut.RemoveTestByIdAsync(test.Id, user.Id);
-            var res = await _context.Tests
+            var rv = await _sut.RemoveSyllabusByIdAsync(test.Id, user.Id);
+            var res = await _context.Sylabuses
                 .FirstOrDefaultAsync(t => t.Id == test.Id
                         && t.SubjectId == subject.Id);
 
@@ -492,14 +492,14 @@ namespace InfrastructureTests.Portal
             await _context.Subjects.AddAsync(subject);
             await _context.SaveChangesAsync();
 
-            var test = _fix.Create<Test>();
+            var test = _fix.Create<Syllabus>();
             test.SubjectId = subject.Id;
             test.Subject = null;
             await _context.AddAsync(test);
             await _context.SaveChangesAsync();
 
-            Assert.ThrowsAsync<TestNotFoundException>(async () =>
-                     await _sut.RemoveTestByIdAsync(test.Id, fakeUserId));
+            Assert.ThrowsAsync<SylabusNotFoundException>(async () =>
+                     await _sut.RemoveSyllabusByIdAsync(test.Id, fakeUserId));
         }
 
         [Test]
@@ -508,8 +508,8 @@ namespace InfrastructureTests.Portal
             var userId = _fix.Create<int>();
             var testId = _fix.Create<int>();
 
-            Assert.ThrowsAsync<TestNotFoundException>(async () =>
-                    await _sut.RemoveTestByIdAsync(testId, userId));
+            Assert.ThrowsAsync<SylabusNotFoundException>(async () =>
+                    await _sut.RemoveSyllabusByIdAsync(testId, userId));
         }
 
 
@@ -524,13 +524,13 @@ namespace InfrastructureTests.Portal
             await _context.SaveChangesAsync();
             subject.UserId = user.Id;
 
-            var test = _fix.Create<Test>();
+            var test = _fix.Create<Syllabus>();
             test.SubjectId = subject.Id;
             test.Subject = null;
             await _context.AddAsync(test);
             await _context.SaveChangesAsync();
 
-            var res = await _sut.GetFullTestByIdAsync(test.Id, user.Id);
+            var res = await _sut.GetFullSyllabusByIdAsync(test.Id, user.Id);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res, Is.EqualTo(test));
@@ -549,14 +549,14 @@ namespace InfrastructureTests.Portal
             await _context.Subjects.AddAsync(subject);
             await _context.SaveChangesAsync();
 
-            var test = _fix.Create<Test>();
+            var test = _fix.Create<Syllabus>();
             test.SubjectId = subject.Id;
             test.Subject = null;
             await _context.AddAsync(test);
             await _context.SaveChangesAsync();
 
-            Assert.ThrowsAsync<TestNotFoundException>(async () =>
-                     await _sut.GetFullTestByIdAsync(test.Id, fakeUserId));
+            Assert.ThrowsAsync<SylabusNotFoundException>(async () =>
+                     await _sut.GetFullSyllabusByIdAsync(test.Id, fakeUserId));
         }
 
         [Test]
@@ -565,8 +565,8 @@ namespace InfrastructureTests.Portal
             var userId = _fix.Create<int>();
             var testId = _fix.Create<int>();
 
-            Assert.ThrowsAsync<TestNotFoundException>(async () =>
-                    await _sut.GetFullTestByIdAsync(testId, userId));
+            Assert.ThrowsAsync<SylabusNotFoundException>(async () =>
+                    await _sut.GetFullSyllabusByIdAsync(testId, userId));
         }
 
     }

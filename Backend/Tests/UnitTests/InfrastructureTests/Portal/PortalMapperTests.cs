@@ -53,10 +53,10 @@ namespace InfrastructureTests.Portal
 
 
         [Test]
-        public void ToTestDto_From_Test()
+        public void ToSyllabusDto_From_Syllabus()
         {
-            var test = _fix.Create<Test>();
-            var res = _sut.ToTestDto(test);
+            var test = _fix.Create<Syllabus>();
+            var res = _sut.ToSyllabusDto(test);
             Assert.That(res, Is.Not.Null);
             HelperMapperTest.AssertCommonPropsByName(res, test);
         }
@@ -100,20 +100,20 @@ namespace InfrastructureTests.Portal
         }
 
         [Test]
-        public void ToTest_From_TestRequestDto()
+        public void ToSyllabus_From_SyllabusRequestDto()
         {
-            var request = _fix.Create<TestRequestDto>();
-            var res = _sut.ToTest(request);
+            var request = _fix.Create<SyllabusRequestDto>();
+            var res = _sut.ToSyllabus(request);
             Assert.That(res, Is.Not.Null);
             HelperMapperTest.AssertCommonPropsByName(res, request);
         }
 
 
         [Test]
-        public void ToTestFullDto_From_Test()
+        public void ToSyllabusFullDto_From_Syllabus()
         {
-            var test = _fix.Create<Test>();
-            var res = _sut.ToTestFullDto(test);
+            var test = _fix.Create<Syllabus>();
+            var res = _sut.ToSyllabusFullDto(test);
             Assert.That(res, Is.Not.Null);
             HelperMapperTest.AssertCommonPropsByName(res, test);
         }
@@ -156,11 +156,11 @@ namespace InfrastructureTests.Portal
         }
 
         [Test]
-        public void ToTestRequest_From_TestRequestDtoNoSubjectId()
+        public void ToSyllabusRequest_From_SyllabusRequestDtoNoSubjectId()
         {
-            var requestNoId = _fix.Create<TestRequestDtoNoSubjectId>();
+            var requestNoId = _fix.Create<SyllabusRequestDtoNoSubjectId>();
             var subjectId = _fix.Create<int>();
-            var res = _sut.ToTest(requestNoId, subjectId);
+            var res = _sut.ToSyllabus(requestNoId, subjectId);
             Assert.That(res, Is.Not.Null);
             Assert.That(res.SubjectId, Is.EqualTo(subjectId));
             HelperMapperTest.AssertCommonPropsByName(res, requestNoId);

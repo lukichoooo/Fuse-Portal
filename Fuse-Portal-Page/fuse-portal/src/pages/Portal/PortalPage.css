@@ -1,0 +1,154 @@
+/* MAIN PAGE CONTAINER */
+.portal-page {
+    padding: 1rem;
+    font-family: Arial, sans-serif;
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    background-color: #f5f5f5;
+}
+
+
+/* GO TO TODAY BUTTON */
+.goto-today-button {
+    padding: 0.5rem 1rem;
+    background-color: #007bff;
+    border: none;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.goto-today-button:hover {
+    background-color: #0056b3;
+}
+
+
+.test-yourself-button {
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: #28a745;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.test-yourself-button:hover {
+    background-color: #1e7e34;
+}
+
+/* SCROLLABLE MONTHS */
+.calendar-container {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    gap: 1rem;
+    flex: 1;
+}
+
+
+/* EACH MONTH CARD */
+.calendar-month {
+    min-width: 900px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+    padding: 0.5rem;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+
+/* WEEK HEADER */
+.calendar-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.calendar-header-cell {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #ddd;
+}
+
+
+/* GRID OF DAYS */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.25rem;
+    flex: 1;
+}
+
+
+/* EACH DAY CELL */
+.calendar-cell {
+    border: 1px solid #eee;
+    border-radius: 4px;
+    padding: 4px;
+    font-size: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    min-height: 60px;
+    transition: background 0.2s;
+}
+
+.calendar-cell:hover {
+    background-color: #f0f8ff;
+}
+
+
+/* DAY NUMBER */
+.calendar-day {
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+
+/* SCHEDULE LABEL */
+.calendar-schedule {
+    margin-top: 2px;
+    font-size: 0.75rem;
+    border-radius: 4px;
+    padding: 2px 4px;
+    color: #000;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.calendar-schedule:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+}
+
+
+/* TODAY HIGHLIGHT */
+.calendar-today {
+    border: 2px solid #FF4500;
+    background-color: #FFFACD;
+}
+
+
+/* SUBJECT DETAILS SECTION */
+.subject-details {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #fff;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}

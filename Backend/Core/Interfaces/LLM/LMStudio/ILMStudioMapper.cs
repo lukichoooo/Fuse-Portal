@@ -7,7 +7,7 @@ namespace Core.Interfaces.LLM.LMStudio
         MessageDto ToMessageDto(LMStudioResponse response, int chatId);
         LMStudioRequest ToRequest(MessageDto msg, string? previousResponseId = null, string? rulesPrompt = null);
 
-        LMStudioRequest ToRequest(string html, string? rulesPrompt = null);
+        LMStudioRequest ToRequest(string text, string? rulesPrompt = null);
         string ToOutputText(LMStudioResponse response);
     }
 }

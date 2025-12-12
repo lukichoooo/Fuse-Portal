@@ -19,9 +19,9 @@ export default class ChatService {
         return res.data;
     }
 
-    static async getFullChat(chatId: number, lastId?: number, pageSize?: number): Promise<ChatFullDto> {
+    static async getFullChat(chatId: number, firstMsgId?: number, pageSize?: number): Promise<ChatFullDto> {
         const params: Record<string, any> = {};
-        if (lastId) params.lastId = lastId;
+        if (firstMsgId) params.lastId = firstMsgId;
         if (pageSize) params.pageSize = pageSize;
 
         const res = await api.get<ChatFullDto>(`/chat/${chatId}`, { params: params });

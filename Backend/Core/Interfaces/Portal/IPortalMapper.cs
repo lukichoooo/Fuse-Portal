@@ -9,7 +9,7 @@ namespace Core.Interfaces.Portal
         SubjectFullDto ToSubjectFullDto(Subject subject);
         Subject ToSubject(SubjectRequestDto dto, int userId);
 
-        TestDto ToTestDto(Test test);
+        SyllabusDto ToSyllabusDto(Syllabus syllabus);
 
         LecturerDto ToLecturerDto(Lecturer lecturer);
 
@@ -21,13 +21,13 @@ namespace Core.Interfaces.Portal
 
         Lecturer ToLecturer(LecturerRequestDto dto);
         Schedule ToSchedule(ScheduleRequestDto dto);
-        Test ToTest(TestRequestDto dto);
-        TestFullDto ToTestFullDto(Test test);
+        Syllabus ToSyllabus(SyllabusRequestDto dto);
+        SyllabusFullDto ToSyllabusFullDto(Syllabus syllabus);
 
         Subject ToSubjectWithoutLists(SubjectFullRequestDto fullRequest, int userId);
 
         Schedule ToSchedule(ScheduleRequestDtoNoSubjectId dto, int subjectId);
         Lecturer ToLecturer(LecturerRequestDtoNoSubjectId dto, int subjectId);
-        Test ToTest(TestRequestDtoNoSubjectId dto, int subjectId);
+        Syllabus ToSyllabus(SyllabusRequestDtoNoSubjectId dto, int subjectId);
     }
 }

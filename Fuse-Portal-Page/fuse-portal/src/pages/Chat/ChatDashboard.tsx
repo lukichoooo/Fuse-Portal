@@ -3,6 +3,7 @@ import './ChatDashboard.css';
 import type { ChatDto, MessageDto } from '../../types/Chat';
 import ChatService from '../../services/ChatService';
 import ErrorPopup from '../../components/Errors/ErrorPopup';
+import type { BackendError } from '../../types/Error';
 
 
 export default function ChatDashboard() {
@@ -25,16 +26,8 @@ export default function ChatDashboard() {
     useEffect(() => {
         ChatService.getAllChats()
             .then(setChats)
-            .catch(err => setError(err.message || "Unknown error"));
+            .catch(err => setError(err.error || "Unknown error"));
     }, []);
-
-    useEffect(() => {
-        if (chats.length === 0) {
-            startNewChat();
-        } else {
-            selectChat(chats[0].id);
-        }
-    }, [chats]);
 
     useEffect(() => {
         scrollRef.current?.scrollTo({
@@ -70,12 +63,12 @@ export default function ChatDashboard() {
             });
 
             setCurrChatMessages(prev => [
-                ...prev.slice(0, -1), // remove pending
+                ...prev.slice(0, -1),
                 response.userMessage,
                 response.response
             ]);
-        } catch (err: any) {
-            setError(err.message || "Failed to send message");
+        } catch (err: BackendError | any) {
+            setError(err.error || "Failed to send message");
         }
     };
 
@@ -90,7 +83,7 @@ export default function ChatDashboard() {
             setChats(prev => [...prev, newChat]);
             selectChat(newChat.id);
         } catch (err: any) {
-            setError(err.message || "Unknown error");
+            setError(err.error || "Unknown error");
         }
     };
 
@@ -99,6 +92,8 @@ export default function ChatDashboard() {
         const fullChat = await ChatService.getFullChat(chatId);
         setCurrChatMessages(fullChat.messages);
     };
+
+
 
     return (
         <div className="chat-dashboard">
@@ -132,25 +127,32 @@ export default function ChatDashboard() {
 
                 <div className="chat-messages" ref={scrollRef}>
                     {currChatMessages.map((msg, idx) => (
-                        <div
-                            key={idx}
-                            className={`chat-message ${msg.fromUser ? 'user' : 'bot'}`}
-                            title={new Date(msg.createdAt).toLocaleString()}
-                        >
-                            {!msg.fromUser && (
-                                <img
-                                    src='/logos/ruby.png'
-                                    alt="Ruby"
-                                    className="chat-avatar"
-                                />
-                            )}
-                            <span className="chat-text">{msg.text}</span>
+                        <>
+                            <div
+                                key={idx}
+                                className={`chat-message ${msg.fromUser ? 'user' : 'bot'}`}
+                                title={new Date(msg.createdAt).toLocaleString()}
+                            >
+                                {!msg.fromUser && (
+                                    <img
+                                        src='/logos/ruby.png'
+                                        alt="Ruby"
+                                        className="chat-avatar"
+                                    />
+                                )}
+                                <span className="chat-text">{msg.text}</span>
+                            </div>
 
-                            {/* Show file icon if there are uploaded file IDs */}
-                            {msg.files && msg.files.length > 0 && (
-                                <span className="file-icon" title="Message contains files">📎</span>
-                            )}
-                        </div>
+                            <div className="chat-files">
+                                {msg.files.map((f, i) => (
+                                    <div key={i} className="file-icon-wrapper">
+                                        <span className="file-icon">📎</span>
+                                        <div className="file-tooltip">{f.text}</div>
+                                    </div>
+                                ))}
+                            </div>
+
+                        </>
                     ))}
                 </div>
 

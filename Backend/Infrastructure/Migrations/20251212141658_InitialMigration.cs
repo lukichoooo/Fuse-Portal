@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class InitialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -201,7 +201,7 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Tests",
+                name: "Sylabuses",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -209,14 +209,13 @@ namespace Infrastructure.Migrations
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     SubjectId = table.Column<int>(type: "int", nullable: false),
-                    Date = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Metadata = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Tests", x => x.Id);
+                    table.PrimaryKey("PK_Sylabuses", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Tests_Subjects_SubjectId",
+                        name: "FK_Sylabuses_Subjects_SubjectId",
                         column: x => x.SubjectId,
                         principalTable: "Subjects",
                         principalColumn: "Id",
@@ -287,8 +286,8 @@ namespace Infrastructure.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tests_SubjectId",
-                table: "Tests",
+                name: "IX_Sylabuses_SubjectId",
+                table: "Sylabuses",
                 column: "SubjectId");
 
             migrationBuilder.CreateIndex(
@@ -320,7 +319,7 @@ namespace Infrastructure.Migrations
                 name: "Schedules");
 
             migrationBuilder.DropTable(
-                name: "Tests");
+                name: "Sylabuses");
 
             migrationBuilder.DropTable(
                 name: "UserUniversities");

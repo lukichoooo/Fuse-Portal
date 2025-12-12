@@ -70,20 +70,20 @@ public class PortalController(
             [FromRoute] int lecturerId)
         => Ok(await _service.RemoveLecturerByIdAsync(lecturerId));
 
-    [HttpPost("test")]
-    public async Task<ActionResult<TestDto>> AddTestAsync(
-            [FromBody] TestRequestDto request)
-        => Ok(await _service.AddTestForSubjectAsync(request));
+    [HttpPost("sylabus")]
+    public async Task<ActionResult<SyllabusDto>> AddSylabusAsync(
+            [FromBody] SyllabusRequestDto request)
+        => Ok(await _service.AddSylabusForSubjectAsync(request));
 
-    [HttpDelete("test/{testId}")]
-    public async Task<ActionResult<TestDto>> RemoveTestAsync(
-            [FromRoute] int testId)
-        => Ok(await _service.RemoveTestByIdAsync(testId));
+    [HttpDelete("sylabus/{sylabusId}")]
+    public async Task<ActionResult<SyllabusDto>> RemoveSylabusAsync(
+            [FromRoute] int sylabusId)
+        => Ok(await _service.RemoveSyllabusByIdAsync(sylabusId));
 
-    [HttpGet("test/{testId}")]
-    public async Task<ActionResult<TestFullDto>> GetTestByIdAsync(
-            [FromRoute] int testId)
-        => Ok(await _service.GetFullTestByIdAsync(testId));
+    [HttpGet("sylabus/{sylabusId}")]
+    public async Task<ActionResult<SyllabusFullDto>> GetSylabusByIdAsync(
+            [FromRoute] int sylabusId)
+        => Ok(await _service.GetFullSyllabusByIdAsync(sylabusId));
 
 }
 

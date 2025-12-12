@@ -208,12 +208,6 @@ namespace InfrastructureTests.Convo
             Assert.That(res.UserMessage.FromUser, Is.EqualTo(true));
             LLMServiceMock.Verify(s => s.SendMessageAsync(It.IsAny<MessageDto>()), Times.Once());
             repoMock.Verify(r => r.AddMessageAsync(It.IsAny<Message>()), Times.Exactly(2));
-            foreach (var fileId in fileIds)
-            {
-                repoMock.Verify(r => r.AddStoredFileToMessage(
-                            fileId, It.IsAny<int>(), DEFAULT_CONTEXT_ID),
-                        Times.Once());
-            }
         }
 
 

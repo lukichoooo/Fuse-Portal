@@ -5,6 +5,7 @@ import type { LoginRequest, RegisterRequest } from '../../types/AuthTypes';
 import { countryCodes, type AddressDto } from '../../types/Address';
 import './AuthPage.css';
 import ErrorPopup from '../../components/Errors/ErrorPopup';
+import type { BackendError } from '../../types/Error';
 
 export default function AuthPage() {
 
@@ -34,8 +35,8 @@ export default function AuthPage() {
             } else {
                 setError('Invalid login response');
             }
-        } catch (err: any) {
-            setError(err?.message || 'Login failed');
+        } catch (err: BackendError | any) {
+            setError(err?.error || 'Login failed');
         }
     };
 
@@ -53,7 +54,7 @@ export default function AuthPage() {
                 setError('Invalid registration response');
             }
         } catch (err: any) {
-            setError(err?.message || 'Registration failed');
+            setError(err?.error || 'Registration failed');
         }
     };
 

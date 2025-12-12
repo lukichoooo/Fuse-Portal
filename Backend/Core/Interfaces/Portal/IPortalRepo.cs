@@ -16,9 +16,8 @@ namespace Core.Interfaces.Portal
         Task<Lecturer> AddLecturerToSubjectAsync(Lecturer lecturer, int userId);
         Task<Lecturer> RemoveLecturerByIdAsync(int lecturerId, int userId);
 
-        Task<Test> AddTestForSubjectAsync(Test test, int userId);
-        Task<Test> RemoveTestByIdAsync(int testId, int userId);
-
-        Task<Test> GetFullTestByIdAsync(int testId, int userId);
+        Task<Syllabus> AddSyllabusForSubjectAsync(Syllabus syllabi, int userId);
+        Task<Syllabus> RemoveSyllabusByIdAsync(int syllabiId, int userId);
+        Task<Syllabus> GetFullSyllabusByIdAsync(int syllabiId, int userId);
     }
 }

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(MyContext))]
-    [Migration("20251211174659_Initial")]
-    partial class Initial
+    [Migration("20251212141658_InitialMigration")]
+    partial class InitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -224,7 +224,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("Subjects");
                 });
 
-            modelBuilder.Entity("Core.Entities.Portal.Test", b =>
+            modelBuilder.Entity("Core.Entities.Portal.Syllabus", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -235,9 +235,6 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("Date")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("Metadata")
                         .HasColumnType("nvarchar(max)");
@@ -253,7 +250,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("SubjectId");
 
-                    b.ToTable("Tests");
+                    b.ToTable("Sylabuses");
                 });
 
             modelBuilder.Entity("Core.Entities.University", b =>
@@ -403,10 +400,10 @@ namespace Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Core.Entities.Portal.Test", b =>
+            modelBuilder.Entity("Core.Entities.Portal.Syllabus", b =>
                 {
                     b.HasOne("Core.Entities.Portal.Subject", "Subject")
-                        .WithMany("Tests")
+                        .WithMany("Syllabuses")
                         .HasForeignKey("SubjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -452,7 +449,7 @@ namespace Infrastructure.Migrations
 
                     b.Navigation("Schedules");
 
-                    b.Navigation("Tests");
+                    b.Navigation("Syllabuses");
                 });
 
             modelBuilder.Entity("Core.Entities.University", b =>

@@ -27,9 +27,9 @@ public class LecturerRequestDtoValidator : AbstractValidator<LecturerRequestDto>
 }
 
 
-public class TestRequestDtoValidator : AbstractValidator<TestRequestDto>
+public class SyllabiRequestDtoValidator : AbstractValidator<SyllabusRequestDto>
 {
-    public TestRequestDtoValidator(IOptions<ValidatorSettings> options)
+    public SyllabiRequestDtoValidator(IOptions<ValidatorSettings> options)
     {
         RuleFor(l => l.Name)
             .Length(1, 30);

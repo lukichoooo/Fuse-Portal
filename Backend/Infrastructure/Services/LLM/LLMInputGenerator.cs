@@ -30,15 +30,15 @@ namespace Infrastructure.Services.LLM
             return sb.ToString().Trim();
         }
 
-        public string GenerateInput(string htmlString, string? rules)
+        public string GenerateInput(string text, string? rules)
         {
             var sb = new StringBuilder();
 
             if (!string.IsNullOrWhiteSpace(rules))
                 sb.AppendLine($"{_settings.RulesPromptDelimiter}\n{rules}");
 
-            if (!string.IsNullOrWhiteSpace(htmlString))
-                sb.AppendLine($"{_settings.FileContentDelimiter}\n{htmlString}");
+            if (!string.IsNullOrWhiteSpace(text))
+                sb.AppendLine($"{_settings.FileContentDelimiter}\n{text}");
 
             return sb.ToString();
         }

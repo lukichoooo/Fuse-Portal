@@ -20,7 +20,7 @@ namespace Core.Entities.Portal
 
         public List<Schedule> Schedules { get; set; } = [];
         public List<Lecturer> Lecturers { get; set; } = [];
-        public List<Test> Tests { get; set; } = [];
+        public List<Syllabus> Syllabuses { get; set; } = [];
     }
 }
 

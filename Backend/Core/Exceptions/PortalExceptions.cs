@@ -25,9 +25,9 @@ public class LecturerNotFoundException : Exception, ICustomException
 }
 
 
-public class TestNotFoundException : Exception, ICustomException
+public class SylabusNotFoundException : Exception, ICustomException
 {
-    public TestNotFoundException(string message) : base(message) { }
-    public TestNotFoundException() { }
-    public TestNotFoundException(string? message, Exception? innerException) : base(message, innerException) { }
+    public SylabusNotFoundException(string message) : base(message) { }
+    public SylabusNotFoundException() { }
+    public SylabusNotFoundException(string? message, Exception? innerException) : base(message, innerException) { }
 }

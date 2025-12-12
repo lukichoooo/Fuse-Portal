@@ -28,7 +28,8 @@ namespace InfrastructureTests.Portal
         private IPortalService CreateService(
                 IPortalRepo? repo = null,
                 ICurrentContext? currentContext = null,
-                IPortalParser? portalParser = null
+                IPortalParser? portalParser = null,
+                IMockExamCreator? examCreator = null
                 )
         {
             repo ??= new Mock<IPortalRepo>().Object;
@@ -47,11 +48,18 @@ namespace InfrastructureTests.Portal
                     .ReturnsAsync(portalDto);
                 portalParser = mock.Object;
             }
+            if (examCreator is null)
+            {
+                var mock = new Mock<IMockExamCreator>();
+                examCreator = mock.Object;
+            }
+
             return new PortalService(
                     repo,
                     _mapper,
                     currentContext,
-                    portalParser);
+                    portalParser,
+                    examCreator);
         }
 
 
@@ -211,14 +219,14 @@ namespace InfrastructureTests.Portal
         [Test]
         public async Task AddTestForSubjectAsync_Success()
         {
-            var request = _fix.Create<TestRequestDto>();
+            var request = _fix.Create<SyllabusRequestDto>();
             var repoMock = new Mock<IPortalRepo>();
-            repoMock.Setup(r => r.AddTestForSubjectAsync(
-                        It.IsAny<Test>(), DEFAULT_CONTEXT_ID))
-                .ReturnsAsync((Test t, int _) => t);
+            repoMock.Setup(r => r.AddSyllabusForSubjectAsync(
+                        It.IsAny<Syllabus>(), DEFAULT_CONTEXT_ID))
+                .ReturnsAsync((Syllabus t, int _) => t);
             var sut = CreateService(repoMock.Object);
 
-            var res = await sut.AddTestForSubjectAsync(request);
+            var res = await sut.AddSylabusForSubjectAsync(request);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Name, Is.EqualTo(request.Name));
@@ -228,14 +236,14 @@ namespace InfrastructureTests.Portal
         [Test]
         public async Task RemoveTestByIdAsync_Success()
         {
-            var test = _fix.Create<Test>();
+            var test = _fix.Create<Syllabus>();
             var repoMock = new Mock<IPortalRepo>();
-            repoMock.Setup(r => r.RemoveTestByIdAsync(
+            repoMock.Setup(r => r.RemoveSyllabusByIdAsync(
                         test.Id, DEFAULT_CONTEXT_ID))
                 .ReturnsAsync(test);
             var sut = CreateService(repoMock.Object);
 
-            var res = await sut.RemoveTestByIdAsync(test.Id);
+            var res = await sut.RemoveSyllabusByIdAsync(test.Id);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Name, Is.EqualTo(test.Name));
@@ -246,14 +254,14 @@ namespace InfrastructureTests.Portal
         [Test]
         public async Task GetFullTestByIdAsync_Success()
         {
-            var test = _fix.Create<Test>();
+            var test = _fix.Create<Syllabus>();
             var repoMock = new Mock<IPortalRepo>();
-            repoMock.Setup(r => r.GetFullTestByIdAsync(
+            repoMock.Setup(r => r.GetFullSyllabusByIdAsync(
                         test.Id, DEFAULT_CONTEXT_ID))
                 .ReturnsAsync(test);
             var sut = CreateService(repoMock.Object);
 
-            var res = await sut.GetFullTestByIdAsync(test.Id);
+            var res = await sut.GetFullSyllabusByIdAsync(test.Id);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Name, Is.EqualTo(test.Name));
@@ -296,9 +304,9 @@ namespace InfrastructureTests.Portal
                         DEFAULT_CONTEXT_ID),
                     Times.Exactly(lecturerCount));
 
-            int testCount = portalDto.Subjects.Sum(s => s.Tests.Count);
-            repoMock.Verify(r => r.AddTestForSubjectAsync(
-                        It.IsAny<Test>(),
+            int testCount = portalDto.Subjects.Sum(s => s.Syllabuses.Count);
+            repoMock.Verify(r => r.AddSyllabusForSubjectAsync(
+                        It.IsAny<Syllabus>(),
                         DEFAULT_CONTEXT_ID),
                     Times.Exactly(testCount));
         }

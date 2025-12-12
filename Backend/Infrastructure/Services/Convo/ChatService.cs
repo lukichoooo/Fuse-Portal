@@ -32,12 +32,12 @@ namespace Infrastructure.Services
 
         public async Task<ChatFullDto> GetChatWithMessagesPageAsync(
                 int chatId,
-                int? lastId,
+                int? firstMsgId,
                 int pageSize)
         {
             int userId = _currentContext.GetCurrentUserId();
             var chat = await _repo.GetChatWithMessagesPageAsync(
-                    chatId, lastId, pageSize, userId);
+                    chatId, firstMsgId, pageSize, userId);
             return _mapper.ToFullChatDto(chat);
         }
 
@@ -76,10 +76,6 @@ namespace Infrastructure.Services
             var message = _mapper.ToMessage(clientMessage, userId, fileDtos);
 
             var userMessage = await _repo.AddMessageAsync(message);
-            foreach (var fileId in fileIds)
-            {
-                await _repo.AddStoredFileToMessage(fileId, message.Id, userId);
-            }
             var llmResponse = await _LLMService.SendMessageAsync(
                     _mapper.ToMessageDto(clientMessage, fileDtos));
 

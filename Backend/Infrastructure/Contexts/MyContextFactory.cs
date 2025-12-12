@@ -1,7 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using Microsoft.Extensions.Options;
-using Core.Dtos.Settings;
 
 namespace Infrastructure.Contexts;
 

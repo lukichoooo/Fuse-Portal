@@ -43,14 +43,14 @@ Your sole purpose is to parse raw HTML from a university portal and convert it i
       ""metadata"": ""string"",
       ""schedules"": [{ ""start"": ""ISO"", ""end"": ""ISO"", ""location"": ""string"", ""metadata"": ""string"" }],
       ""lecturers"": [{ ""name"": ""string"" }],
-      ""tests"": [{ ""name"": ""string"", ""content"": ""string"", ""date"": ""ISO"", ""metadata"": ""string"" }]
+      ""syllabuses"": [{ ""name"": ""string"", ""content"": ""string"", ""metadata"": ""string"" }]
     }
   ],
   ""metadata"": ""string""
 }
 
 ### IMPORTANT
-Output must start with { and end with }. NOTHING else.
+Output must start with ""{"" and end with ""}"" NOTHING else.
 ";
 
 
@@ -59,7 +59,7 @@ Output must start with { and end with }. NOTHING else.
             HtmlPage = _htmlCleaner.CleanHtml(HtmlPage);
 
             LMStudioRequest lmStudioRequest = _mapper.ToRequest(
-                   html: HtmlPage,
+                   text: HtmlPage,
                     rulesPrompt: rulesPrompt);
 
             LMStudioResponse response = await _api.SendMessageAsync(

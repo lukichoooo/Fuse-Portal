@@ -1,7 +1,12 @@
 
 namespace Core.Dtos;
 
-public record TestDto(
+
+public record MockExamResponse(
+        string Exam
+        );
+
+public record SyllabusDto(
         int Id,
         string Name
         );
@@ -11,11 +16,10 @@ public record LecturerDto(
         string Name
         );
 
-public record TestFullDto(
+public record SyllabusFullDto(
         int Id,
         string Name,
         string Content,
-        DateTime? Date,
         string? Metadata
         );
 
@@ -30,6 +34,7 @@ public record ScheduleDto(
 public record SubjectDto(
         int Id,
         string Name,
+        List<ScheduleDto> Schedules,
         string? Metadata
         );
 
@@ -41,7 +46,7 @@ public record SubjectFullDto
 
     public required List<ScheduleDto> Schedules { get; init; } = [];
     public required List<LecturerDto> Lecturers { get; init; } = [];
-    public required List<TestDto> Tests { get; init; } = [];
+    public required List<SyllabusDto> Syllabuses { get; init; } = [];
 
     public string? Metadata { get; init; }
 }
@@ -63,12 +68,11 @@ public record ScheduleRequestDto
     public string? Metadata { get; set; }
 }
 
-public record TestRequestDto
+public record SyllabusRequestDto
 {
     public required string Name { get; set; } = null!;
     public required string Content { get; set; } = null!;
     public required int SubjectId { get; set; }
-    public DateTime? Date { get; set; }
     public string? Metadata { get; set; }
 }
 
@@ -88,11 +92,10 @@ public record ScheduleRequestDtoNoSubjectId
     public string? Metadata { get; set; }
 }
 
-public record TestRequestDtoNoSubjectId
+public record SyllabusRequestDtoNoSubjectId
 {
     public required string Name { get; set; } = null!;
     public required string Content { get; set; } = null!;
-    public DateTime? Date { get; set; }
     public string? Metadata { get; set; }
 }
 
@@ -114,7 +117,7 @@ public record SubjectFullRequestDto
 
     public required List<ScheduleRequestDtoNoSubjectId> Schedules { get; init; } = [];
     public required List<LecturerRequestDtoNoSubjectId> Lecturers { get; init; } = [];
-    public required List<TestRequestDtoNoSubjectId> Tests { get; init; } = [];
+    public required List<SyllabusRequestDtoNoSubjectId> Syllabuses { get; init; } = [];
 }
 
 public record PortalParserResponseDto
@@ -122,5 +125,4 @@ public record PortalParserResponseDto
     public List<SubjectFullRequestDto> Subjects { get; init; } = [];
     public string? Metadata { get; set; }
 }
-
 

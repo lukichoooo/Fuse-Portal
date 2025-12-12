@@ -36,6 +36,7 @@ namespace Infrastructure.Services.Portal
             => new(
                     Id: subject.Id,
                     Name: subject.Name,
+                    Schedules: subject.Schedules.ConvertAll(ToScheduleDto),
                     Metadata: subject.Metadata
                   );
 
@@ -50,8 +51,8 @@ namespace Infrastructure.Services.Portal
                     .ConvertAll(ToLecturerDto),
                 Schedules = subject.Schedules
                     .ConvertAll(ToScheduleDto),
-                Tests = subject.Tests
-                    .ConvertAll(ToTestDto)
+                Syllabuses = subject.Syllabuses
+                    .ConvertAll(ToSyllabusDto)
             };
 
         public Subject ToSubject(SubjectRequestDto dto, int userId)
@@ -80,29 +81,27 @@ namespace Infrastructure.Services.Portal
                 Metadata = dto.Metadata
             };
 
-        public TestDto ToTestDto(Test test)
+        public SyllabusDto ToSyllabusDto(Syllabus sylabus)
             => new(
-                    Id: test.Id,
-                    Name: test.Name
+                    Id: sylabus.Id,
+                    Name: sylabus.Name
                   );
 
-        public Test ToTest(TestRequestDto dto)
+        public Syllabus ToSyllabus(SyllabusRequestDto dto)
             => new()
             {
                 Content = dto.Content,
                 Name = dto.Name,
                 SubjectId = dto.SubjectId,
-                Date = dto.Date,
                 Metadata = dto.Metadata
             };
 
-        public TestFullDto ToTestFullDto(Test test)
+        public SyllabusFullDto ToSyllabusFullDto(Syllabus sylabus)
             => new(
-                    Id: test.Id,
-                    Name: test.Name,
-                    Content: test.Content,
-                    Date: test.Date,
-                    Metadata: test.Metadata
+                    Id: sylabus.Id,
+                    Name: sylabus.Name,
+                    Content: sylabus.Content,
+                    Metadata: sylabus.Metadata
                   );
 
         public Subject ToSubjectWithoutLists(SubjectFullRequestDto fullRequest, int userId)
@@ -138,13 +137,12 @@ namespace Infrastructure.Services.Portal
             };
 
 
-        public Test ToTest(
-                TestRequestDtoNoSubjectId dto,
+        public Syllabus ToSyllabus(
+                SyllabusRequestDtoNoSubjectId dto,
                 int subjectId)
             => new()
             {
                 Name = dto.Name,
-                Date = dto.Date,
                 Content = dto.Content,
                 Metadata = dto.Metadata,
                 SubjectId = subjectId

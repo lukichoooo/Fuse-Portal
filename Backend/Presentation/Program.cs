@@ -76,7 +76,7 @@ builder.Services.AddValidatorsFromAssemblyContaining<ClientMessageValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<AddressValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<ScheduleRequestDtoValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<LecturerRequestDtoValidator>();
-builder.Services.AddValidatorsFromAssemblyContaining<TestRequestDtoValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<SyllabiRequestDtoValidator>();
 builder.Services.AddFluentValidationAutoValidation();
 
 

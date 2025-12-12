@@ -15,7 +15,7 @@ public class MyContext(DbContextOptions<MyContext> options) : DbContext(options)
 
     public DbSet<Subject> Subjects { get; set; }
     public DbSet<Schedule> Schedules { get; set; }
-    public DbSet<Test> Tests { get; set; }
+    public DbSet<Syllabus> Sylabuses { get; set; }
     public DbSet<Lecturer> Lecturers { get; set; }
 
     public DbSet<Chat> Chats { get; set; }
@@ -93,10 +93,10 @@ public class MyContext(DbContextOptions<MyContext> options) : DbContext(options)
             .HasForeignKey(l => l.SubjectId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Subject → Tests
-        mb.Entity<Test>()
+        // Subject → Sylabus
+        mb.Entity<Syllabus>()
             .HasOne(t => t.Subject)
-            .WithMany(s => s.Tests)
+            .WithMany(s => s.Syllabuses)
             .HasForeignKey(t => t.SubjectId)
             .OnDelete(DeleteBehavior.Cascade);
     }

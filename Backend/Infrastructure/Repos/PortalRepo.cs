@@ -42,6 +42,7 @@ namespace Infrastructure.Repos
                     .Where(ss => ss.Id > lastSubjectId);
             }
             return await userSubjects
+                .Include(s => s.Schedules)
                 .OrderBy(s => s.Id)
                 .ToListAsync();
         }
@@ -49,7 +50,7 @@ namespace Infrastructure.Repos
         public async ValueTask<Subject?> GetFullSubjectByIdAsync(int subjectId, int userId)
             => await _context.Subjects
                 .Include(s => s.Schedules)
-                .Include(s => s.Tests)
+                .Include(s => s.Syllabuses)
                 .Include(s => s.Lecturers)
                 .FirstOrDefaultAsync(s => s.UserId == userId && s.Id == subjectId);
 
@@ -113,41 +114,41 @@ namespace Infrastructure.Repos
             return lecturer;
         }
 
-        public async Task<Test> AddTestForSubjectAsync(Test test, int userId)
+        public async Task<Syllabus> AddSyllabusForSubjectAsync(Syllabus sylabus, int userId)
         {
             bool subjectExists = await _context.Subjects
-                .AnyAsync(t => t.Id == test.SubjectId
+                .AnyAsync(t => t.Id == sylabus.SubjectId
                         && t.UserId == userId);
 
             if (!subjectExists)
             {
                 throw new SubjectNotFoundException(
-                    $"Subject not found: Id={test.SubjectId}, UserId={userId}");
+                    $"Subject not found: Id={sylabus.SubjectId}, UserId={userId}");
             }
 
-            await _context.Tests.AddAsync(test);
+            await _context.Sylabuses.AddAsync(sylabus);
             await _context.SaveChangesAsync();
-            return test;
+            return sylabus;
         }
 
-        public async Task<Test> RemoveTestByIdAsync(int testId, int userId)
+        public async Task<Syllabus> RemoveSyllabusByIdAsync(int sylabusId, int userId)
         {
-            var test = await _context.Tests
-                .FirstOrDefaultAsync(t => t.Id == testId
+            var sylabus = await _context.Sylabuses
+                .FirstOrDefaultAsync(t => t.Id == sylabusId
                         && t.Subject!.UserId == userId)
-                ?? throw new TestNotFoundException(
-                        $"Test not found with Id={testId}, UserId={userId}");
+                ?? throw new SylabusNotFoundException(
+                        $"Sylabus not found with Id={sylabusId}, UserId={userId}");
 
-            _context.Tests.Remove(test);
+            _context.Sylabuses.Remove(sylabus);
             await _context.SaveChangesAsync();
-            return test;
+            return sylabus;
         }
 
-        public async Task<Test> GetFullTestByIdAsync(int testId, int userId)
-            => await _context.Tests
-                .FirstOrDefaultAsync(t => t.Id == testId
+        public async Task<Syllabus> GetFullSyllabusByIdAsync(int sylabusId, int userId)
+            => await _context.Sylabuses
+                .FirstOrDefaultAsync(t => t.Id == sylabusId
                         && t.Subject!.UserId == userId)
-                ?? throw new TestNotFoundException(
-                        $"Test not found with Id={testId}, UserId={userId}");
+                ?? throw new SylabusNotFoundException(
+                        $"Sylabus not found with Id={sylabusId}, UserId={userId}");
     }
 }

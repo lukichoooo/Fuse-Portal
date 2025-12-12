@@ -18,8 +18,9 @@ namespace Core.Interfaces.Portal
         Task<LecturerDto> AddLecturerToSubjectAsync(LecturerRequestDto request);
         Task<LecturerDto> RemoveLecturerByIdAsync(int lecturerId);
 
-        Task<TestDto> AddTestForSubjectAsync(TestRequestDto request);
-        Task<TestDto> RemoveTestByIdAsync(int testId);
-        Task<TestFullDto> GetFullTestByIdAsync(int testId);
+        Task<SyllabusDto> AddSylabusForSubjectAsync(SyllabusRequestDto request);
+        Task<SyllabusDto> RemoveSyllabusByIdAsync(int syllabusId);
+        Task<SyllabusFullDto> GetFullSyllabusByIdAsync(int syllabusId);
+        Task<MockExamResponse> GenerateMockExamForSyllabus(int syllabusId);
     }
 }

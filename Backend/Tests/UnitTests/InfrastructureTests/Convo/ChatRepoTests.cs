@@ -193,6 +193,17 @@ namespace InfrastructureTests.Convo
                 res.Messages.ConvertAll(m => m.Id).Order().ToList(),
                 Is.EqualTo(messages.ConvertAll(m => m.Id).Order().ToList())
             );
+            Assert.That(res.Messages
+                    .SelectMany(m => m.Files)
+                    .Select(f => f.Name)
+                    .ToList()
+                    .Order(),
+            Is.EquivalentTo(messages
+                .SelectMany(m => m.Files)
+                .Select(f => f.Name)
+                .ToList()
+                .Order()
+                ));
         }
 
 
@@ -202,7 +213,7 @@ namespace InfrastructureTests.Convo
         public async Task GetChatWithMessagesPageAsync_PagingTest(int n)
         {
             const int pageSize = 16;
-            int? lastId = null;
+            int? firstId = null;
             const int chatId = 5;
             const int userId = 10;
 
@@ -238,14 +249,15 @@ namespace InfrastructureTests.Convo
             for (int i = 0; i < n; i += pageSize)
             {
                 var res = await _repo.GetChatWithMessagesPageAsync(
-                    chat.Id, lastId, pageSize, userId);
+                    chat.Id, firstId, pageSize, userId);
                 Assert.That(res, Is.Not.Null);
                 foreach (var msg in res.Messages)
                 {
                     Assert.That(seenId.Contains(msg.Id), Is.EqualTo(false));
                     seenId.Add(msg.Id);
                 }
-                lastId = res.Messages.Last().Id;
+                if (res.Messages.Count > 0)
+                    firstId = res.Messages[0].Id;
             }
             Assert.That(seenId, Has.Count.EqualTo(n));
         }
@@ -380,8 +392,21 @@ namespace InfrastructureTests.Convo
                 var res = await _context.ChatFiles.FindAsync(f.Id);
                 Assert.That(res, Is.Not.Null);
             }
+            var filesCount = _context.ChatFiles.Count();
+            Assert.That(files, Has.Count.EqualTo(filesCount));
         }
 
+        //
+        // [Test]
+        // public async Task AddStoredFileToMessage_Success()
+        // {
+        //     const int userId = 10;
+        //     var file = _fix.Create<ChatFile>();
+        //     file.UserId = userId;
+        //     var msg = _fix.Create<Message>();
+        //
+        //     var returnValue = await _repo.AddStoredFileToMessage(file.Id, msg.Id, userId);
+        // }
 
     }
 }

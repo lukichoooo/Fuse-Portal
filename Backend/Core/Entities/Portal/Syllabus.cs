@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Core.Entities.Portal
 {
-    public class Test
+    public class Syllabus
     {
         [Key]
         public int Id { get; set; }
@@ -16,9 +16,6 @@ namespace Core.Entities.Portal
         [Required]
         public required int SubjectId { get; set; }
         public Subject? Subject { get; set; }
-
-
-        public DateTime? Date { get; set; }
 
         public string? Metadata { get; set; }
     }

@@ -55,32 +55,32 @@ namespace Infrastructure.Repos
                 .ToListAsync();
         }
 
-
-
         public async Task<Chat> GetChatWithMessagesPageAsync(
             int chatId,
-            int? lastMsgId,
+            int? firstMsgId,
             int pageSize,
             int userId)
         {
+            IQueryable<Message> messageQuery = _context.Messages
+                .Where(m => m.ChatId == chatId);
+
+            if (firstMsgId is not null)
+                messageQuery = messageQuery.Where(m => m.Id < firstMsgId);
+
+            var messages = await messageQuery
+                .Include(m => m.Files)
+                .OrderByDescending(m => m.Id)
+                .Take(pageSize)
+                .ToListAsync();
+
+            messages.Reverse();
+
             var chat = await _context.Chats
                 .Where(c => c.Id == chatId && c.UserId == userId)
                 .FirstOrDefaultAsync()
                 ?? throw new ChatNotFoundException($"Chat not found with Id={chatId}");
 
-            IQueryable<Message> query = _context.Messages
-                .Where(m => m.ChatId == chat.Id);
-
-            if (lastMsgId is not null)
-            {
-                query = query
-                    .Where(m => m.Id > lastMsgId);
-            }
-
-            chat.Messages = await query
-                .OrderBy(m => m.Id)
-                .Take(pageSize)
-                .ToListAsync();
+            chat.Messages = messages;
 
             return chat;
         }
@@ -139,7 +139,11 @@ namespace Infrastructure.Repos
                     .FirstOrDefaultAsync(f => f.Id == fileId
                             && f.UserId == userId)
                 ?? throw new FileNotFoundException($"File not found With Id={fileId}");
-            file.MessageId = messageId;
+            if (file.MessageId != messageId) // only update if it's different
+            {
+                file.MessageId = messageId;
+                await _context.SaveChangesAsync();
+            }
             await _context.SaveChangesAsync();
             return file;
         }

@@ -168,36 +168,36 @@ namespace PresentationTests
 
 
         [Test]
-        public async Task AddTestAsync_Success()
+        public async Task AddSyllabusAsync_Success()
         {
-            var request = _fix.Create<TestRequestDto>();
-            var testDto = _fix.Create<TestDto>();
+            var request = _fix.Create<SyllabusRequestDto>();
+            var testDto = _fix.Create<SyllabusDto>();
             var mock = new Mock<IPortalService>();
-            mock.Setup(s => s.AddTestForSubjectAsync(request))
+            mock.Setup(s => s.AddSylabusForSubjectAsync(request))
                 .ReturnsAsync(testDto);
             var sut = CreateController(mock.Object);
 
-            var res = await sut.AddTestAsync(request);
+            var res = await sut.AddSylabusAsync(request);
 
             Assert.That(res, Is.Not.Null);
-            var actual = (res.Result as OkObjectResult)?.Value as TestDto;
+            var actual = (res.Result as OkObjectResult)?.Value as SyllabusDto;
             Assert.That(actual, Is.EqualTo(testDto));
         }
 
 
         [Test]
-        public async Task GetTestByIdAsync_Success()
+        public async Task GetSyllabusByIdAsync_Success()
         {
-            var testDto = _fix.Create<TestFullDto>();
+            var testDto = _fix.Create<SyllabusFullDto>();
             var mock = new Mock<IPortalService>();
-            mock.Setup(s => s.GetFullTestByIdAsync(testDto.Id))
+            mock.Setup(s => s.GetFullSyllabusByIdAsync(testDto.Id))
                 .ReturnsAsync(testDto);
             var sut = CreateController(mock.Object);
 
-            var res = await sut.GetTestByIdAsync(testDto.Id);
+            var res = await sut.GetSylabusByIdAsync(testDto.Id);
 
             Assert.That(res, Is.Not.Null);
-            var actual = (res.Result as OkObjectResult)?.Value as TestFullDto;
+            var actual = (res.Result as OkObjectResult)?.Value as SyllabusFullDto;
             Assert.That(actual, Is.EqualTo(testDto));
         }
 

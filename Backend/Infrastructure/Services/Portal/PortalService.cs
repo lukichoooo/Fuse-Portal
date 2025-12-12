@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Core.Dtos;
 using Core.Exceptions;
 using Core.Interfaces.Auth;
@@ -10,14 +9,25 @@ namespace Infrastructure.Services.Portal
             IPortalRepo repo,
             IPortalMapper mapper,
             ICurrentContext currentContext,
-            IPortalParser portalParser
+            IPortalParser portalParser,
+            IMockExamCreator examCreator
             ) : IPortalService
     {
         private readonly IPortalRepo _repo = repo;
         private readonly IPortalMapper _mapper = mapper;
         private readonly ICurrentContext _currentContext = currentContext;
         private readonly IPortalParser _portalParser = portalParser;
+        private readonly IMockExamCreator _examCreator = examCreator;
 
+
+        // TODO: Write tests / implement functionality
+        public async Task<MockExamResponse> GenerateMockExamForSyllabus(int syllabusId)
+        {
+            var userId = _currentContext.GetCurrentUserId();
+            var syllabus = await _repo.GetFullSyllabusByIdAsync(syllabusId, userId);
+            var examContent = await _examCreator.GenerateExamAsync(syllabus.Content);
+            return new MockExamResponse(examContent);
+        }
 
         public async Task<PortalParserResponseDto> ParseAndSavePortalAsync(string HtmlPage)
         {
@@ -44,10 +54,10 @@ namespace Infrastructure.Services.Portal
                     await _repo.AddLecturerToSubjectAsync(lecturer, userId);
                 }
 
-                foreach (var testNoSubjectId in subjectFullRequest.Tests)
+                foreach (var sylabusNoSubjectId in subjectFullRequest.Syllabuses)
                 {
-                    var test = _mapper.ToTest(testNoSubjectId, subjectId);
-                    await _repo.AddTestForSubjectAsync(test, userId);
+                    var sylabus = _mapper.ToSyllabus(sylabusNoSubjectId, subjectId);
+                    await _repo.AddSyllabusForSubjectAsync(sylabus, userId);
                 }
             }
             return portal;
@@ -114,26 +124,26 @@ namespace Infrastructure.Services.Portal
                                     lecturerId, userId));
         }
 
-        public async Task<TestDto> AddTestForSubjectAsync(TestRequestDto request)
+        public async Task<SyllabusDto> AddSylabusForSubjectAsync(SyllabusRequestDto request)
         {
             int userId = _currentContext.GetCurrentUserId();
-            var test = _mapper.ToTest(request);
-            return _mapper.ToTestDto(await _repo.AddTestForSubjectAsync(
-                        test, userId));
+            var sylabus = _mapper.ToSyllabus(request);
+            return _mapper.ToSyllabusDto(await _repo.AddSyllabusForSubjectAsync(
+                        sylabus, userId));
         }
 
-        public async Task<TestDto> RemoveTestByIdAsync(int testId)
+        public async Task<SyllabusDto> RemoveSyllabusByIdAsync(int syllabiId)
         {
             int userId = _currentContext.GetCurrentUserId();
-            return _mapper.ToTestDto(await _repo.RemoveTestByIdAsync(
-                        testId, userId));
+            return _mapper.ToSyllabusDto(await _repo.RemoveSyllabusByIdAsync(
+                        syllabiId, userId));
         }
 
-        public async Task<TestFullDto> GetFullTestByIdAsync(int testId)
+        public async Task<SyllabusFullDto> GetFullSyllabusByIdAsync(int syllabiId)
         {
             int userId = _currentContext.GetCurrentUserId();
-            return _mapper.ToTestFullDto(await _repo.GetFullTestByIdAsync(
-                        testId, userId));
+            return _mapper.ToSyllabusFullDto(await _repo.GetFullSyllabusByIdAsync(
+                        syllabiId, userId));
         }
     }
 }
