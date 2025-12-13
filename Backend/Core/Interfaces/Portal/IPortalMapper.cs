@@ -29,5 +29,8 @@ namespace Core.Interfaces.Portal
         Schedule ToSchedule(ScheduleRequestDtoNoSubjectId dto, int subjectId);
         Lecturer ToLecturer(LecturerRequestDtoNoSubjectId dto, int subjectId);
         Syllabus ToSyllabus(SyllabusRequestDtoNoSubjectId dto, int subjectId);
+
+        Exam ToExam(ExamDto dto);
+        ExamDto ToExamDto(Exam exam);
     }
 }

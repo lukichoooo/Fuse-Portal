@@ -11,7 +11,7 @@ namespace Core.Dtos.Settings
         public float Temperature { get; init; }
         public int MaxTokens { get; init; }
         public int ContextWindow { get; init; }
-        public bool Stream { get; init; }
+        public bool Stream { get; init; } = false;
 
         public string? ResponseFormatType { get; init; }
     }

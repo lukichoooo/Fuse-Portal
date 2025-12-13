@@ -9,7 +9,7 @@ using Moq;
 namespace InfrastructureTests.LLM.LMStudio
 {
     [TestFixture]
-    public class LMStudioMockExamGeneratorTests
+    public class LMStudioMockExamServiceTests
     {
         private readonly Fixture _fix = new();
 
@@ -23,10 +23,10 @@ namespace InfrastructureTests.LLM.LMStudio
         {
             Chat = "chatyy",
             Parser = "parserr",
-            ExamGenerator = "exam-gen-key"
+            ExamService = "exam-gen-key"
         };
 
-        private LMStudioMockExamGenerator CreateSut(
+        private LMStudioMockExamService CreateSut(
             ILMStudioApi api,
             ILMStudioMapper mapper)
         {
@@ -45,7 +45,7 @@ namespace InfrastructureTests.LLM.LMStudio
             var apiMock = new Mock<ILMStudioApi>();
             apiMock.Setup(a => a.SendMessageAsync(
                         It.IsAny<LMStudioRequest>(),
-                        _settingKeys.ExamGenerator))
+                        _settingKeys.ExamService))
                     .ReturnsAsync(apiResponse);
 
             var mapperMock = new Mock<ILMStudioMapper>();
@@ -61,11 +61,48 @@ namespace InfrastructureTests.LLM.LMStudio
             var sut = CreateSut(apiMock.Object, mapperMock.Object);
 
             // Act
-            var result = await sut.GenerateExamAsync(syllabi);
+            var result = await sut.GenerateExamQuestionsAsync(syllabi);
 
             // Assert
             Assert.That(result, Is.Not.Null);
             Assert.That(result, Is.EqualTo(expectedExamOutput));
+        }
+
+
+
+        [TestCase(0)]
+        [TestCase(100)]
+        [TestCase(10)]
+        public async Task GetExamResultsAsync_Success(int score)
+        {
+            // Arrange
+            string text = $"aujifdawifhjauif Score:{score}";
+            var examDto = _fix.Create<ExamDto>();
+
+            var apiResponse = _fix.Create<LMStudioResponse>();
+
+            var apiMock = new Mock<ILMStudioApi>();
+            apiMock.Setup(a => a.SendMessageAsync(
+                        It.IsAny<LMStudioRequest>(),
+                        _settingKeys.ExamService))
+                    .ReturnsAsync(apiResponse);
+
+            var lmsRequest = _fix.Create<LMStudioRequest>();
+
+            var mapperMock = new Mock<ILMStudioMapper>();
+            mapperMock.Setup(m => m.ToRequest(
+                        It.IsAny<string>(),
+                        It.IsAny<string>()))
+                .Returns(lmsRequest);
+            mapperMock.Setup(m => m.ToOutputText(apiResponse))
+                .Returns(text);
+
+            var sut = CreateSut(apiMock.Object, mapperMock.Object);
+
+            var result = await sut.GetExamResultsAsync(examDto);
+
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Grade, Is.EqualTo(score));
         }
 
         [Test]
@@ -78,7 +115,7 @@ namespace InfrastructureTests.LLM.LMStudio
             var apiMock = new Mock<ILMStudioApi>();
             apiMock.Setup(a => a.SendMessageAsync(
                         It.IsAny<LMStudioRequest>(),
-                        _settingKeys.ExamGenerator))
+                        _settingKeys.ExamService))
                     .ReturnsAsync(apiResponse);
 
             var mapperMock = new Mock<ILMStudioMapper>();
@@ -94,12 +131,12 @@ namespace InfrastructureTests.LLM.LMStudio
             var sut = CreateSut(apiMock.Object, mapperMock.Object);
 
             // Act
-            await sut.GenerateExamAsync(syllabi);
+            await sut.GenerateExamQuestionsAsync(syllabi);
 
             // Assert
             apiMock.Verify(a => a.SendMessageAsync(
                 It.IsAny<LMStudioRequest>(),
-                _settingKeys.ExamGenerator), Times.Once);
+                _settingKeys.ExamService), Times.Once);
         }
 
 
@@ -129,7 +166,7 @@ namespace InfrastructureTests.LLM.LMStudio
             var sut = CreateSut(apiMock.Object, mapperMock.Object);
 
             // Act
-            await sut.GenerateExamAsync(syllabi);
+            await sut.GenerateExamQuestionsAsync(syllabi);
 
             // Assert
             mapperMock.Verify(m => m.ToOutputText(apiResponse), Times.Once);
@@ -161,7 +198,7 @@ namespace InfrastructureTests.LLM.LMStudio
             var sut = CreateSut(apiMock.Object, mapperMock.Object);
 
             // Act
-            var result = await sut.GenerateExamAsync(syllabi);
+            var result = await sut.GenerateExamQuestionsAsync(syllabi);
 
             // Assert
             Assert.That(result, Is.EqualTo(string.Empty));
@@ -190,7 +227,7 @@ namespace InfrastructureTests.LLM.LMStudio
 
             // Act & Assert
             Assert.ThrowsAsync<Exception>(async () =>
-                await sut.GenerateExamAsync(syllabi));
+                await sut.GenerateExamQuestionsAsync(syllabi));
         }
     }
 }

@@ -5,6 +5,8 @@ function App() {
     const openChatbot = () => chrome.tabs.create({ url: "https://fuseportal.ai/chat" });
     const openPortal = () => chrome.tabs.create({ url: "https://fuseportal.ai" });
 
+    // chrome.runtime.sendMessage({ action: "runScript" });
+
     return (
         <div id="root">
             {/* Header hamburger */}

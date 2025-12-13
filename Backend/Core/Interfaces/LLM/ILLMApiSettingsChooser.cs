@@ -4,6 +4,6 @@ namespace Core.Interfaces.LLM
 {
     public interface ILLMApiSettingsChooser
     {
-        public LLMApiSettings GetSettings(string settingsKey);
+        LLMApiSettings GetSettings(string settingsKey);
     }
 }

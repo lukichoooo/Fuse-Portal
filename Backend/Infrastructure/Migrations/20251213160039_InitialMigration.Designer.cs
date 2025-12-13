@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(MyContext))]
-    [Migration("20251212141658_InitialMigration")]
+    [Migration("20251213160039_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -142,6 +142,38 @@ namespace Infrastructure.Migrations
                     b.HasIndex("UniversityId");
 
                     b.ToTable("UserUniversities");
+                });
+
+            modelBuilder.Entity("Core.Entities.Portal.Exam", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Answers")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Questions")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Results")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ScoreFrom100")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SubjectId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SubjectId");
+
+                    b.ToTable("Exams");
                 });
 
             modelBuilder.Entity("Core.Entities.Portal.Lecturer", b =>
@@ -365,6 +397,17 @@ namespace Infrastructure.Migrations
                     b.Navigation("University");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Core.Entities.Portal.Exam", b =>
+                {
+                    b.HasOne("Core.Entities.Portal.Subject", "Subject")
+                        .WithMany()
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Subject");
                 });
 
             modelBuilder.Entity("Core.Entities.Portal.Lecturer", b =>

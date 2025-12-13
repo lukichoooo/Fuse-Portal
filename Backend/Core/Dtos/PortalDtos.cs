@@ -2,9 +2,17 @@
 namespace Core.Dtos;
 
 
-public record MockExamResponse(
-        string Exam
-        );
+public record ExamDto
+{
+    public int Id { get; init; }
+    public string Questions { get; init; } = null!;
+    public int? ScoreFrom100 { get; init; }
+    public string Answers { get; init; } = "";
+    public string? Results { get; set; }
+    public int? Grade { get; set; }
+    public int SubjectId { get; init; }
+    public string? SubjectName { get; init; }
+}
 
 public record SyllabusDto(
         int Id,

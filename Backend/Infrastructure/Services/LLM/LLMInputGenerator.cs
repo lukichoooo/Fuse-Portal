@@ -42,5 +42,21 @@ namespace Infrastructure.Services.LLM
 
             return sb.ToString();
         }
+
+        public string GenerateInput(ExamDto examDto, string? rules)
+        {
+            var sb = new StringBuilder();
+
+            if (!string.IsNullOrWhiteSpace(rules))
+                sb.AppendLine($"{_settings.RulesPromptDelimiter}\n{rules}");
+
+            if (!string.IsNullOrWhiteSpace(examDto.Questions))
+                sb.AppendLine($"-----QUESTIONS-----\n{examDto.Questions}");
+
+            if (!string.IsNullOrWhiteSpace(examDto.Questions))
+                sb.AppendLine($"-----ANSWERS-----\n{examDto.Answers}");
+
+            return sb.ToString();
+        }
     }
 }

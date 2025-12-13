@@ -60,5 +60,11 @@ namespace Infrastructure.Services.LLM.LMStudio
         public string ToOutputText(LMStudioResponse response)
             => response.Output[0].Content[0].Text;
 
+        public LMStudioRequest ToRequest(ExamDto examDto, string? rulesPrompt = null)
+            => new()
+            {
+                Model = _settingsChooser.GetSettings(_keySettings.ExamService).Model,
+                Input = _inputGenerator.GenerateInput(examDto, rulesPrompt),
+            };
     }
 }

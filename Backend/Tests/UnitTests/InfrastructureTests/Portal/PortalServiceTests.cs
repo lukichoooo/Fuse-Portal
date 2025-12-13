@@ -29,7 +29,7 @@ namespace InfrastructureTests.Portal
                 IPortalRepo? repo = null,
                 ICurrentContext? currentContext = null,
                 IPortalParser? portalParser = null,
-                IMockExamCreator? examCreator = null
+                IMockExamService? examService = null
                 )
         {
             repo ??= new Mock<IPortalRepo>().Object;
@@ -48,10 +48,10 @@ namespace InfrastructureTests.Portal
                     .ReturnsAsync(portalDto);
                 portalParser = mock.Object;
             }
-            if (examCreator is null)
+            if (examService is null)
             {
-                var mock = new Mock<IMockExamCreator>();
-                examCreator = mock.Object;
+                var mock = new Mock<IMockExamService>();
+                examService = mock.Object;
             }
 
             return new PortalService(
@@ -59,7 +59,7 @@ namespace InfrastructureTests.Portal
                     _mapper,
                     currentContext,
                     portalParser,
-                    examCreator);
+                    examService);
         }
 
 
@@ -310,6 +310,61 @@ namespace InfrastructureTests.Portal
                         DEFAULT_CONTEXT_ID),
                     Times.Exactly(testCount));
         }
+
+        [Test]
+        public async Task GenerateMockExamForSyllabusAsync_Success()
+        {
+            var syllabus = _fix.Create<Syllabus>();
+            var questions = _fix.Create<string>();
+
+            var repoMock = new Mock<IPortalRepo>();
+            repoMock.Setup(r => r.GetFullSyllabusByIdAsync(
+                        syllabus.Id, DEFAULT_CONTEXT_ID))
+                .ReturnsAsync(syllabus);
+            repoMock.Setup(r => r.AddExamAsync(
+                        It.IsAny<Exam>(), DEFAULT_CONTEXT_ID))
+                .ReturnsAsync((Exam e, int _) => e);
+
+            var examServiceMock = new Mock<IMockExamService>();
+            examServiceMock.Setup(c => c.GenerateExamQuestionsAsync(syllabus.Content))
+                .ReturnsAsync(questions);
+
+            var sut = CreateService(
+                    repo: repoMock.Object,
+                    examService: examServiceMock.Object
+                    );
+
+            var res = await sut.GenerateMockExamForSyllabusAsync(syllabus.Id);
+
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res.Questions, Is.EqualTo(questions));
+        }
+
+
+        [Test]
+        public async Task CheckExamAnswersAsync_Success()
+        {
+            var examDto = _fix.Create<ExamDto>();
+
+            var examServiceMock = new Mock<IMockExamService>();
+            examServiceMock.Setup(c => c.GetExamResultsAsync(It.IsAny<ExamDto>()))
+                .ReturnsAsync((ExamDto e) => e);
+
+            var repoMock = new Mock<IPortalRepo>();
+            repoMock.Setup(r => r.UpdateExamResultsAsync(
+                        It.IsAny<Exam>(), DEFAULT_CONTEXT_ID))
+                .ReturnsAsync((Exam e, int _) => e);
+
+            var sut = CreateService(
+                    repo: repoMock.Object,
+                    examService: examServiceMock.Object);
+
+            var res = await sut.CheckExamAnswersAsync(examDto);
+
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res.Questions, Is.EqualTo(examDto.Questions));
+        }
+
 
     }
 }

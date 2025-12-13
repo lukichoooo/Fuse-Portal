@@ -37,8 +37,18 @@ public record LMStudioResponse(
 
 public record LMStudioRequest
 {
-    public string Model { get; init; } = null!;
+    public string Model { get; set; } = null!;
     public string Input { get; init; } = null!;
+    public bool Stream { get; set; } = false;
     public string? PreviousResponseId { get; set; }
 }
 
+public record LMStudioStreamEvent(
+     string Type,
+     string? ItemId = null,
+     int? OutputIndex = null,
+     int? ContentIndex = null,
+     string? Delta = null,
+     int? SequenceNumber = null,
+     LMStudioResponse? Response = null
+ );

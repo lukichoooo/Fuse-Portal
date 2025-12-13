@@ -405,7 +405,7 @@ namespace InfrastructureTests.Portal
 
 
         [Test]
-        public async Task AddTestToSubjectAsync_Success()
+        public async Task AddSyllabusToSubjectAsync_Success()
         {
             var user = _fix.Create<User>();
             var subject = _fix.Create<Subject>();
@@ -433,7 +433,7 @@ namespace InfrastructureTests.Portal
 
 
         [Test]
-        public async Task AddTestToSubjectAsync_SubjectNotFound_Throws()
+        public async Task AddSyllabusToSubjectAsync_SubjectNotFound_Throws()
         {
             const int realUserId = 5, fakeUserId = 10;
             var user = _fix.Create<User>();
@@ -454,7 +454,7 @@ namespace InfrastructureTests.Portal
 
 
         [Test]
-        public async Task RemoveTestByIdAsync_Success()
+        public async Task RemoveSyllabusByIdAsync_Success()
         {
             var user = _fix.Create<User>();
             var subject = _fix.Create<Subject>();
@@ -481,7 +481,7 @@ namespace InfrastructureTests.Portal
 
 
         [Test]
-        public async Task RemoveTestByIdAsync_WrongUser_Throws()
+        public async Task RemoveSyllabusByIdAsync_WrongUser_Throws()
         {
             const int realUserId = 5, fakeUserId = 10;
             var user = _fix.Create<User>();
@@ -503,18 +503,18 @@ namespace InfrastructureTests.Portal
         }
 
         [Test]
-        public async Task RemoveTestByIdAsync_NotFound_Throws()
+        public async Task RemoveSyllabusByIdAsync_NotFound_Throws()
         {
             var userId = _fix.Create<int>();
-            var testId = _fix.Create<int>();
+            var syllabusId = _fix.Create<int>();
 
             Assert.ThrowsAsync<SylabusNotFoundException>(async () =>
-                    await _sut.RemoveSyllabusByIdAsync(testId, userId));
+                    await _sut.RemoveSyllabusByIdAsync(syllabusId, userId));
         }
 
 
         [Test]
-        public async Task GetFullTestByIdAsync_Success()
+        public async Task GetFullSyllabusByIdAsync_Success()
         {
             var user = _fix.Create<User>();
             var subject = _fix.Create<Subject>();
@@ -524,21 +524,21 @@ namespace InfrastructureTests.Portal
             await _context.SaveChangesAsync();
             subject.UserId = user.Id;
 
-            var test = _fix.Create<Syllabus>();
-            test.SubjectId = subject.Id;
-            test.Subject = null;
-            await _context.AddAsync(test);
+            var syllabus = _fix.Create<Syllabus>();
+            syllabus.SubjectId = subject.Id;
+            syllabus.Subject = null;
+            await _context.AddAsync(syllabus);
             await _context.SaveChangesAsync();
 
-            var res = await _sut.GetFullSyllabusByIdAsync(test.Id, user.Id);
+            var res = await _sut.GetFullSyllabusByIdAsync(syllabus.Id, user.Id);
 
             Assert.That(res, Is.Not.Null);
-            Assert.That(res, Is.EqualTo(test));
+            Assert.That(res, Is.EqualTo(syllabus));
         }
 
 
         [Test]
-        public async Task GetFullTestByIdAsync_WrongUser_Throws()
+        public async Task GetFullSyllabusByIdAsync_WrongUser_Throws()
         {
             const int realUserId = 5, fakeUserId = 10;
             var user = _fix.Create<User>();
@@ -549,24 +549,142 @@ namespace InfrastructureTests.Portal
             await _context.Subjects.AddAsync(subject);
             await _context.SaveChangesAsync();
 
-            var test = _fix.Create<Syllabus>();
-            test.SubjectId = subject.Id;
-            test.Subject = null;
-            await _context.AddAsync(test);
+            var syllabus = _fix.Create<Syllabus>();
+            syllabus.SubjectId = subject.Id;
+            syllabus.Subject = null;
+            await _context.AddAsync(syllabus);
             await _context.SaveChangesAsync();
 
             Assert.ThrowsAsync<SylabusNotFoundException>(async () =>
-                     await _sut.GetFullSyllabusByIdAsync(test.Id, fakeUserId));
+                     await _sut.GetFullSyllabusByIdAsync(syllabus.Id, fakeUserId));
         }
 
         [Test]
-        public async Task GetFullTestByIdAsync_NotFound_Throws()
+        public async Task GetFullSullabusByIdAsync_NotFound_Throws()
         {
             var userId = _fix.Create<int>();
-            var testId = _fix.Create<int>();
+            var syllabusId = _fix.Create<int>();
 
             Assert.ThrowsAsync<SylabusNotFoundException>(async () =>
-                    await _sut.GetFullSyllabusByIdAsync(testId, userId));
+                    await _sut.GetFullSyllabusByIdAsync(syllabusId, userId));
+        }
+
+
+        [Test]
+        public async Task AddExamAsync_Success()
+        {
+            var user = _fix.Create<User>();
+            var subject = _fix.Create<Subject>();
+
+            await _context.Users.AddAsync(user);
+            await _context.Subjects.AddAsync(subject);
+            await _context.SaveChangesAsync();
+            subject.UserId = user.Id;
+            await _context.SaveChangesAsync();
+
+            var exam = _fix.Create<Exam>();
+            exam.SubjectId = subject.Id;
+            exam.Subject = null;
+
+            var rv = await _sut.AddExamAsync(exam, user.Id);
+            var res = await _context.Exams
+                .FirstOrDefaultAsync(e => e.Id == exam.Id
+                        && e.SubjectId == subject.Id);
+
+            Assert.That(rv, Is.Not.Null);
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res, Is.EqualTo(exam));
+            Assert.That(rv, Is.EqualTo(exam));
+        }
+
+        [Test]
+        public async Task AddExamAsync_NoSubject_Throws()
+        {
+            var user = _fix.Create<User>();
+
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
+
+            var exam = _fix.Create<Exam>();
+            exam.Subject = null;
+
+            Assert.ThrowsAsync<SubjectNotFoundException>(async () =>
+                    await _sut.AddExamAsync(exam, user.Id));
+        }
+
+        [Test]
+        public async Task UpdateExamAsync_Success()
+        {
+            var user = _fix.Create<User>();
+            var subject = _fix.Create<Subject>();
+
+            await _context.Users.AddAsync(user);
+            await _context.Subjects.AddAsync(subject);
+            await _context.SaveChangesAsync();
+            subject.UserId = user.Id;
+            await _context.SaveChangesAsync();
+
+            var exam = _fix.Create<Exam>();
+            exam.SubjectId = subject.Id;
+            exam.Subject = null;
+            await _context.Exams.AddAsync(exam);
+            await _context.SaveChangesAsync();
+
+
+            var updatedExam = _fix.Create<Exam>();
+            updatedExam.Id = exam.Id;
+            updatedExam.SubjectId = subject.Id;
+            updatedExam.Subject = null;
+
+            var rv = await _sut.UpdateExamResultsAsync(updatedExam, user.Id);
+            var res = await _context.Exams
+                .FirstOrDefaultAsync(e => e.Id == exam.Id
+                        && e.SubjectId == subject.Id);
+
+            Assert.That(rv, Is.Not.Null);
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res.Results, Is.EqualTo(updatedExam.Results));
+            Assert.That(res.ScoreFrom100, Is.EqualTo(updatedExam.ScoreFrom100));
+            Assert.That(rv.Results, Is.EqualTo(updatedExam.Results));
+            Assert.That(rv.ScoreFrom100, Is.EqualTo(updatedExam.ScoreFrom100));
+        }
+
+        [Test]
+        public async Task UpdateExamAsync_NotFound_Throws()
+        {
+            var user = _fix.Create<User>();
+            var subject = _fix.Create<Subject>();
+
+            await _context.Users.AddAsync(user);
+            await _context.Subjects.AddAsync(subject);
+            await _context.SaveChangesAsync();
+            subject.UserId = user.Id;
+            await _context.SaveChangesAsync();
+
+            var updatedExam = _fix.Create<Exam>();
+            updatedExam.SubjectId = subject.Id;
+            updatedExam.Subject = null;
+
+            Assert.ThrowsAsync<ExamNotFoundException>(async () =>
+                    await _sut.UpdateExamResultsAsync(updatedExam, user.Id));
+        }
+
+
+
+        [Test]
+        public async Task UpdateExamAsync_SubjectNotFound_Throws()
+        {
+            var user = _fix.Create<User>();
+
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+
+            var updatedExam = _fix.Create<Exam>();
+            updatedExam.Subject = null;
+
+            Assert.ThrowsAsync<SubjectNotFoundException>(async () =>
+                    await _sut.UpdateExamResultsAsync(updatedExam, user.Id));
         }
 
     }

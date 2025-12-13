@@ -6,5 +6,6 @@ namespace Core.Interfaces.LLM
     {
         string GenerateInput(MessageDto msg, string? rules);
         string GenerateInput(string text, string? rules);
+        string GenerateInput(ExamDto examDto, string? rules);
     }
 }

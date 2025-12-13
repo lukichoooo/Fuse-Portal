@@ -58,7 +58,7 @@ public static class DependencyInjection
         services.AddScoped<ILLMMessageService, LMStudioMessageService>();
         services.AddScoped<ILLMInputGenerator, LLMInputGenerator>();
         services.AddScoped<ILLMApiSettingsChooser, LLMApiSettingsChooser>();
-        services.AddScoped<IMockExamCreator, LMStudioMockExamGenerator>();
+        services.AddScoped<IMockExamService, LMStudioMockExamService>();
 
         // ORC
         services.AddSingleton(new IronTesseract

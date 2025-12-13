@@ -6,7 +6,8 @@ namespace Core.Interfaces.Portal
     {
         Task<PortalParserResponseDto> ParseAndSavePortalAsync(string HtmlPage);
 
-        Task<List<SubjectDto>> GetSubjectsPageForCurrentUserAsync(int? lastSubjectId, int pageSize);
+        Task<List<SubjectDto>> GetSubjectsPageForCurrentUserAsync(
+                int? lastSubjectId, int pageSize);
         Task<SubjectFullDto> GetFullSubjectByIdAsync(int subjectId);
 
         Task<SubjectFullDto> AddSubjectForCurrentUserAsync(SubjectRequestDto dto);
@@ -21,6 +22,8 @@ namespace Core.Interfaces.Portal
         Task<SyllabusDto> AddSylabusForSubjectAsync(SyllabusRequestDto request);
         Task<SyllabusDto> RemoveSyllabusByIdAsync(int syllabusId);
         Task<SyllabusFullDto> GetFullSyllabusByIdAsync(int syllabusId);
-        Task<MockExamResponse> GenerateMockExamForSyllabus(int syllabusId);
+
+        Task<ExamDto> GenerateMockExamForSyllabusAsync(int syllabusId);
+        Task<ExamDto> CheckExamAnswersAsync(ExamDto examDto);
     }
 }

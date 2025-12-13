@@ -1,4 +1,5 @@
 using Core.Dtos;
+using Core.Entities.Portal;
 using Core.Exceptions;
 using Core.Interfaces.Auth;
 using Core.Interfaces.Portal;
@@ -10,24 +11,37 @@ namespace Infrastructure.Services.Portal
             IPortalMapper mapper,
             ICurrentContext currentContext,
             IPortalParser portalParser,
-            IMockExamCreator examCreator
+            IMockExamService examCreator
             ) : IPortalService
     {
         private readonly IPortalRepo _repo = repo;
         private readonly IPortalMapper _mapper = mapper;
         private readonly ICurrentContext _currentContext = currentContext;
         private readonly IPortalParser _portalParser = portalParser;
-        private readonly IMockExamCreator _examCreator = examCreator;
+        private readonly IMockExamService _examService = examCreator;
 
 
-        // TODO: Write tests / implement functionality
-        public async Task<MockExamResponse> GenerateMockExamForSyllabus(int syllabusId)
+        public async Task<ExamDto> GenerateMockExamForSyllabusAsync(int syllabusId)
         {
             var userId = _currentContext.GetCurrentUserId();
             var syllabus = await _repo.GetFullSyllabusByIdAsync(syllabusId, userId);
-            var examContent = await _examCreator.GenerateExamAsync(syllabus.Content);
-            return new MockExamResponse(examContent);
+            Exam exam = new()
+            {
+                Questions = await _examService.GenerateExamQuestionsAsync(syllabus.Content),
+                SubjectId = syllabus.SubjectId,
+            };
+            return _mapper.ToExamDto(await _repo.AddExamAsync(exam, userId));
         }
+
+        public async Task<ExamDto> CheckExamAnswersAsync(ExamDto examDto)
+        {
+            var userId = _currentContext.GetCurrentUserId();
+            var responseDto = await _examService.GetExamResultsAsync(examDto);
+            var exam = await _repo.UpdateExamResultsAsync(
+                    _mapper.ToExam(responseDto), userId);
+            return _mapper.ToExamDto(exam);
+        }
+
 
         public async Task<PortalParserResponseDto> ParseAndSavePortalAsync(string HtmlPage)
         {

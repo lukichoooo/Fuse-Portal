@@ -9,5 +9,7 @@ namespace Core.Interfaces.LLM.LMStudio
 
         LMStudioRequest ToRequest(string text, string? rulesPrompt = null);
         string ToOutputText(LMStudioResponse response);
+
+        LMStudioRequest ToRequest(ExamDto examDto, string? rulesPrompt = null);
     }
 }

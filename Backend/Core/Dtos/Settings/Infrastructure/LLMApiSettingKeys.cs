@@ -4,6 +4,6 @@ namespace Core.Dtos.Settings.Infrastructure
     {
         public string Chat { get; set; } = null!;
         public string Parser { get; set; } = null!;
-        public string ExamGenerator { get; set; } = null!;
+        public string ExamService { get; set; } = null!;
     }
 }

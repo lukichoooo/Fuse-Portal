@@ -147,5 +147,28 @@ namespace Infrastructure.Services.Portal
                 Metadata = dto.Metadata,
                 SubjectId = subjectId
             };
+
+        public Exam ToExam(ExamDto dto)
+            => new()
+            {
+                Id = dto.Id,
+                Questions = dto.Questions,
+                Answers = dto.Answers,
+                SubjectId = dto.SubjectId,
+                Results = dto.Results,
+                ScoreFrom100 = dto.ScoreFrom100,
+            };
+
+        public ExamDto ToExamDto(Exam exam)
+            => new()
+            {
+                Id = exam.Id,
+                Questions = exam.Questions,
+                ScoreFrom100 = exam.ScoreFrom100,
+                Answers = exam.Answers,
+                Results = exam.Results,
+                SubjectName = exam.Subject?.Name,
+                SubjectId = exam.SubjectId
+            };
     }
 }

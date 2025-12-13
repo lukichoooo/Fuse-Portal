@@ -8,7 +8,6 @@ using Core.Exceptions;
 using Core.Interfaces.LLM;
 using Infrastructure.Services.LLM.LMStudio;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Moq;
 using Moq.Protected;
 
@@ -56,10 +55,10 @@ public class LMStudioApiTests
 
 
         _sut = new LMStudioApi(
-            httpClient,
             _loggerMock.Object,
             _serializerOptions,
-            settingsChooserMock.Object
+            settingsChooserMock.Object,
+            httpClient
         );
     }
 

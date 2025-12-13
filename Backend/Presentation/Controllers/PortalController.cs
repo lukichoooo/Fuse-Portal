@@ -19,8 +19,20 @@ public class PortalController(
     private readonly IPortalService _service = service;
     private readonly ControllerSettings _settings = options.Value;
 
+    [HttpGet("exam/{syllabusId}")]
+    public async Task<ActionResult<ExamDto>> GenerateMockExamBySyllabusAsync(
+            [FromRoute] int syllabusId
+            )
+        => Ok(await _service.GenerateMockExamForSyllabusAsync(syllabusId));
+
+    [HttpPost("exam")]
+    public async Task<ActionResult<ExamDto>> CheckExamAnswersAsync(
+            [FromBody] ExamDto examDto
+            )
+        => Ok(await _service.CheckExamAnswersAsync(examDto));
+
     [HttpPost("upload-html")]
-    public async Task<ActionResult> AddLecturerAsync()
+    public async Task<ActionResult> ParseHtmlPortalAsync()
     {
         var rawHtmlPage = await Request.GetRawBodyAsync();
         await _service.ParseAndSavePortalAsync(rawHtmlPage);

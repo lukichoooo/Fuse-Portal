@@ -19,5 +19,8 @@ namespace Core.Interfaces.Portal
         Task<Syllabus> AddSyllabusForSubjectAsync(Syllabus syllabi, int userId);
         Task<Syllabus> RemoveSyllabusByIdAsync(int syllabiId, int userId);
         Task<Syllabus> GetFullSyllabusByIdAsync(int syllabiId, int userId);
+
+        Task<Exam> AddExamAsync(Exam exam, int userId);
+        Task<Exam> UpdateExamResultsAsync(Exam exam, int userId);
     }
 }

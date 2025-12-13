@@ -150,5 +150,43 @@ namespace Infrastructure.Repos
                         && t.Subject!.UserId == userId)
                 ?? throw new SylabusNotFoundException(
                         $"Sylabus not found with Id={sylabusId}, UserId={userId}");
+
+        public async Task<Exam> AddExamAsync(Exam exam, int userId)
+        {
+            bool subjectExists = await _context.Subjects
+                .AnyAsync(s => s.Id == exam.SubjectId
+                        && s.UserId == userId);
+
+            if (!subjectExists)
+            {
+                throw new SubjectNotFoundException(
+                    $"Subject not found: Id={exam.SubjectId}, UserId={userId}");
+            }
+
+            await _context.Exams.AddAsync(exam);
+            await _context.SaveChangesAsync();
+            return exam;
+        }
+
+        public async Task<Exam> UpdateExamResultsAsync(Exam examUpdate, int userId)
+        {
+            bool subjectExists = await _context.Subjects
+                .AnyAsync(s => s.Id == examUpdate.SubjectId
+                        && s.UserId == userId);
+
+            if (!subjectExists)
+            {
+                throw new SubjectNotFoundException(
+                    $"Subject not found: Id={examUpdate.SubjectId}, UserId={userId}");
+            }
+
+            var onDbExam = await _context.Exams.FindAsync(examUpdate.Id)
+                ?? throw new ExamNotFoundException($"Exam Not Found With Id={examUpdate.Id}");
+            onDbExam.Results = examUpdate.Results;
+            onDbExam.ScoreFrom100 = examUpdate.ScoreFrom100;
+
+            await _context.SaveChangesAsync();
+            return examUpdate;
+        }
     }
 }

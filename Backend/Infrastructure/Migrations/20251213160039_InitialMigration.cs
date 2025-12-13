@@ -158,6 +158,29 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Exams",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Questions = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Answers = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Results = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ScoreFrom100 = table.Column<int>(type: "int", nullable: true),
+                    SubjectId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Exams", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Exams_Subjects_SubjectId",
+                        column: x => x.SubjectId,
+                        principalTable: "Subjects",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Lecturers",
                 columns: table => new
                 {
@@ -266,6 +289,11 @@ namespace Infrastructure.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Exams_SubjectId",
+                table: "Exams",
+                column: "SubjectId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Lecturers_SubjectId",
                 table: "Lecturers",
                 column: "SubjectId");
@@ -311,6 +339,9 @@ namespace Infrastructure.Migrations
         {
             migrationBuilder.DropTable(
                 name: "ChatFiles");
+
+            migrationBuilder.DropTable(
+                name: "Exams");
 
             migrationBuilder.DropTable(
                 name: "Lecturers");

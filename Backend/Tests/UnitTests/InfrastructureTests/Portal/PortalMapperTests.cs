@@ -166,5 +166,25 @@ namespace InfrastructureTests.Portal
             HelperMapperTest.AssertCommonPropsByName(res, requestNoId);
         }
 
+
+        [Test]
+        public void ToExam_From_ExamDto()
+        {
+            var dto = _fix.Create<ExamDto>();
+            var res = _sut.ToExam(dto);
+            Assert.That(res, Is.Not.Null);
+            HelperMapperTest.AssertCommonPropsByName(res, dto);
+        }
+
+
+        [Test]
+        public void ToExamDto_From_Exam()
+        {
+            var exam = _fix.Create<Exam>();
+            var res = _sut.ToExamDto(exam);
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res.SubjectName, Is.EqualTo(exam.Subject!.Name));
+            HelperMapperTest.AssertCommonPropsByName(res, exam);
+        }
     }
 }

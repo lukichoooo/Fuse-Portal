@@ -31,3 +31,11 @@ public class SylabusNotFoundException : Exception, ICustomException
     public SylabusNotFoundException() { }
     public SylabusNotFoundException(string? message, Exception? innerException) : base(message, innerException) { }
 }
+
+
+public class ExamNotFoundException : Exception, ICustomException
+{
+    public ExamNotFoundException(string message) : base(message) { }
+    public ExamNotFoundException() { }
+    public ExamNotFoundException(string? message, Exception? innerException) : base(message, innerException) { }
+}
