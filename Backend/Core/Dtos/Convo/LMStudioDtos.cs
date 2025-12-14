@@ -52,3 +52,5 @@ public record LMStudioStreamEvent(
      int? SequenceNumber = null,
      LMStudioResponse? Response = null
  );
+
+

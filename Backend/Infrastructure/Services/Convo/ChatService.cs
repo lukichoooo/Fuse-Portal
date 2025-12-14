@@ -67,7 +67,8 @@ namespace Infrastructure.Services
             int userId = _currentContext.GetCurrentUserId();
 
             var fileDtos = (await Task.WhenAll(fileIds
-                        .Select(id => _repo.GetFileByIdAsync(id, userId).AsTask())
+                        .Select(id => _repo.GetFileByIdAsync(id, userId)
+                            .AsTask())
                         ))
                 .Where(f => f is not null)
                 .Select(f => _mapper.ToFileDto(f!))
@@ -77,7 +78,8 @@ namespace Infrastructure.Services
 
             var userMessage = await _repo.AddMessageAsync(message);
             var llmResponse = await _LLMService.SendMessageAsync(
-                    _mapper.ToMessageDto(clientMessage, fileDtos));
+                    _mapper.ToMessageDto(clientMessage, fileDtos)
+                    );
 
             var response = await _repo.AddMessageAsync(_mapper.ToMessage(llmResponse, userId));
 

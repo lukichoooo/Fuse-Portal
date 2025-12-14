@@ -58,7 +58,8 @@ namespace Infrastructure.Services.Convo.FileServices
                 string ext = Path.GetExtension(f.Name).ToLowerInvariant();
                 string text = await (_handlers.TryGetValue(ext, out var handler)
                                         ? handler(ms)
-                                        : _ocr.FallbackOcrAsync(ms));
+                                        : _ocr.FallbackOcrAsync(ms)
+                                        );
 
                 _logger.LogInformation("FileName: {}, Contents: {}", f.Name, text);
                 return new FileDto(f.Name, text);

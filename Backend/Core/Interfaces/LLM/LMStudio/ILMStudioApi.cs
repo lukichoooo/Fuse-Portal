@@ -5,5 +5,10 @@ namespace Core.Interfaces.LLM.LMStudio
     public interface ILMStudioApi
     {
         Task<LMStudioResponse> SendMessageAsync(LMStudioRequest request, string settingsKey);
+
+        Task<LMStudioResponse> SendMessageStreamingAsync(
+                LMStudioRequest request,
+                string settingsKey,
+                Action<string>? action = null);
     }
 }

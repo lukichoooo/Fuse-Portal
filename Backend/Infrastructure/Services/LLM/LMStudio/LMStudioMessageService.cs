@@ -44,5 +44,25 @@ When uncertain, ask for clarification.";
             return _mapper.ToMessageDto(response, chatId);
         }
 
+        public async Task<MessageDto> SendMessageAsyncStream(
+                MessageDto msg,
+                Action<string>? onReceived = null)
+        {
+            var chatId = msg.ChatId;
+
+            var request = _mapper.ToRequest(
+                    msg,
+                    await _metadataService.GetLastResponseIdAsync(chatId),
+                    rulesPrompt);
+
+            var response = await _api.SendMessageStreamingAsync(
+                    request,
+                    _apiKeys.Chat,
+                    onReceived);
+
+            await _metadataService.SetLastResponseIdAsync(chatId, response.Id);
+
+            return _mapper.ToMessageDto(response, chatId);
+        }
     }
 }
