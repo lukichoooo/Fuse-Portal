@@ -42,6 +42,7 @@ public record MessageRequest
 {
     public required ClientMessage Message { get; init; }
     public List<int> FileIds { get; init; } = [];
+    public bool Stream { get; init; }
 }
 
 public record CreateChatRequest(

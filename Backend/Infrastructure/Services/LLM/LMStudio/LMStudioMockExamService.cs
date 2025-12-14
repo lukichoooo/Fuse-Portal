@@ -78,7 +78,6 @@ namespace Infrastructure.Services.LLM.LMStudio
         }
 
 
-        // TODO: write in another file
         const string generateExamPrompt = @" 
 Instructions
 When given syllabus content, create a well-structured mock exam following these guidelines:

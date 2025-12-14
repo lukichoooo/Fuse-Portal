@@ -35,6 +35,7 @@ export interface ClientMessage {
 export interface MessageRequest {
     message: ClientMessage;
     fileIds: number[];
+    stream: boolean;
 }
 
 export interface CreateChatRequest {

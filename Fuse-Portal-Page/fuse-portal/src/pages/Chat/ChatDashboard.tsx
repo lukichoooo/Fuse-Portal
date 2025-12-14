@@ -59,7 +59,8 @@ export default function ChatDashboard() {
 
             const response = await ChatService.sendMessage({
                 message: { text: trimmed, chatId: currentChatId },
-                fileIds
+                fileIds,
+                stream: true
             });
 
             setCurrChatMessages(prev => [

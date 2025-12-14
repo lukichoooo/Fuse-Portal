@@ -6,7 +6,7 @@ namespace Core.Interfaces.LLM
     {
         Task<MessageDto> SendMessageAsync(MessageDto msg);
 
-        Task<MessageDto> SendMessageAsyncStream(
+        Task<MessageDto> SendMessageWithStreamingAsync(
                 MessageDto msg,
                 Action<string>? onReceived = null);
     }

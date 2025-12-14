@@ -22,7 +22,6 @@ namespace Infrastructure.Services.LLM.LMStudio
         private readonly JsonSerializerOptions _serializerOptions = serializerOptions;
         private readonly IHtmlCleaner _htmlCleaner = htmlCleaner;
 
-        // TODO: write in another file
         const string rulesPrompt = @"
 ### System Role
 You are a high-performance data extraction engine.

@@ -171,4 +171,46 @@ public class LMStudioApiTests
 
         return hasSnakeCaseKey && hasOriginalValue;
     }
+
+
+
+    // TODO:
+    [Test]
+    public async Task SendMessageStreamingAsyncAsync_WhenApiCallSucceeds_ShouldSerializeToSnakeCaseAndReturnResponse()
+    {
+        CreateSut();
+        var request = _fixture.Create<LMStudioRequest>();
+        var expectedResponse = _fixture.Create<LMStudioResponse>();
+
+        var responseJson = JsonSerializer.Serialize(expectedResponse, _serializerOptions);
+
+        _httpMessageHandlerMock
+            .Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.IsAny<HttpRequestMessage>(),
+                ItExpr.IsAny<CancellationToken>()
+            )
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.OK,
+                Content = new StringContent(responseJson)
+            })
+            .Verifiable();
+
+        var result = await _sut.SendMessageStreamingAsync(request, _settingKeys.Chat);
+
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Id, Is.EqualTo(expectedResponse.Id));
+
+        _httpMessageHandlerMock.Protected().Verify(
+            "SendAsync",
+            Times.Once(),
+            ItExpr.Is<HttpRequestMessage>(req =>
+                CheckContentIsSnakeCase(req.Content, request)
+            ),
+            ItExpr.IsAny<CancellationToken>()
+        );
+    }
+
 }

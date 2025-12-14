@@ -19,13 +19,6 @@ namespace Infrastructure.Services.LLM.LMStudio
         private readonly IChatMetadataService _metadataService = metadataService;
         private readonly LLMApiSettingKeys _apiKeys = apiKeyOptions.Value;
 
-        // TODO: write in another file
-        const string rulesPrompt = @"
-You are Ruby, a fox with glasses and an AI mentor for students around the world.
-Be direct, concise, and technical. Give clear answers without fluff.
-When uncertain, ask for clarification.";
-
-
         public async Task<MessageDto> SendMessageAsync(MessageDto msg)
         {
             var chatId = msg.ChatId;
@@ -44,7 +37,7 @@ When uncertain, ask for clarification.";
             return _mapper.ToMessageDto(response, chatId);
         }
 
-        public async Task<MessageDto> SendMessageAsyncStream(
+        public async Task<MessageDto> SendMessageWithStreamingAsync(
                 MessageDto msg,
                 Action<string>? onReceived = null)
         {
@@ -54,6 +47,7 @@ When uncertain, ask for clarification.";
                     msg,
                     await _metadataService.GetLastResponseIdAsync(chatId),
                     rulesPrompt);
+            request.Stream = true;
 
             var response = await _api.SendMessageStreamingAsync(
                     request,
@@ -64,5 +58,13 @@ When uncertain, ask for clarification.";
 
             return _mapper.ToMessageDto(response, chatId);
         }
+
+
+        const string rulesPrompt = @"
+You are Ruby, a fox with glasses and an AI mentor for students around the world.
+Be direct, concise, and technical. Give clear answers without fluff.
+When uncertain, ask for clarification.";
+
+
     }
 }

@@ -59,36 +59,36 @@ namespace Infrastructure.Services
             return _mapper.ToChatDto(await _repo.CreateNewChatAsync(chat));
         }
 
-
-        public async Task<SendMessageResponseDto> SendMessageAsync(MessageRequest messageRequest)
+        public async Task<SendMessageResponseDto> SendMessageAsync(
+            MessageRequest messageRequest,
+            Action<string>? onReceived)
         {
-            ClientMessage clientMessage = messageRequest.Message;
-            List<int> fileIds = messageRequest.FileIds;
             int userId = _currentContext.GetCurrentUserId();
 
-            var fileDtos = (await Task.WhenAll(fileIds
-                        .Select(id => _repo.GetFileByIdAsync(id, userId)
-                            .AsTask())
-                        ))
-                .Where(f => f is not null)
+            var files = await Task.WhenAll(messageRequest.FileIds
+                    .Select(id => _repo.GetFileByIdAsync(id, userId).AsTask()));
+            var fileDtos = files
+                .Where(f => f != null)
                 .Select(f => _mapper.ToFileDto(f!))
                 .ToList();
 
-            var message = _mapper.ToMessage(clientMessage, userId, fileDtos);
+            var userMessage = _mapper.ToMessage(messageRequest.Message, userId, fileDtos);
+            var userMessageDb = await _repo.AddMessageAsync(userMessage);
+            var messageDto = _mapper.ToMessageDto(messageRequest.Message, fileDtos);
 
-            var userMessage = await _repo.AddMessageAsync(message);
-            var llmResponse = await _LLMService.SendMessageAsync(
-                    _mapper.ToMessageDto(clientMessage, fileDtos)
-                    );
+            var llmResponse = messageRequest.Stream
+                ? await _LLMService.SendMessageWithStreamingAsync(messageDto, onReceived)
+                : await _LLMService.SendMessageAsync(messageDto);
 
-            var response = await _repo.AddMessageAsync(_mapper.ToMessage(llmResponse, userId));
+            var responseDb = await _repo.AddMessageAsync(_mapper.ToMessage(llmResponse, userId));
 
-            return new()
+            return new SendMessageResponseDto
             {
-                Response = _mapper.ToMessageDto(response),
-                UserMessage = _mapper.ToMessageDto(userMessage),
+                UserMessage = _mapper.ToMessageDto(userMessageDb),
+                Response = _mapper.ToMessageDto(responseDb)
             };
         }
+
 
         public async Task<FileDto> RemoveFileAsync(int fileId)
             => _mapper.ToFileDto(await _repo.RemoveFileByIdAsync(

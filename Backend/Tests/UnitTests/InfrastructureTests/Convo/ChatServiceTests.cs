@@ -199,7 +199,7 @@ namespace InfrastructureTests.Convo
 
             var service = CreateService(repoMock.Object, LLMServiceMock.Object);
 
-            var res = await service.SendMessageAsync(messageRequest);
+            var res = await service.SendMessageAsync(messageRequest, null);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Response.Text, Is.EqualTo(llmResponse.Text));
@@ -231,7 +231,7 @@ namespace InfrastructureTests.Convo
             var service = CreateService(repoMock.Object, LLMServiceMock.Object);
             var messageRequest = new MessageRequest { Message = cm, FileIds = fileIds };
 
-            var res = await service.SendMessageAsync(messageRequest);
+            var res = await service.SendMessageAsync(messageRequest, null);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Response.Text, Is.EqualTo(response.Text));
@@ -239,6 +239,53 @@ namespace InfrastructureTests.Convo
             LLMServiceMock.Verify(s => s.SendMessageAsync(It.IsAny<MessageDto>()), Times.Once());
             repoMock.Verify(r => r.AddMessageAsync(It.IsAny<Message>()), Times.Exactly(2));
         }
+
+        // TODO: 
+        [Test]
+        public async Task SendMessageAsync_Success_Streaming()
+        {
+            var chatid = _fix.Create<int>();
+            var text = _fix.Create<string>();
+            ClientMessage clientMessage = new()
+            {
+                Text = text,
+                ChatId = chatid
+            };
+            var fileIds = _fix.CreateMany<int>().ToList();
+            MessageRequest messageRequest = new()
+            {
+                FileIds = fileIds,
+                Message = clientMessage,
+            };
+
+            var llmResponse = _fix.Build<MessageDto>()
+                .With(m => m.FromUser, false)
+                .Create();
+            var LLMServiceMock = new Mock<ILLMMessageService>();
+            LLMServiceMock.Setup(s => s.SendMessageAsync(It.IsAny<MessageDto>()))
+                .ReturnsAsync(llmResponse);
+
+            int msgId = _fix.Create<int>();
+            var repoMock = new Mock<IChatRepo>();
+            repoMock.Setup(r => r.AddMessageAsync(It.IsAny<Message>()))
+                .ReturnsAsync((Message msg) => msg);
+
+            var service = CreateService(repoMock.Object, LLMServiceMock.Object);
+
+            var res = await service.SendMessageAsync(messageRequest, null);
+
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res.Response.Text, Is.EqualTo(llmResponse.Text));
+            Assert.That(res.Response.FromUser, Is.EqualTo(false));
+            Assert.That(res.UserMessage.Text, Is.EqualTo(clientMessage.Text));
+            Assert.That(res.UserMessage.FromUser, Is.EqualTo(true));
+            LLMServiceMock.Verify(s => s.SendMessageAsync(It.IsAny<MessageDto>()), Times.Once());
+            repoMock.Verify(r => r.AddMessageAsync(It.IsAny<Message>()), Times.Exactly(2));
+        }
+
+
+
+
 
 
         [Test]

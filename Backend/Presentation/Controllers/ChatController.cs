@@ -7,7 +7,6 @@ using Microsoft.Extensions.Options;
 
 namespace Presentation.Controllers
 {
-    // TODO: Default arguments dont work
     [ApiController]
     [Authorize]
     [Route("api/[controller]")]
@@ -52,15 +51,26 @@ namespace Presentation.Controllers
             )
             => Ok(await _service.DeleteMessageByIdAsync(msgId));
 
-        // TODO: Add cencelation Token
+
         [HttpPost("messages/text")]
         public async Task<ActionResult<MessageDto>> SendMessageAsync(
             [FromBody] MessageRequest messageRequest
             )
-            => Ok(await _service.SendMessageAsync(messageRequest));
+        {
+            if (messageRequest.Stream)
+            {
+                // TODO: add websocket connection
+                Action<string> onRecieved = (string text)
+                    => Console.WriteLine($"Text recieved {text}");
+
+                return Ok(await _service.SendMessageAsync(
+                            messageRequest,
+                            onRecieved));
+            }
+            return Ok(await _service.SendMessageAsync(messageRequest, null));
+        }
 
 
-        // TODO: Add cencelation Token
         [HttpPost("messages/file")]
         public async Task<ActionResult<List<int>>> UploadFilesAsync(
                 [FromForm] IFormFileCollection Files
