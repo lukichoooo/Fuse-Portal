@@ -197,7 +197,7 @@ public class LMStudioApiTests
                     });
         var sut = CreateSut(streamerMock.Object);
 
-        var result = await sut.SendMessageStreamingAsync(
+        var result = await sut.SendMessageWithStreamingAsync(
                 request,
                 _settingKeys.Chat,
                 onRecieved);
@@ -255,7 +255,7 @@ public class LMStudioApiTests
         var sut = CreateSut(streamerMock.Object);
 
         Assert.ThrowsAsync<LMStudioApiException>(async () =>
-                await sut.SendMessageStreamingAsync(
+                await sut.SendMessageWithStreamingAsync(
                 request,
                 _settingKeys.Chat,
                 onRecieved));
@@ -295,7 +295,7 @@ public class LMStudioApiTests
         var sut = CreateSut();
 
         Assert.ThrowsAsync<LMStudioApiException>(async () =>
-                await sut.SendMessageStreamingAsync(
+                await sut.SendMessageWithStreamingAsync(
                 request,
                 _settingKeys.Chat,
                 null));

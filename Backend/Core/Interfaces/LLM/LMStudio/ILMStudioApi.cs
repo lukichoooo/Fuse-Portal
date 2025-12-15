@@ -8,7 +8,7 @@ namespace Core.Interfaces.LLM.LMStudio
                 LMStudioRequest request,
                 string settingsKey);
 
-        Task<LMStudioResponse> SendMessageStreamingAsync(
+        Task<LMStudioResponse> SendMessageWithStreamingAsync(
                 LMStudioRequest request,
                 string settingsKey,
                 Action<string>? action);

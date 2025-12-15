@@ -71,9 +71,7 @@ namespace Infrastructure.Services
             var userMessageDb = await _repo.AddMessageAsync(userMessage);
             var messageDto = _mapper.ToMessageDto(messageRequest.Message, fileDtos);
 
-            var llmResponse = messageRequest.Stream
-                ? await _LLMService.SendMessageWithStreamingAsync(messageDto, onReceived)
-                : await _LLMService.SendMessageAsync(messageDto);
+            var llmResponse = await _LLMService.SendMessageAsync(messageDto, onReceived);
 
             var responseDb = await _repo.AddMessageAsync(_mapper.ToMessage(llmResponse, userId));
 

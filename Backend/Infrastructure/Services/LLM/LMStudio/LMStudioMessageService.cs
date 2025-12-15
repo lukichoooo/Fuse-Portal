@@ -19,44 +19,32 @@ namespace Infrastructure.Services.LLM.LMStudio
         private readonly IChatMetadataService _metadataService = metadataService;
         private readonly LLMApiSettingKeys _apiKeys = apiKeyOptions.Value;
 
-        public async Task<MessageDto> SendMessageAsync(MessageDto msg)
+
+        public async Task<MessageDto> SendMessageAsync(MessageDto msg, Action<string>? onStreamReceived)
         {
             var chatId = msg.ChatId;
-            var request = await CreateRequest(msg);
-
-            var response = await _api.SendMessageAsync(
-                    request,
-                    _apiKeys.Chat);
-
-            await _metadataService.SetLastResponseIdAsync(chatId, response.Id);
-
-            return _mapper.ToMessageDto(response, chatId);
-        }
-
-        public async Task<MessageDto> SendMessageWithStreamingAsync(
-                MessageDto msg,
-                Action<string>? onReceived)
-        {
-            var chatId = msg.ChatId;
-            var request = await CreateRequest(msg);
-            request.Stream = true;
-
-            var response = await _api.SendMessageStreamingAsync(
-                    request,
-                    _apiKeys.Chat,
-                    onReceived);
-
-            await _metadataService.SetLastResponseIdAsync(chatId, response.Id);
-
-            return _mapper.ToMessageDto(response, chatId);
-        }
-
-        // Helper
-
-        private async Task<LMStudioRequest> CreateRequest(MessageDto msg)
-        {
             var lastId = await _metadataService.GetLastResponseIdAsync(msg.ChatId);
-            return _mapper.ToRequest(msg, lastId, RulesPrompt);
+            var request = _mapper.ToRequest(msg, lastId, RulesPrompt);
+            LMStudioResponse response;
+
+            if (onStreamReceived == null)
+            {
+                request.Stream = false;
+                response = await _api.SendMessageAsync(
+                        request,
+                        _apiKeys.Chat);
+            }
+            else
+            {
+                request.Stream = true;
+                response = await _api.SendMessageWithStreamingAsync(
+                        request,
+                        _apiKeys.Chat,
+                        onStreamReceived);
+            }
+
+            await _metadataService.SetLastResponseIdAsync(chatId, response.Id);
+            return _mapper.ToMessageDto(response, chatId);
         }
 
         private const string RulesPrompt = @"

@@ -189,7 +189,9 @@ namespace InfrastructureTests.Convo
                 .With(m => m.FromUser, false)
                 .Create();
             var LLMServiceMock = new Mock<ILLMMessageService>();
-            LLMServiceMock.Setup(s => s.SendMessageAsync(It.IsAny<MessageDto>()))
+            LLMServiceMock.Setup(s => s.SendMessageAsync(
+                        It.IsAny<MessageDto>(),
+                        It.IsAny<Action<string>>()))
                 .ReturnsAsync(llmResponse);
 
             int msgId = _fix.Create<int>();
@@ -206,7 +208,10 @@ namespace InfrastructureTests.Convo
             Assert.That(res.Response.FromUser, Is.EqualTo(false));
             Assert.That(res.UserMessage.Text, Is.EqualTo(clientMessage.Text));
             Assert.That(res.UserMessage.FromUser, Is.EqualTo(true));
-            LLMServiceMock.Verify(s => s.SendMessageAsync(It.IsAny<MessageDto>()), Times.Once());
+            LLMServiceMock.Verify(s => s.SendMessageAsync(
+                        It.IsAny<MessageDto>(),
+                        It.IsAny<Action<string>>()),
+                    Times.Once());
             repoMock.Verify(r => r.AddMessageAsync(It.IsAny<Message>()), Times.Exactly(2));
         }
 
@@ -220,7 +225,9 @@ namespace InfrastructureTests.Convo
 
             var response = _fix.Create<MessageDto>();
             var LLMServiceMock = new Mock<ILLMMessageService>();
-            LLMServiceMock.Setup(s => s.SendMessageAsync(It.IsAny<MessageDto>()))
+            LLMServiceMock.Setup(s => s.SendMessageAsync(
+                        It.IsAny<MessageDto>(),
+                        It.IsAny<Action<string>>()))
                 .ReturnsAsync(response);
 
             int msgId = _fix.Create<int>();
@@ -236,11 +243,13 @@ namespace InfrastructureTests.Convo
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Response.Text, Is.EqualTo(response.Text));
             Assert.That(res.UserMessage.Text, Is.EqualTo(cm.Text));
-            LLMServiceMock.Verify(s => s.SendMessageAsync(It.IsAny<MessageDto>()),
-                    Times.Once());
-            LLMServiceMock.Verify(s => s.SendMessageWithStreamingAsync(
+            LLMServiceMock.Verify(s => s.SendMessageAsync(
                         It.IsAny<MessageDto>(),
-                        It.IsAny<Action<string>>()),
+                        null),
+                    Times.Once());
+            LLMServiceMock.Verify(s => s.SendMessageAsync(
+                        It.IsAny<MessageDto>(),
+                        It.Is<Action<string>>(a => a != null)),
                     Times.Never());
             repoMock.Verify(r => r.AddMessageAsync(It.IsAny<Message>()), Times.Exactly(2));
         }
@@ -261,7 +270,6 @@ namespace InfrastructureTests.Convo
             {
                 FileIds = fileIds,
                 Message = clientMessage,
-                Stream = true,
             };
             var action = _fix.Create<Action<string>>();
 
@@ -269,7 +277,7 @@ namespace InfrastructureTests.Convo
                 .With(m => m.FromUser, false)
                 .Create();
             var LLMServiceMock = new Mock<ILLMMessageService>();
-            LLMServiceMock.Setup(s => s.SendMessageWithStreamingAsync(
+            LLMServiceMock.Setup(s => s.SendMessageAsync(
                         It.IsAny<MessageDto>(),
                         action))
                 .ReturnsAsync(responseMessageDto);
@@ -288,9 +296,11 @@ namespace InfrastructureTests.Convo
             Assert.That(res.Response.FromUser, Is.EqualTo(false));
             Assert.That(res.UserMessage.Text, Is.EqualTo(clientMessage.Text));
             Assert.That(res.UserMessage.FromUser, Is.EqualTo(true));
-            LLMServiceMock.Verify(s => s.SendMessageAsync(It.IsAny<MessageDto>()),
+            LLMServiceMock.Verify(s => s.SendMessageAsync(
+                        It.IsAny<MessageDto>(),
+                        null),
                     Times.Never());
-            LLMServiceMock.Verify(s => s.SendMessageWithStreamingAsync(
+            LLMServiceMock.Verify(s => s.SendMessageAsync(
                         It.IsAny<MessageDto>(),
                         action),
                     Times.Once());

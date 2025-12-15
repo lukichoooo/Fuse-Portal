@@ -60,7 +60,7 @@ namespace Infrastructure.Services.LLM.LMStudio
         }
 
 
-        public async Task<LMStudioResponse> SendMessageStreamingAsync(
+        public async Task<LMStudioResponse> SendMessageWithStreamingAsync(
                 LMStudioRequest lmStudioRequest,
                 string settingsKey,
                 Action<string>? onReceived)

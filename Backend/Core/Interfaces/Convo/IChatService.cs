@@ -11,7 +11,7 @@ namespace Core.Interfaces.Convo
 
         Task<SendMessageResponseDto> SendMessageAsync(
                 MessageRequest messageRequest,
-                Action<string>? onRecieved);
+                Action<string>? onStreamRecieved);
 
         Task<List<int>> UploadFilesAsync(List<FileUpload> files);
         Task<FileDto> RemoveFileAsync(int fileId);

@@ -88,7 +88,7 @@ namespace InfrastructureTests.LLM.LMStudio
 
             var service = CreateService(apiMock.Object, dataServiceMock.Object);
 
-            var res = await service.SendMessageAsync(msg);
+            var res = await service.SendMessageAsync(msg, null);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.ChatId, Is.EqualTo(msg.ChatId));
@@ -117,7 +117,7 @@ namespace InfrastructureTests.LLM.LMStudio
 
             var service = CreateService(apiMock.Object, dataServiceMock.Object);
 
-            var res = await service.SendMessageAsync(msg);
+            var res = await service.SendMessageAsync(msg, null);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.ChatId, Is.EqualTo(msg.ChatId));
@@ -127,7 +127,7 @@ namespace InfrastructureTests.LLM.LMStudio
 
 
         [Test]
-        public async Task SendMessageWithStreamingAsync_Success()
+        public async Task SendMessageAsync_WithStreaming_Success()
         {
             var msg = _fix.Create<MessageDto>();
             var request = _fix.Create<LMStudioRequest>();
@@ -135,7 +135,7 @@ namespace InfrastructureTests.LLM.LMStudio
             var response = _fix.Create<LMStudioResponse>();
 
             var apiMock = new Mock<ILMStudioApi>();
-            apiMock.Setup(a => a.SendMessageStreamingAsync(
+            apiMock.Setup(a => a.SendMessageWithStreamingAsync(
                         It.IsAny<LMStudioRequest>(),
                         It.IsAny<string>(),
                         action))
@@ -149,7 +149,7 @@ namespace InfrastructureTests.LLM.LMStudio
 
             var service = CreateService(apiMock.Object, dataServiceMock.Object);
 
-            var res = await service.SendMessageWithStreamingAsync(msg, action);
+            var res = await service.SendMessageAsync(msg, action);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.ChatId, Is.EqualTo(msg.ChatId));
@@ -158,7 +158,7 @@ namespace InfrastructureTests.LLM.LMStudio
 
 
         [Test]
-        public async Task SendMessageWithStreamingAsync_NullLastResponseId_Success()
+        public async Task SendMessageAsync_WithStreaming_NullLastResponseId_Success()
         {
             var msg = _fix.Create<MessageDto>();
             var request = _fix.Create<LMStudioRequest>();
@@ -166,7 +166,7 @@ namespace InfrastructureTests.LLM.LMStudio
             var response = _fix.Create<LMStudioResponse>();
 
             var apiMock = new Mock<ILMStudioApi>();
-            apiMock.Setup(a => a.SendMessageStreamingAsync(
+            apiMock.Setup(a => a.SendMessageWithStreamingAsync(
                         It.IsAny<LMStudioRequest>(),
                         It.IsAny<string>(),
                         action))
@@ -180,14 +180,14 @@ namespace InfrastructureTests.LLM.LMStudio
 
             var service = CreateService(apiMock.Object, dataServiceMock.Object);
 
-            var res = await service.SendMessageWithStreamingAsync(msg, action);
+            var res = await service.SendMessageAsync(msg, action);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.ChatId, Is.EqualTo(msg.ChatId));
             AssertStreamServiceCalls(apiMock, dataServiceMock, action);
         }
 
-        private void AssertStreamServiceCalls(
+        private static void AssertStreamServiceCalls(
                 Mock<ILMStudioApi> apiMock,
                 Mock<IChatMetadataService> dataServiceMock,
                 Action<string>? action = null)
@@ -196,7 +196,7 @@ namespace InfrastructureTests.LLM.LMStudio
                         It.IsAny<LMStudioRequest>(),
                         It.IsAny<string>()),
                         Times.Never());
-            apiMock.Verify(a => a.SendMessageStreamingAsync(
+            apiMock.Verify(a => a.SendMessageWithStreamingAsync(
                         It.IsAny<LMStudioRequest>(),
                         It.IsAny<string>(),
                         action),
@@ -208,7 +208,7 @@ namespace InfrastructureTests.LLM.LMStudio
                         Times.Once());
         }
 
-        private void AssertServiceCalls(
+        private static void AssertServiceCalls(
                 Mock<ILMStudioApi> apiMock,
                 Mock<IChatMetadataService> dataServiceMock)
         {
@@ -216,7 +216,7 @@ namespace InfrastructureTests.LLM.LMStudio
                         It.IsAny<LMStudioRequest>(),
                         It.IsAny<string>()),
                         Times.Once());
-            apiMock.Verify(a => a.SendMessageStreamingAsync(
+            apiMock.Verify(a => a.SendMessageWithStreamingAsync(
                         It.IsAny<LMStudioRequest>(),
                         It.IsAny<string>(),
                         It.IsAny<Action<string>>()),
