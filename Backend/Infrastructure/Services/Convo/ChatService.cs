@@ -65,12 +65,7 @@ namespace Infrastructure.Services
         {
             int userId = _currentContext.GetCurrentUserId();
 
-            var files = await Task.WhenAll(messageRequest.FileIds
-                    .Select(id => _repo.GetFileByIdAsync(id, userId).AsTask()));
-            var fileDtos = files
-                .Where(f => f != null)
-                .Select(f => _mapper.ToFileDto(f!))
-                .ToList();
+            var fileDtos = await GetFileDtosAsync(messageRequest.FileIds, userId);
 
             var userMessage = _mapper.ToMessage(messageRequest.Message, userId, fileDtos);
             var userMessageDb = await _repo.AddMessageAsync(userMessage);
@@ -103,5 +98,18 @@ namespace Infrastructure.Services
             var onDbFiles = await _repo.AddFilesAsync(files);
             return onDbFiles.ConvertAll(f => f.Id);
         }
+
+
+        // Helper
+        private async Task<List<FileDto>> GetFileDtosAsync(IEnumerable<int> fileIds, int userId)
+        {
+            var files = await Task.WhenAll(fileIds
+                .Select(id => _repo.GetFileByIdAsync(id, userId).AsTask()));
+            return files
+                .Where(f => f != null)
+                .Select(f => _mapper.ToFileDto(f!))
+                .ToList();
+        }
+
     }
 }

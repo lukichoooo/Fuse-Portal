@@ -15,18 +15,21 @@ namespace Infrastructure.Services.LLM.LMStudio
         private readonly ILogger<LMStudioApi> _logger;
         private readonly ILLMApiSettingsChooser _apiSettingsChooser;
         private readonly HttpClient _httpClient;
+        private readonly ILLMApiResponseStreamer _responseStreamer;
 
         public LMStudioApi(
                 ILogger<LMStudioApi> logger,
                 JsonSerializerOptions serializerOptions,
                 ILLMApiSettingsChooser apiSettingsChooser,
-                HttpClient httpClient
+                HttpClient httpClient,
+                ILLMApiResponseStreamer responseStreamer
                 )
         {
             _logger = logger;
             _serializerOptions = serializerOptions;
             _apiSettingsChooser = apiSettingsChooser;
             _httpClient = httpClient;
+            _responseStreamer = responseStreamer;
         }
 
 
@@ -60,8 +63,7 @@ namespace Infrastructure.Services.LLM.LMStudio
         public async Task<LMStudioResponse> SendMessageStreamingAsync(
                 LMStudioRequest lmStudioRequest,
                 string settingsKey,
-                Action<string>? onReceived = null
-                )
+                Action<string>? onReceived)
         {
             var settings = _apiSettingsChooser.GetSettings(settingsKey);
             _httpClient.BaseAddress = new Uri(settings.URL);
@@ -85,7 +87,8 @@ namespace Infrastructure.Services.LLM.LMStudio
 
             await CheckUnsuccessfulResponseAsync(response);
 
-            LMStudioResponse? completedResponse = await ReadResponseAsStreamAsync(response, onReceived);
+            LMStudioResponse? completedResponse =
+                await _responseStreamer.ReadResponseAsStreamAsync(response, onReceived);
 
             _logger.LogInformation("Completed Response from LMStudio --- \n {}",
                     completedResponse?.Output[0].Content[0].Text);
@@ -109,61 +112,6 @@ namespace Infrastructure.Services.LLM.LMStudio
             }
         }
 
-        private async Task<LMStudioResponse?> ReadResponseAsStreamAsync(HttpResponseMessage responseMessage, Action<string>? onReceived = null)
-        {
-            await using var stream = await responseMessage.Content.ReadAsStreamAsync();
-            using var reader = new StreamReader(stream, Encoding.UTF8);
-
-            string? line;
-            string? currentEvent = null;
-            string? currentData = null;
-            LMStudioStreamEvent? streamEvent = null;
-
-            while ((line = await reader.ReadLineAsync()) != null)
-            {
-                _logger.LogInformation("Stream from LMStudio --- \n {}", line);
-
-                if (line.Length == 0)
-                {
-                    if (currentEvent is not null && currentData is not null)
-                    {
-                        streamEvent = HandleEvent(currentEvent, currentData, onReceived)
-                            ?? streamEvent;
-                    }
-
-                    currentEvent = null;
-                    currentData = null;
-                    continue;
-                }
-
-                if (line.StartsWith("event:"))
-                    currentEvent = line["event:".Length..].Trim();
-                else if (line.StartsWith("data:"))
-                    currentData = line["data:".Length..].Trim();
-            }
-
-            return streamEvent?.Response;
-        }
-
-        private LMStudioStreamEvent? HandleEvent(string evt, string data, Action<string>? onReceived = null)
-        {
-            var streamEvent = JsonSerializer.Deserialize<LMStudioStreamEvent>(data, _serializerOptions);
-            if (streamEvent is null)
-                return null;
-
-            switch (evt)
-            {
-                case "response.output_text.delta":
-                    if (!string.IsNullOrEmpty(streamEvent.Delta))
-                        onReceived?.Invoke(streamEvent.Delta);
-                    break;
-
-                case "response.completed":
-                    return streamEvent;
-            }
-
-            return null;
-        }
 
 
     }

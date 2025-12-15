@@ -236,11 +236,16 @@ namespace InfrastructureTests.Convo
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Response.Text, Is.EqualTo(response.Text));
             Assert.That(res.UserMessage.Text, Is.EqualTo(cm.Text));
-            LLMServiceMock.Verify(s => s.SendMessageAsync(It.IsAny<MessageDto>()), Times.Once());
+            LLMServiceMock.Verify(s => s.SendMessageAsync(It.IsAny<MessageDto>()),
+                    Times.Once());
+            LLMServiceMock.Verify(s => s.SendMessageWithStreamingAsync(
+                        It.IsAny<MessageDto>(),
+                        It.IsAny<Action<string>>()),
+                    Times.Never());
             repoMock.Verify(r => r.AddMessageAsync(It.IsAny<Message>()), Times.Exactly(2));
         }
 
-        // TODO: 
+
         [Test]
         public async Task SendMessageAsync_Success_Streaming()
         {
@@ -256,14 +261,18 @@ namespace InfrastructureTests.Convo
             {
                 FileIds = fileIds,
                 Message = clientMessage,
+                Stream = true,
             };
+            var action = _fix.Create<Action<string>>();
 
-            var llmResponse = _fix.Build<MessageDto>()
+            var responseMessageDto = _fix.Build<MessageDto>()
                 .With(m => m.FromUser, false)
                 .Create();
             var LLMServiceMock = new Mock<ILLMMessageService>();
-            LLMServiceMock.Setup(s => s.SendMessageAsync(It.IsAny<MessageDto>()))
-                .ReturnsAsync(llmResponse);
+            LLMServiceMock.Setup(s => s.SendMessageWithStreamingAsync(
+                        It.IsAny<MessageDto>(),
+                        action))
+                .ReturnsAsync(responseMessageDto);
 
             int msgId = _fix.Create<int>();
             var repoMock = new Mock<IChatRepo>();
@@ -272,15 +281,21 @@ namespace InfrastructureTests.Convo
 
             var service = CreateService(repoMock.Object, LLMServiceMock.Object);
 
-            var res = await service.SendMessageAsync(messageRequest, null);
+            var res = await service.SendMessageAsync(messageRequest, action);
 
             Assert.That(res, Is.Not.Null);
-            Assert.That(res.Response.Text, Is.EqualTo(llmResponse.Text));
+            Assert.That(res.Response.Text, Is.EqualTo(responseMessageDto.Text));
             Assert.That(res.Response.FromUser, Is.EqualTo(false));
             Assert.That(res.UserMessage.Text, Is.EqualTo(clientMessage.Text));
             Assert.That(res.UserMessage.FromUser, Is.EqualTo(true));
-            LLMServiceMock.Verify(s => s.SendMessageAsync(It.IsAny<MessageDto>()), Times.Once());
-            repoMock.Verify(r => r.AddMessageAsync(It.IsAny<Message>()), Times.Exactly(2));
+            LLMServiceMock.Verify(s => s.SendMessageAsync(It.IsAny<MessageDto>()),
+                    Times.Never());
+            LLMServiceMock.Verify(s => s.SendMessageWithStreamingAsync(
+                        It.IsAny<MessageDto>(),
+                        action),
+                    Times.Once());
+            repoMock.Verify(r => r.AddMessageAsync(It.IsAny<Message>()),
+                    Times.Exactly(2));
         }
 
 
@@ -291,17 +306,8 @@ namespace InfrastructureTests.Convo
         [Test]
         public async Task UploadFilesAsync_Success()
         {
-            // var fileUploads = _globalFixture.Build<FileUpload>()
-            //         .With(fu => fu.Name, _globalFixture.Create<string>())
-            //         .With(fu => fu.Stream, _globalFixture.Create<MemoryStream>())
-            //         .CreateMany()
-            //         .ToList();
-
             var fileUploads = new List<FileUpload>();
-
-            var files = _fix.Build<ChatFile>()
-                .CreateMany()
-                .ToList();
+            var files = _fix.CreateMany<ChatFile>().ToList();
             foreach (var f in files)
             {
                 f.UserId = DEFAULT_CONTEXT_ID;
@@ -314,7 +320,7 @@ namespace InfrastructureTests.Convo
 
             var repoMock = new Mock<IChatRepo>();
             repoMock.Setup(r => r.AddFilesAsync(It.IsAny<List<ChatFile>>()))
-                .ReturnsAsync((List<ChatFile> fs) => fs);
+                .ReturnsAsync(files);
 
             var service = CreateService(
                     repo: repoMock.Object,
@@ -324,9 +330,9 @@ namespace InfrastructureTests.Convo
             var res = await service.UploadFilesAsync(fileUploads);
 
             Assert.That(res, Is.Not.Null);
-            // Assert.That(res.Order(),
-            //         Is.EqualTo(files.ConvertAll(f => f.Id)
-            //             .Order()));
+            Assert.That(res.Order(),
+                    Is.EqualTo(files.ConvertAll(f => f.Id)
+                        .Order()));
         }
 
 

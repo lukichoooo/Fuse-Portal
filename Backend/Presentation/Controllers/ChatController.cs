@@ -75,21 +75,26 @@ namespace Presentation.Controllers
         public async Task<ActionResult<List<int>>> UploadFilesAsync(
                 [FromForm] IFormFileCollection Files
                 )
-            => Ok(await _service.UploadFilesAsync(await HelperFilesToStream(Files)));
+            => Ok(await _service.UploadFilesAsync(await Files.FilesToStream()));
 
 
-        // Helper
+    }
+}
 
-        private static async Task<List<FileUpload>> HelperFilesToStream(IFormFileCollection formFiles)
+
+// Helper
+public static class PortalControllerExtensions
+{
+    public static async Task<List<FileUpload>> FilesToStream(
+            this IFormFileCollection formFiles)
+    {
+        var result = new List<FileUpload>(formFiles.Count);
+        foreach (var file in formFiles)
         {
-            var result = new List<FileUpload>(formFiles.Count);
-            foreach (var file in formFiles)
-            {
-                if (file.Length == 0)
-                    continue;
-                result.Add(new FileUpload(file.FileName, file.OpenReadStream()));
-            }
-            return result;
+            if (file.Length == 0)
+                continue;
+            result.Add(new FileUpload(file.FileName, file.OpenReadStream()));
         }
+        return result;
     }
 }

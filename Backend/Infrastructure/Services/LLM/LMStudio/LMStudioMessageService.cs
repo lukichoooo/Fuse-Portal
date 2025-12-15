@@ -22,11 +22,7 @@ namespace Infrastructure.Services.LLM.LMStudio
         public async Task<MessageDto> SendMessageAsync(MessageDto msg)
         {
             var chatId = msg.ChatId;
-
-            var request = _mapper.ToRequest(
-                    msg,
-                    await _metadataService.GetLastResponseIdAsync(chatId),
-                    rulesPrompt);
+            var request = await CreateRequest(msg);
 
             var response = await _api.SendMessageAsync(
                     request,
@@ -39,14 +35,10 @@ namespace Infrastructure.Services.LLM.LMStudio
 
         public async Task<MessageDto> SendMessageWithStreamingAsync(
                 MessageDto msg,
-                Action<string>? onReceived = null)
+                Action<string>? onReceived)
         {
             var chatId = msg.ChatId;
-
-            var request = _mapper.ToRequest(
-                    msg,
-                    await _metadataService.GetLastResponseIdAsync(chatId),
-                    rulesPrompt);
+            var request = await CreateRequest(msg);
             request.Stream = true;
 
             var response = await _api.SendMessageStreamingAsync(
@@ -59,8 +51,15 @@ namespace Infrastructure.Services.LLM.LMStudio
             return _mapper.ToMessageDto(response, chatId);
         }
 
+        // Helper
 
-        const string rulesPrompt = @"
+        private async Task<LMStudioRequest> CreateRequest(MessageDto msg)
+        {
+            var lastId = await _metadataService.GetLastResponseIdAsync(msg.ChatId);
+            return _mapper.ToRequest(msg, lastId, RulesPrompt);
+        }
+
+        private const string RulesPrompt = @"
 You are Ruby, a fox with glasses and an AI mentor for students around the world.
 Be direct, concise, and technical. Give clear answers without fluff.
 When uncertain, ask for clarification.";

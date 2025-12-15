@@ -133,7 +133,7 @@ namespace PresentationTests
             var request = _gloablFixture.Create<MessageRequest>();
             var returnValue = _gloablFixture.Create<SendMessageResponseDto>();
             var mock = new Mock<IChatService>();
-            mock.Setup(s => s.SendMessageAsync(request))
+            mock.Setup(s => s.SendMessageAsync(request, null))
                 .ReturnsAsync(returnValue);
             var sut = CreateController(mock.Object);
 
@@ -152,7 +152,7 @@ namespace PresentationTests
         {
             var request = _gloablFixture.Create<MessageRequest>();
             var mock = new Mock<IChatService>();
-            mock.Setup(s => s.SendMessageAsync(request))
+            mock.Setup(s => s.SendMessageAsync(request, null))
                 .ThrowsAsync(new ChatNotFoundException());
             var sut = CreateController(mock.Object);
 

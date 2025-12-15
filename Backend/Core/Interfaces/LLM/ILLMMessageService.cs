@@ -8,6 +8,6 @@ namespace Core.Interfaces.LLM
 
         Task<MessageDto> SendMessageWithStreamingAsync(
                 MessageDto msg,
-                Action<string>? onReceived = null);
+                Action<string>? onReceived);
     }
 }
