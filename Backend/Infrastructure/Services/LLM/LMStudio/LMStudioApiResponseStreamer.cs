@@ -17,7 +17,7 @@ namespace Infrastructure.Services.LLM.LMStudio
 
         public async Task<LMStudioResponse?> ReadResponseAsStreamAsync(
                 HttpResponseMessage responseMessage,
-                Action<string>? onReceived)
+                Func<string, Task>? onReceived)
         {
             await using var stream = await responseMessage.Content.ReadAsStreamAsync();
             using var reader = new StreamReader(stream, Encoding.UTF8);
@@ -35,7 +35,10 @@ namespace Infrastructure.Services.LLM.LMStudio
                 {
                     if (currentEvent != null && currentData != null)
                     {
-                        streamEvent = HandleEvent(currentEvent, currentData, onReceived)
+                        streamEvent = await HandleEventAsync(
+                                currentEvent,
+                                currentData,
+                                onReceived)
                             ?? streamEvent;
                     }
 
@@ -55,10 +58,10 @@ namespace Infrastructure.Services.LLM.LMStudio
 
         // Helper
 
-        private LMStudioStreamEvent? HandleEvent(
+        private async ValueTask<LMStudioStreamEvent?> HandleEventAsync(
                 string evt,
                 string data,
-                Action<string>? onReceived = null)
+                Func<string, Task>? onReceived)
         {
             var streamEvent = JsonSerializer.Deserialize<LMStudioStreamEvent>(
                     data,
@@ -73,8 +76,9 @@ namespace Infrastructure.Services.LLM.LMStudio
             switch (evt)
             {
                 case "response.output_text.delta":
-                    if (!string.IsNullOrEmpty(streamEvent.Delta))
-                        onReceived?.Invoke(streamEvent.Delta);
+                    if (!string.IsNullOrEmpty(streamEvent.Delta) && onReceived != null)
+                        await onReceived(streamEvent.Delta);
+
                     break;
 
                 case "response.completed":

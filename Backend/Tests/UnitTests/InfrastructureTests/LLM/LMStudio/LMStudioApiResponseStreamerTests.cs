@@ -77,10 +77,15 @@ namespace InfrastructureTests.LLM.LMStudio
             };
             var sut = CreateSut();
             List<string> deltaResults = [];
+            Func<string, Task> onRecieved = (string text) =>
+            {
+                deltaResults.Add(text);
+                return Task.CompletedTask;
+            };
 
             var result = await sut.ReadResponseAsStreamAsync(
                 response,
-                deltaResults.Add
+                onRecieved
             );
 
             Assert.That(deltaResults, Is.EquivalentTo(deltaInputs));

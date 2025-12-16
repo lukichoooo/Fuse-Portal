@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import './ChatDashboard.css';
-import type { ChatDto, MessageDto } from '../../types/Chat';
+import type { ChatDto, MessageDto, MessageRequest } from '../../types/Chat';
 import ChatService from '../../services/ChatService';
 import ErrorPopup from '../../components/Errors/ErrorPopup';
 import type { BackendError } from '../../types/Error';
+import React from 'react';
 
 
 export default function ChatDashboard() {
@@ -43,35 +44,65 @@ export default function ChatDashboard() {
         if (!trimmed && selectedFiles.length === 0) return;
 
         setInput('');
-        const currPendingMessage: MessageDto = {
-            ...pendingMessage,
+
+        // Add user's pending message
+        const userMessage: MessageDto = {
             text: trimmed,
-            chatId: currentChatId
+            id: 0,
+            createdAt: "sending...",
+            chatId: currentChatId,
+            fromUser: true,
+            files: []
         };
-        setCurrChatMessages(prev => [...prev, currPendingMessage]);
+        setCurrChatMessages(prev => [...prev, userMessage]);
 
         try {
-            let fileIds: number[] = [];
-            if (selectedFiles.length > 0) {
-                fileIds = await ChatService.uploadFiles(selectedFiles);
-                setSelectedFiles([]);
-            }
+            // Upload files if any
+            const fileIds = selectedFiles.length > 0
+                ? await ChatService.uploadFiles(selectedFiles)
+                : [];
+            if (selectedFiles.length > 0) setSelectedFiles([]);
 
-            const response = await ChatService.sendMessage({
-                message: { text: trimmed, chatId: currentChatId },
-                fileIds,
-                stream: true
+            // Add pending bot message
+            const botPending: MessageDto = {
+                text: "",
+                id: 0,
+                createdAt: "sending...",
+                chatId: currentChatId,
+                fromUser: false,
+                files: []
+            };
+            setCurrChatMessages(prev => [...prev, botPending]);
+
+            // Streaming handler
+            const onReceived = (chunk: string) => {
+                setCurrChatMessages(prev => {
+                    const last = prev[prev.length - 1];
+                    if (!last) return prev;
+                    return [...prev.slice(0, -1), { ...last, text: last.text + chunk }];
+                });
+            };
+
+            // Send message
+            const request: MessageRequest = { message: { text: trimmed, chatId: currentChatId }, fileIds };
+            const response = await ChatService.sendMessageWithStream(request, onReceived);
+
+            // Replace pending bot message with final messages
+            setCurrChatMessages(prev => {
+                const lastBotIndex = prev.findIndex(m => m.fromUser === false && m.text === "");
+                const newMessages = [...prev];
+
+                if (lastBotIndex !== -1) newMessages[lastBotIndex] = response.userMessage ?? botPending;
+                if (response.response) newMessages.splice(lastBotIndex + 1, 0, response.response);
+
+                return newMessages;
             });
 
-            setCurrChatMessages(prev => [
-                ...prev.slice(0, -1),
-                response.userMessage,
-                response.response
-            ]);
         } catch (err: BackendError | any) {
             setError(err.error || "Failed to send message");
         }
     };
+
 
 
     const removeFileFromMessage = (index: number) => {
@@ -128,32 +159,28 @@ export default function ChatDashboard() {
 
                 <div className="chat-messages" ref={scrollRef}>
                     {currChatMessages.map((msg, idx) => (
-                        <>
-                            <div
-                                key={idx}
-                                className={`chat-message ${msg.fromUser ? 'user' : 'bot'}`}
-                                title={new Date(msg.createdAt).toLocaleString()}
-                            >
-                                {!msg.fromUser && (
-                                    <img
-                                        src='/logos/ruby.png'
-                                        alt="Ruby"
-                                        className="chat-avatar"
-                                    />
-                                )}
-                                <span className="chat-text">{msg.text}</span>
-                            </div>
+                        msg && (
+                            <React.Fragment key={idx}>
+                                <div
+                                    className={`chat-message ${msg.fromUser ? 'user' : 'bot'}`}
+                                    title={new Date(msg.createdAt).toLocaleString()}
+                                >
+                                    {!msg.fromUser && (
+                                        <img src='/logos/ruby.png' alt="Ruby" className="chat-avatar" />
+                                    )}
+                                    <span className="chat-text">{msg.text}</span>
+                                </div>
 
-                            <div className="chat-files">
-                                {msg.files.map((f, i) => (
-                                    <div key={i} className="file-icon-wrapper">
-                                        <span className="file-icon">📎</span>
-                                        <div className="file-tooltip">{f.text}</div>
-                                    </div>
-                                ))}
-                            </div>
-
-                        </>
+                                <div className="chat-files">
+                                    {msg.files.map((f, i) => (
+                                        <div key={i} className="file-icon-wrapper">
+                                            <span className="file-icon">📎</span>
+                                            <div className="file-tooltip">{f.text}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </React.Fragment>
+                        )
                     ))}
                 </div>
 

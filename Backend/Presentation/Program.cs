@@ -1,4 +1,5 @@
 
+using System.Configuration;
 using System.Diagnostics;
 using System.Security.Claims;
 using System.Text;
@@ -7,6 +8,7 @@ using Core.Dtos;
 using Core.Dtos.Settings;
 using Core.Dtos.Settings.Infrastructure;
 using Core.Dtos.Settings.Presentation;
+using Core.Interfaces.Convo;
 using Core.Settings;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -17,6 +19,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Presentation.Filters;
+using Presentation.SignalRHubs;
 using Presentation.Validation;
 using Presentation.Validator;
 
@@ -47,11 +50,16 @@ builder.Services.AddDbContext<MyContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
+// Hub
+builder.Services.AddSignalR();
+builder.Services.AddSingleton<IMessageStreamer, SignalRMessageStreamer>();
+
 // get Settings from Appsettings
 builder.Services.Configure<ValidatorSettings>(builder.Configuration.GetSection("ValidatorSettings"));
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.Configure<EncryptorSettings>(builder.Configuration.GetSection("EncryptorSettings"));
 builder.Services.Configure<ControllerSettings>(builder.Configuration.GetSection("ControllerSettings"));
+builder.Services.Configure<RedisSettings>(builder.Configuration.GetSection("RedisSettings"));
 
 // LLM
 builder.Services.Configure<LLMApiSettingKeys>(builder.Configuration.GetSection("LLMApiSettingKeys"));
@@ -102,7 +110,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddInfrastructure();
+builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddCors(options =>
 {
@@ -110,8 +118,8 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins("http://localhost:5173")
               .AllowAnyHeader()
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 
@@ -130,7 +138,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
+app.MapHub<ChatHub>("/hub/chat");
 
 app.UseCors("AllowFrontend");
 app.Run();

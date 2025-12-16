@@ -191,7 +191,7 @@ namespace InfrastructureTests.Convo
             var LLMServiceMock = new Mock<ILLMMessageService>();
             LLMServiceMock.Setup(s => s.SendMessageAsync(
                         It.IsAny<MessageDto>(),
-                        It.IsAny<Action<string>>()))
+                        It.IsAny<Func<string, Task>>()))
                 .ReturnsAsync(llmResponse);
 
             int msgId = _fix.Create<int>();
@@ -210,7 +210,7 @@ namespace InfrastructureTests.Convo
             Assert.That(res.UserMessage.FromUser, Is.EqualTo(true));
             LLMServiceMock.Verify(s => s.SendMessageAsync(
                         It.IsAny<MessageDto>(),
-                        It.IsAny<Action<string>>()),
+                        It.IsAny<Func<string, Task>>()),
                     Times.Once());
             repoMock.Verify(r => r.AddMessageAsync(It.IsAny<Message>()), Times.Exactly(2));
         }
@@ -227,7 +227,7 @@ namespace InfrastructureTests.Convo
             var LLMServiceMock = new Mock<ILLMMessageService>();
             LLMServiceMock.Setup(s => s.SendMessageAsync(
                         It.IsAny<MessageDto>(),
-                        It.IsAny<Action<string>>()))
+                        It.IsAny<Func<string, Task>>()))
                 .ReturnsAsync(response);
 
             int msgId = _fix.Create<int>();
@@ -249,7 +249,7 @@ namespace InfrastructureTests.Convo
                     Times.Once());
             LLMServiceMock.Verify(s => s.SendMessageAsync(
                         It.IsAny<MessageDto>(),
-                        It.Is<Action<string>>(a => a != null)),
+                        It.Is<Func<string, Task>>(a => a != null)),
                     Times.Never());
             repoMock.Verify(r => r.AddMessageAsync(It.IsAny<Message>()), Times.Exactly(2));
         }
@@ -271,7 +271,7 @@ namespace InfrastructureTests.Convo
                 FileIds = fileIds,
                 Message = clientMessage,
             };
-            var action = _fix.Create<Action<string>>();
+            var action = _fix.Create<Func<string, Task>>();
 
             var responseMessageDto = _fix.Build<MessageDto>()
                 .With(m => m.FromUser, false)

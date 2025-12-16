@@ -18,14 +18,17 @@ using Infrastructure.Services.LLM.Cache;
 using Infrastructure.Services.LLM.LMStudio;
 using Infrastructure.Services.Portal;
 using IronOcr;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using StackExchange.Redis;
 
 namespace Infrastructure;
 
 public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(
-        this IServiceCollection services)
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
         // Add services here for Infrastructure
 
@@ -35,6 +38,12 @@ public static class DependencyInjection
         services.AddScoped<IUniversityRepo, UniversityRepo>();
         services.AddScoped<IChatRepo, ChatRepo>();
         services.AddScoped<IPortalRepo, PortalRepo>();
+
+        // Redis
+        services.AddSingleton<IConnectionMultiplexer>(
+            _ => ConnectionMultiplexer.Connect(
+                configuration.GetConnectionString("Redis")
+                ?? throw new InvalidOperationException("Redis Connection String Null")));
 
         // Mappers
         services.AddScoped<IUserMapper, UserMapper>();
@@ -59,6 +68,7 @@ public static class DependencyInjection
         services.AddScoped<ILLMInputGenerator, LLMInputGenerator>();
         services.AddScoped<ILLMApiSettingsChooser, LLMApiSettingsChooser>();
         services.AddScoped<IMockExamService, LMStudioMockExamService>();
+        services.AddScoped<ILLMApiResponseStreamer, LMStudioApiResponseStreamer>();
 
         // ORC
         services.AddSingleton(new IronTesseract

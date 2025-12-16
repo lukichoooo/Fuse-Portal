@@ -6,6 +6,6 @@ namespace Core.Interfaces.LLM
     {
         Task<LMStudioResponse?> ReadResponseAsStreamAsync(
                 HttpResponseMessage responseMessage,
-                Action<string>? onReceived);
+                Func<string, Task>? onReceived);
     }
 }

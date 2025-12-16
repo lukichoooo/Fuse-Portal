@@ -20,7 +20,7 @@ namespace Infrastructure.Services.LLM.LMStudio
         private readonly LLMApiSettingKeys _apiKeys = apiKeyOptions.Value;
 
 
-        public async Task<MessageDto> SendMessageAsync(MessageDto msg, Action<string>? onStreamReceived)
+        public async Task<MessageDto> SendMessageAsync(MessageDto msg, Func<string, Task>? onStreamReceived)
         {
             var chatId = msg.ChatId;
             var lastId = await _metadataService.GetLastResponseIdAsync(msg.ChatId);

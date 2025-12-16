@@ -22,7 +22,32 @@ namespace Infrastructure.Services.LLM.LMStudio
         private readonly JsonSerializerOptions _serializerOptions = serializerOptions;
         private readonly IHtmlCleaner _htmlCleaner = htmlCleaner;
 
-        const string rulesPrompt = @"
+
+        public async Task<PortalParserResponseDto> ParsePortalHtml(string HtmlPage)
+        {
+            HtmlPage = _htmlCleaner.CleanHtml(HtmlPage);
+
+            LMStudioRequest lmStudioRequest = _mapper.ToRequest(
+                   text: HtmlPage,
+                    rulesPrompt: rulesPrompt);
+
+            LMStudioResponse response = await _api.SendMessageAsync(
+                    lmStudioRequest,
+                    _keySettings.Parser
+                    );
+
+            var portalJson = _mapper.ToOutputText(response);
+
+            portalJson = portalJson.Trim();
+            if (portalJson.StartsWith("```")) portalJson = portalJson[3..];
+            if (portalJson.EndsWith("```")) portalJson = portalJson[..^3];
+
+            return JsonSerializer.Deserialize<PortalParserResponseDto>(portalJson, _serializerOptions)
+                   ?? throw new LMStudioApiException("LMStudio returned empty response");
+        }
+
+
+        readonly string rulesPrompt = @"
 ### System Role
 You are a high-performance data extraction engine.
 Your sole purpose is to parse raw HTML from a university portal and convert it into a strict JSON object.
@@ -50,30 +75,9 @@ Your sole purpose is to parse raw HTML from a university portal and convert it i
 
 ### IMPORTANT
 Output must start with ""{"" and end with ""}"" NOTHING else.
-";
+"
++
+$"* Include schedules for each subject for the next 5 months from today {DateTime.UtcNow}.";
 
-
-        public async Task<PortalParserResponseDto> ParsePortalHtml(string HtmlPage)
-        {
-            HtmlPage = _htmlCleaner.CleanHtml(HtmlPage);
-
-            LMStudioRequest lmStudioRequest = _mapper.ToRequest(
-                   text: HtmlPage,
-                    rulesPrompt: rulesPrompt);
-
-            LMStudioResponse response = await _api.SendMessageAsync(
-                    lmStudioRequest,
-                    _keySettings.Parser
-                    );
-
-            var portalJson = _mapper.ToOutputText(response);
-
-            portalJson = portalJson.Trim();
-            if (portalJson.StartsWith("```")) portalJson = portalJson[3..];
-            if (portalJson.EndsWith("```")) portalJson = portalJson[..^3];
-
-            return JsonSerializer.Deserialize<PortalParserResponseDto>(portalJson, _serializerOptions)
-                   ?? throw new LMStudioApiException("LMStudio returned empty response");
-        }
     }
 }

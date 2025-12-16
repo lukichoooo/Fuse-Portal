@@ -131,7 +131,7 @@ namespace InfrastructureTests.LLM.LMStudio
         {
             var msg = _fix.Create<MessageDto>();
             var request = _fix.Create<LMStudioRequest>();
-            var action = _fix.Create<Action<string>>();
+            var action = _fix.Create<Func<string, Task>>();
             var response = _fix.Create<LMStudioResponse>();
 
             var apiMock = new Mock<ILMStudioApi>();
@@ -162,7 +162,7 @@ namespace InfrastructureTests.LLM.LMStudio
         {
             var msg = _fix.Create<MessageDto>();
             var request = _fix.Create<LMStudioRequest>();
-            var action = _fix.Create<Action<string>>();
+            var action = _fix.Create<Func<string, Task>>();
             var response = _fix.Create<LMStudioResponse>();
 
             var apiMock = new Mock<ILMStudioApi>();
@@ -190,7 +190,7 @@ namespace InfrastructureTests.LLM.LMStudio
         private static void AssertStreamServiceCalls(
                 Mock<ILMStudioApi> apiMock,
                 Mock<IChatMetadataService> dataServiceMock,
-                Action<string>? action = null)
+                Func<string, Task>? action = null)
         {
             apiMock.Verify(a => a.SendMessageAsync(
                         It.IsAny<LMStudioRequest>(),
@@ -219,7 +219,7 @@ namespace InfrastructureTests.LLM.LMStudio
             apiMock.Verify(a => a.SendMessageWithStreamingAsync(
                         It.IsAny<LMStudioRequest>(),
                         It.IsAny<string>(),
-                        It.IsAny<Action<string>>()),
+                        It.IsAny<Func<string, Task>>()),
                         Times.Never());
             dataServiceMock.Verify(a => a.GetLastResponseIdAsync(It.IsAny<int>()),
                         Times.Once());

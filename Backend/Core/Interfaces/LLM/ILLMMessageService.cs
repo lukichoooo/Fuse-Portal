@@ -4,6 +4,6 @@ namespace Core.Interfaces.LLM
 {
     public interface ILLMMessageService
     {
-        Task<MessageDto> SendMessageAsync(MessageDto msg, Action<string>? onStreamReceived);
+        Task<MessageDto> SendMessageAsync(MessageDto msg, Func<string, Task>? onStreamReceived);
     }
 }

@@ -12,10 +12,12 @@ namespace Presentation.Controllers;
 [Route("api/[controller]")]
 public class ChatController(
         IChatService service,
+        IMessageStreamer messageStreamer,
         IOptions<ControllerSettings> options
         ) : ControllerBase
 {
     private readonly IChatService _service = service;
+    private readonly IMessageStreamer _messageStreamer = messageStreamer;
     private readonly ControllerSettings _settings = options.Value;
 
     [HttpGet]
@@ -58,14 +60,15 @@ public class ChatController(
         )
         => Ok(await _service.SendMessageAsync(messageRequest, null));
 
-    [HttpGet("ws/messages/text")]
+    [HttpPost("ws/messages/text")]
     public async Task<IActionResult> SendMessageWithStreamingAsync(
                     MessageRequest messageRequest
                 )
     {
-        // TODO: add websocket connection
-        Action<string> onRecieved = (string text)
-            => Console.WriteLine($"Text recieved {text}");
+        Func<string, Task> onRecieved = async (string text)
+            => await _messageStreamer.StreamAsync(
+                    messageRequest.Message.ChatId.ToString(),
+                    text);
 
         await _service.SendMessageAsync(messageRequest, onRecieved);
         return Ok();

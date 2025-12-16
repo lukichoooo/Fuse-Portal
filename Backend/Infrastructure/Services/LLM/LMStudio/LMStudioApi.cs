@@ -63,7 +63,7 @@ namespace Infrastructure.Services.LLM.LMStudio
         public async Task<LMStudioResponse> SendMessageWithStreamingAsync(
                 LMStudioRequest lmStudioRequest,
                 string settingsKey,
-                Action<string>? onReceived)
+                Func<string, Task>? onReceived)
         {
             var settings = _apiSettingsChooser.GetSettings(settingsKey);
             _httpClient.BaseAddress = new Uri(settings.URL);
@@ -91,7 +91,7 @@ namespace Infrastructure.Services.LLM.LMStudio
                 await _responseStreamer.ReadResponseAsStreamAsync(response, onReceived);
 
             _logger.LogInformation("Completed Response from LMStudio --- \n {}",
-                    completedResponse?.Output[0].Content[0].Text);
+                    completedResponse?.ToString());
 
             return completedResponse
                 ?? throw new LMStudioApiException("Completed Response Null");
@@ -111,7 +111,6 @@ namespace Infrastructure.Services.LLM.LMStudio
                 );
             }
         }
-
 
 
     }

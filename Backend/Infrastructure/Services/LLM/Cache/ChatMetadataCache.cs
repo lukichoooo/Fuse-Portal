@@ -1,24 +1,34 @@
+using Core.Dtos.Settings.Infrastructure;
 using Core.Interfaces.LLM.Cache;
+using Microsoft.Extensions.Options;
+using StackExchange.Redis;
 
 namespace Infrastructure.Services.LLM.Cache
 {
     public class ChatMetadataCache : IChatMetadataCache
     {
-        // In-memory placeholder until Redis is ready
-        // TODO: Add Redis
-        private readonly Dictionary<int, string> _cache = [];
+        private readonly IDatabase _db;
+        private readonly RedisSettings _settings;
 
-        public Task<string?> GetValueAsync(int key)
+        public ChatMetadataCache(
+            IConnectionMultiplexer redis,
+            IOptions<RedisSettings> options)
         {
-            _cache.TryGetValue(key, out var value);
-            return Task.FromResult(value);
+            _db = redis.GetDatabase();
+            _settings = options.Value;
+
+            if (_settings.DefaultMinutes <= 0)
+                throw new InvalidOperationException("Redis TTL must be > 0");
         }
 
-        public Task SetValueAsync(int key, string value)
-        {
-            _cache[key] = value;
-            return Task.CompletedTask;
-        }
+        public async Task<string?> GetValueAsync(int key)
+            => await _db.StringGetAsync(key.ToString());
+
+        public async Task SetValueAsync(int key, string value)
+            => await _db.StringSetAsync(
+                    key.ToString(),
+                    value,
+                    TimeSpan.FromMinutes(_settings.DefaultMinutes));
     }
 }
 

@@ -61,7 +61,7 @@ namespace Infrastructure.Services
 
         public async Task<SendMessageResponseDto> SendMessageAsync(
             MessageRequest messageRequest,
-            Action<string>? onReceived)
+            Func<string, Task>? onReceived)
         {
             int userId = _currentContext.GetCurrentUserId();
 

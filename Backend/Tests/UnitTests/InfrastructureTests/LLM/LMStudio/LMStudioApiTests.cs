@@ -183,14 +183,17 @@ public class LMStudioApiTests
             });
 
         bool onRecievedCalled = false;
-        Action<string> onRecieved = (string _) => onRecievedCalled = true;
-
+        Func<string, Task> onRecieved = (string _) =>
+        {
+            onRecievedCalled = true;
+            return Task.CompletedTask;
+        };
         var streamerMock = new Mock<ILLMApiResponseStreamer>();
         streamerMock.Setup(s => s.ReadResponseAsStreamAsync(
                     It.IsAny<HttpResponseMessage>(),
                     onRecieved
                     ))
-            .ReturnsAsync((HttpResponseMessage _, Action<string> onRecieved) =>
+            .ReturnsAsync((HttpResponseMessage _, Func<string, Task> onRecieved) =>
                     {
                         onRecieved.Invoke("message");
                         return expectedResponse;
@@ -240,14 +243,18 @@ public class LMStudioApiTests
             });
 
         bool onRecievedCalled = false;
-        Action<string> onRecieved = (string _) => onRecievedCalled = true;
+        Func<string, Task> onRecieved = (string _) =>
+        {
+            onRecievedCalled = true;
+            return Task.CompletedTask;
+        };
 
         var streamerMock = new Mock<ILLMApiResponseStreamer>();
         streamerMock.Setup(s => s.ReadResponseAsStreamAsync(
                     It.IsAny<HttpResponseMessage>(),
                     onRecieved
                     ))
-            .ReturnsAsync((HttpResponseMessage _, Action<string> onRecieved) =>
+            .ReturnsAsync((HttpResponseMessage _, Func<string, Task> onRecieved) =>
                     {
                         onRecieved.Invoke("message");
                         return null;
