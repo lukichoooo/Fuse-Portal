@@ -9,7 +9,7 @@ obj/
 *.so
 
 # settings
-appsettings.Development.json
+# appsettings.Development.json
 
 
 # js
