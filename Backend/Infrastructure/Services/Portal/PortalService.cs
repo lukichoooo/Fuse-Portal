@@ -68,10 +68,10 @@ namespace Infrastructure.Services.Portal
                     await _repo.AddLecturerToSubjectAsync(lecturer, userId);
                 }
 
-                foreach (var sylabusNoSubjectId in subjectFullRequest.Syllabuses)
+                foreach (var syllabusNoSubjectId in subjectFullRequest.Syllabuses)
                 {
-                    var sylabus = _mapper.ToSyllabus(sylabusNoSubjectId, subjectId);
-                    await _repo.AddSyllabusForSubjectAsync(sylabus, userId);
+                    var syllabus = _mapper.ToSyllabus(syllabusNoSubjectId, subjectId);
+                    await _repo.AddSyllabusForSubjectAsync(syllabus, userId);
                 }
             }
             return portal;
@@ -138,7 +138,7 @@ namespace Infrastructure.Services.Portal
                                     lecturerId, userId));
         }
 
-        public async Task<SyllabusDto> AddSylabusForSubjectAsync(SyllabusRequestDto request)
+        public async Task<SyllabusDto> AddSyllabusForSubjectAsync(SyllabusRequestDto request)
         {
             int userId = _currentContext.GetCurrentUserId();
             var sylabus = _mapper.ToSyllabus(request);

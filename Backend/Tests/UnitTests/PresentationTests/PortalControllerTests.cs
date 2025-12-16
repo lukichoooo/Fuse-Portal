@@ -173,7 +173,7 @@ namespace PresentationTests
             var request = _fix.Create<SyllabusRequestDto>();
             var testDto = _fix.Create<SyllabusDto>();
             var mock = new Mock<IPortalService>();
-            mock.Setup(s => s.AddSylabusForSubjectAsync(request))
+            mock.Setup(s => s.AddSyllabusForSubjectAsync(request))
                 .ReturnsAsync(testDto);
             var sut = CreateController(mock.Object);
 

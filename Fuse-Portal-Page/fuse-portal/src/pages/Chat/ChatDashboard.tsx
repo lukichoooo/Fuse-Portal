@@ -15,14 +15,6 @@ export default function ChatDashboard() {
     const [currChatMessages, setCurrChatMessages] = useState<MessageDto[]>([]);
     const [input, setInput] = useState('');
     const scrollRef = useRef<HTMLDivElement>(null);
-    const pendingMessage: MessageDto = {
-        text: "",
-        id: 0,
-        createdAt: "sending...",
-        chatId: currentChatId,
-        fromUser: true,
-        files: []
-    }
 
     useEffect(() => {
         ChatService.getAllChats()
@@ -49,7 +41,7 @@ export default function ChatDashboard() {
         const userMessage: MessageDto = {
             text: trimmed,
             id: 0,
-            createdAt: "sending...",
+            createdAt: new Date().toISOString(),
             chatId: currentChatId,
             fromUser: true,
             files: []
@@ -67,7 +59,7 @@ export default function ChatDashboard() {
             const botPending: MessageDto = {
                 text: "",
                 id: 0,
-                createdAt: "sending...",
+                createdAt: new Date().toISOString(),
                 chatId: currentChatId,
                 fromUser: false,
                 files: []

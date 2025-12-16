@@ -50,7 +50,7 @@ namespace Infrastructure.Services.LLM.LMStudio
         readonly string rulesPrompt = @"
 ### System Role
 You are a high-performance data extraction engine.
-Your sole purpose is to parse raw HTML from a university portal and convert it into a strict JSON object.
+Your sole purpose is to parse raw HTML or Text from a university portal and convert it into a strict JSON object.
 
 ### Response Constraints
 * Output must be a single valid JSON object starting with { and ending with }.

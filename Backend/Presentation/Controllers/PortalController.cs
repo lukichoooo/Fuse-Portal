@@ -82,20 +82,20 @@ public class PortalController(
             [FromRoute] int lecturerId)
         => Ok(await _service.RemoveLecturerByIdAsync(lecturerId));
 
-    [HttpPost("sylabus")]
+    [HttpPost("syllabus")]
     public async Task<ActionResult<SyllabusDto>> AddSylabusAsync(
             [FromBody] SyllabusRequestDto request)
-        => Ok(await _service.AddSylabusForSubjectAsync(request));
+        => Ok(await _service.AddSyllabusForSubjectAsync(request));
 
-    [HttpDelete("sylabus/{sylabusId}")]
+    [HttpDelete("syllabus/{syllabusId}")]
     public async Task<ActionResult<SyllabusDto>> RemoveSylabusAsync(
-            [FromRoute] int sylabusId)
-        => Ok(await _service.RemoveSyllabusByIdAsync(sylabusId));
+            [FromRoute] int syllabusId)
+        => Ok(await _service.RemoveSyllabusByIdAsync(syllabusId));
 
-    [HttpGet("sylabus/{sylabusId}")]
+    [HttpGet("syllabus/{syllabusId}")]
     public async Task<ActionResult<SyllabusFullDto>> GetSylabusByIdAsync(
-            [FromRoute] int sylabusId)
-        => Ok(await _service.GetFullSyllabusByIdAsync(sylabusId));
+            [FromRoute] int syllabusId)
+        => Ok(await _service.GetFullSyllabusByIdAsync(syllabusId));
 
 }
 

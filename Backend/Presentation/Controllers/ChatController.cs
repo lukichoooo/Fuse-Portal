@@ -55,23 +55,22 @@ public class ChatController(
 
 
     [HttpPost("messages/text")]
-    public async Task<IActionResult> SendMessageAsync(
+    public async Task<ActionResult<SendMessageResponseDto>> SendMessageAsync(
         [FromBody] MessageRequest messageRequest
         )
         => Ok(await _service.SendMessageAsync(messageRequest, null));
 
     [HttpPost("ws/messages/text")]
-    public async Task<IActionResult> SendMessageWithStreamingAsync(
+    public async Task<ActionResult<SendMessageResponseDto>> SendMessageWithStreamingAsync(
                     MessageRequest messageRequest
                 )
     {
-        Func<string, Task> onRecieved = async (string text)
+        Func<string, Task> onRecieved = async text
             => await _messageStreamer.StreamAsync(
                     messageRequest.Message.ChatId.ToString(),
                     text);
 
-        await _service.SendMessageAsync(messageRequest, onRecieved);
-        return Ok();
+        return Ok(await _service.SendMessageAsync(messageRequest, onRecieved));
     }
 
 

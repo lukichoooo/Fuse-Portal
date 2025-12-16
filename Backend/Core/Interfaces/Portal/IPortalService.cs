@@ -19,7 +19,7 @@ namespace Core.Interfaces.Portal
         Task<LecturerDto> AddLecturerToSubjectAsync(LecturerRequestDto request);
         Task<LecturerDto> RemoveLecturerByIdAsync(int lecturerId);
 
-        Task<SyllabusDto> AddSylabusForSubjectAsync(SyllabusRequestDto request);
+        Task<SyllabusDto> AddSyllabusForSubjectAsync(SyllabusRequestDto request);
         Task<SyllabusDto> RemoveSyllabusByIdAsync(int syllabusId);
         Task<SyllabusFullDto> GetFullSyllabusByIdAsync(int syllabusId);
 

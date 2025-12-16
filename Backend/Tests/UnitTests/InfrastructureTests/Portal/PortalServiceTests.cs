@@ -226,7 +226,7 @@ namespace InfrastructureTests.Portal
                 .ReturnsAsync((Syllabus t, int _) => t);
             var sut = CreateService(repoMock.Object);
 
-            var res = await sut.AddSylabusForSubjectAsync(request);
+            var res = await sut.AddSyllabusForSubjectAsync(request);
 
             Assert.That(res, Is.Not.Null);
             Assert.That(res.Name, Is.EqualTo(request.Name));
