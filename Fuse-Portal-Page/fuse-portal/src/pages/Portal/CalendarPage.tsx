@@ -1,8 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import PortalService from '../../services/PortalService';
 import type { ScheduleDto, SubjectDto, SubjectFullDto } from '../../types/Portal';
-import './PortalPage.css';
-import { Link } from 'react-router-dom';
+import './CalendarPage.css';
 
 interface DayCell {
     date: Date;
@@ -15,7 +14,7 @@ const COLORS = [
     '#DA70D6', '#F08080', '#20B2AA', '#B0C4DE'
 ];
 
-export default function PortalPage() {
+export default function CalendarPage() {
     const [subjects, setSubjects] = useState<SubjectDto[]>([]);
     const [selectedSubject, setSelectedSubject] = useState<SubjectFullDto | null>(null);
 
@@ -214,14 +213,6 @@ export default function PortalPage() {
                             </li>
                         ))}
                     </ul>
-
-                    {/* Button to open mock exam generator */}
-                    <Link
-                        to={`/tests/${selectedSubject.id}`}
-                        className="test-yourself-button"
-                    >
-                        Test Yourself
-                    </Link>
 
                 </div>
             )}

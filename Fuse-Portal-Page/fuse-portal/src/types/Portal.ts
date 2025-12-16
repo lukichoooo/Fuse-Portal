@@ -1,5 +1,15 @@
-
 // ---- Main DTOs ----
+export interface ExamDto {
+    id: number;
+    questions: string;
+    scoreFrom100?: number;
+    answers: string;
+    results?: string | null;
+    grade?: number | null;
+    subjectId: number;
+    subjectName?: string | null;
+}
+
 export interface SyllabusDto {
     id: number;
     name: string;
@@ -19,8 +29,8 @@ export interface SyllabusFullDto {
 
 export interface ScheduleDto {
     id: number;
-    start: string;             // ISO string
-    end: string;               // ISO string
+    start: string;   // ISO string
+    end: string;     // ISO string
     subjectId: number;
     metadata?: string | null;
 }
@@ -28,8 +38,8 @@ export interface ScheduleDto {
 export interface SubjectDto {
     id: number;
     name: string;
-    metadata?: string | null;
     schedules: ScheduleDto[];
+    metadata?: string | null;
 }
 
 export interface SubjectFullDto {
@@ -42,7 +52,6 @@ export interface SubjectFullDto {
     metadata?: string | null;
 }
 
-
 // ---- Request DTOs (with SubjectId) ----
 export interface LecturerRequestDto {
     name: string;
@@ -50,8 +59,8 @@ export interface LecturerRequestDto {
 }
 
 export interface ScheduleRequestDto {
-    start: string;             // ISO string
-    end: string;               // ISO string
+    start: string;   // ISO string
+    end: string;     // ISO string
     subjectId: number;
     location?: string;
     metadata?: string;
@@ -76,8 +85,8 @@ export interface LecturerRequestDtoNoSubjectId {
 }
 
 export interface ScheduleRequestDtoNoSubjectId {
-    start: string;             // ISO string
-    end: string;               // ISO string
+    start: string;   // ISO string
+    end: string;     // ISO string
     location?: string;
     metadata?: string;
 }
@@ -85,5 +94,21 @@ export interface ScheduleRequestDtoNoSubjectId {
 export interface SyllabusRequestDtoNoSubjectId {
     name: string;
     content: string;
+    metadata?: string;
+}
+
+// ---- Full Subject Request (used in parser) ----
+export interface SubjectFullRequestDto {
+    name: string;
+    grade?: number | null;
+    metadata?: string;
+    schedules: ScheduleRequestDtoNoSubjectId[];
+    lecturers: LecturerRequestDtoNoSubjectId[];
+    syllabuses: SyllabusRequestDtoNoSubjectId[];
+}
+
+// ---- Portal Parser Response ----
+export interface PortalParserResponseDto {
+    subjects: SubjectFullRequestDto[];
     metadata?: string;
 }

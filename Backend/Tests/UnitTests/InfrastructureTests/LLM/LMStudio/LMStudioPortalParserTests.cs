@@ -3,6 +3,7 @@ using AutoFixture;
 using Core.Dtos;
 using Core.Dtos.Settings.Infrastructure;
 using Core.Interfaces.LLM.LMStudio;
+using Core.Interfaces.Portal;
 using Infrastructure.Services.LLM.LMStudio;
 using Infrastructure.Services.Portal;
 using Microsoft.Extensions.Options;
@@ -39,8 +40,18 @@ namespace InfrastructureTests.LLM.LMStudio
             };
             HtmlCleaner cleaner = new();
 
+            var jsonExtractorMock = new Mock<IValidJsonExtractor>();
+            jsonExtractorMock.Setup(e => e.ExtractJsonObject(It.IsAny<string>()))
+                .Returns((string s) => s);
+
             var keyOptions = Options.Create(_settingKeys);
-            return new(api, mapper, keyOptions, cleaner, jsonSerializerOptions);
+            return new(
+                    api,
+                    mapper,
+                    cleaner,
+                    jsonExtractorMock.Object,
+                    keyOptions,
+                    jsonSerializerOptions);
         }
 
 

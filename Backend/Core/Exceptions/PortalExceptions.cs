@@ -39,3 +39,10 @@ public class ExamNotFoundException : Exception, ICustomException
     public ExamNotFoundException() { }
     public ExamNotFoundException(string? message, Exception? innerException) : base(message, innerException) { }
 }
+
+public class ExamScoreParsingException : Exception, ICustomException
+{
+    public ExamScoreParsingException(string message) : base(message) { }
+    public ExamScoreParsingException() { }
+    public ExamScoreParsingException(string? message, Exception? innerException) : base(message, innerException) { }
+}

@@ -31,11 +31,11 @@ public class PortalController(
             )
         => Ok(await _service.CheckExamAnswersAsync(examDto));
 
-    [HttpPost("upload-html")]
+    [HttpPost("upload-page")]
     public async Task<ActionResult> ParseHtmlPortalAsync()
     {
-        var rawHtmlPage = await Request.GetRawBodyAsync();
-        await _service.ParseAndSavePortalAsync(rawHtmlPage);
+        var rawPage = await Request.GetRawBodyAsync();
+        await _service.ParseAndSavePortalAsync(rawPage);
         return Ok();
     }
 

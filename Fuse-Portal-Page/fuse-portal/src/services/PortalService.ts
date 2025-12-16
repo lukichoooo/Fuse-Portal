@@ -10,10 +10,24 @@ import type {
     SubjectRequestDto,
     ScheduleRequestDto,
     LecturerRequestDto,
-    SyllabusRequestDto
+    SyllabusRequestDto,
+    ExamDto
 } from '../types/Portal';
 
 export default class PortalService {
+
+    // Exams
+    static async generateMockExam(syllabusId: number): Promise<ExamDto> {
+        const res = await api.get<ExamDto>(`/portal/exam/${syllabusId}`);
+        return res.data;
+    }
+
+    static async checkExamAnswers(examDto: ExamDto): Promise<ExamDto> {
+        const res = await api.post<ExamDto>('/portal/exam', examDto);
+        return res.data;
+    }
+
+
     // Subjects
     static async getSubjects(lastSubjectId?: number, pageSize?: number): Promise<SubjectDto[]> {
         const params: Record<string, any> = {};
@@ -23,6 +37,7 @@ export default class PortalService {
         const res = await api.get<SubjectDto[]>('/portal/subjects', { params });
         return res.data;
     }
+
 
     static async getFullSubject(subjectId: number): Promise<SubjectFullDto> {
         const res = await api.get<SubjectFullDto>(`/portal/subject/${subjectId}`);
@@ -77,9 +92,9 @@ export default class PortalService {
         return res.data;
     }
 
-    // Upload raw HTML
+    // Upload raw HTML or page Text
     static async uploadHtml(html: string): Promise<void> {
-        await api.post('/portal/upload-html', html, {
+        await api.post('/portal/upload-page', html, {
             headers: { 'Content-Type': 'text/plain' }
         });
     }

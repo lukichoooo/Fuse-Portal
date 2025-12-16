@@ -26,17 +26,6 @@
 }
 
 
-.test-yourself-button {
-    display: inline-block;
-    margin-top: 0.5rem;
-    padding: 0.5rem 1rem;
-    background-color: #28a745;
-    color: white;
-    border-radius: 6px;
-    text-decoration: none;
-    font-weight: bold;
-    cursor: pointer;
-}
 
 .test-yourself-button:hover {
     background-color: #1e7e34;

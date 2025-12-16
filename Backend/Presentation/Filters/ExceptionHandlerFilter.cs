@@ -11,6 +11,7 @@ namespace Presentation.Filters
         public void OnException(ExceptionContext context)
         {
             var ex = context.Exception;
+            _logger.LogError(ex, "An unhandled exception occurred");
 
             if (ex is ICustomException)
             {
@@ -21,7 +22,6 @@ namespace Presentation.Filters
             }
             else
             {
-                _logger.LogError(ex, "An unhandled exception occurred");
                 context.Result = new ObjectResult(new())
                 {
                     Value = ex.Message,

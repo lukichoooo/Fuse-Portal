@@ -5,7 +5,9 @@ import Home from './pages/Home/Home'
 import AuthPage from './pages/Auth/AuthPage'
 import ChatDashboard from './pages/Chat/ChatDashboard'
 import ProtectedRoute from './pages/Auth/ProtectedRoute'
-import PortalPage from './pages/Portal/PortalPage'
+import CalendarPage from './pages/Portal/CalendarPage'
+import StudentPortal from './pages/Portal/StudentPortal'
+import MockExamPage from './pages/Portal/MockExamPage'
 
 function App() {
     return (
@@ -26,13 +28,30 @@ function App() {
                         }
                     />
                     <Route
-                        path="/portal"
+                        path="/calendar"
                         element={
                             <ProtectedRoute>
-                                <PortalPage />
+                                <CalendarPage />
                             </ProtectedRoute>
                         }
                     />
+                    <Route
+                        path="/portal"
+                        element={
+                            <ProtectedRoute>
+                                <StudentPortal />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/mockexams"
+                        element={
+                            <ProtectedRoute>
+                                <MockExamPage />
+                            </ProtectedRoute>
+                        }
+                    />
+
                 </Routes>
             </main>
         </>

@@ -11,8 +11,9 @@ namespace Infrastructure.Services.LLM.LMStudio
     public class LMStudioPortalParser(
             ILMStudioApi api,
             ILMStudioMapper mapper,
-            IOptions<LLMApiSettingKeys> keyOptions,
             IHtmlCleaner htmlCleaner,
+            IValidJsonExtractor jsonExtractor,
+            IOptions<LLMApiSettingKeys> keyOptions,
             JsonSerializerOptions serializerOptions
             ) : IPortalParser
     {
@@ -21,14 +22,15 @@ namespace Infrastructure.Services.LLM.LMStudio
         private readonly LLMApiSettingKeys _keySettings = keyOptions.Value;
         private readonly JsonSerializerOptions _serializerOptions = serializerOptions;
         private readonly IHtmlCleaner _htmlCleaner = htmlCleaner;
+        private readonly IValidJsonExtractor _jsonExtractor = jsonExtractor;
 
 
-        public async Task<PortalParserResponseDto> ParsePortalHtml(string HtmlPage)
+        public async Task<PortalParserResponseDto> ParsePortalHtml(string page)
         {
-            HtmlPage = _htmlCleaner.CleanHtml(HtmlPage);
+            page = _htmlCleaner.CleanHtml(page);
 
             LMStudioRequest lmStudioRequest = _mapper.ToRequest(
-                   text: HtmlPage,
+                   text: page,
                     rulesPrompt: rulesPrompt);
 
             LMStudioResponse response = await _api.SendMessageAsync(
@@ -36,48 +38,66 @@ namespace Infrastructure.Services.LLM.LMStudio
                     _keySettings.Parser
                     );
 
-            var portalJson = _mapper.ToOutputText(response);
+            var portalText = _mapper.ToOutputText(response);
 
-            portalJson = portalJson.Trim();
-            if (portalJson.StartsWith("```")) portalJson = portalJson[3..];
-            if (portalJson.EndsWith("```")) portalJson = portalJson[..^3];
+            var portalJson = _jsonExtractor.ExtractJsonObject(portalText);
 
             return JsonSerializer.Deserialize<PortalParserResponseDto>(portalJson, _serializerOptions)
                    ?? throw new LMStudioApiException("LMStudio returned empty response");
         }
 
 
-        readonly string rulesPrompt = @"
-### System Role
-You are a high-performance data extraction engine.
-Your sole purpose is to parse raw HTML or Text from a university portal and convert it into a strict JSON object.
 
-### Response Constraints
-* Output must be a single valid JSON object starting with { and ending with }.
-* Do NOT include any explanations, text, headers, or markdown.
-* Escape all special characters in string fields (including newlines \n and quotes \"").
-* Follow the schema exactly.
 
-### Target JSON Structure
-{
+        readonly string rulesPrompt = $@"
+SYSTEM:
+You extract data only. Do NOT guess or invent.
+
+OUTPUT:
+- Return ONE valid JSON object only.
+- Must start with {{ and end with }}.
+- No text outside JSON.
+- JSON-escape all strings.
+- Never use null.
+- Missing values → """" or [].
+
+DATES:
+- ISO-8601 only: YYYY-MM-DDTHH:mm:ssZ
+- Month 01–12 only.
+- Valid day for month.
+- If a date is unclear or invalid → REMOVE that schedule.
+- Include schedules for each subject for the next 3 months from today {DateTime.UtcNow}.
+
+SCHEMA (EXACT, ALL KEYS REQUIRED):
+{{
   ""subjects"": [
-    {
+    {{
       ""name"": ""string"",
       ""grade"": 0,
       ""metadata"": ""string"",
-      ""schedules"": [{ ""start"": ""ISO"", ""end"": ""ISO"", ""location"": ""string"", ""metadata"": ""string"" }],
-      ""lecturers"": [{ ""name"": ""string"" }],
-      ""syllabuses"": [{ ""name"": ""string"", ""content"": ""string"", ""metadata"": ""string"" }]
-    }
+      ""schedules"": [
+        {{
+          ""start"": ""YYYY-MM-DDTHH:mm:ssZ"",
+          ""end"": ""YYYY-MM-DDTHH:mm:ssZ"",
+          ""location"": ""string"",
+          ""metadata"": ""string""
+        }}
+      ],
+      ""lecturers"": [{{ ""name"": ""string"" }}],
+      ""syllabuses"": [
+        {{ ""name"": ""string"", ""content"": ""string"", ""metadata"": ""string"" }}
+      ]
+    }}
   ],
   ""metadata"": ""string""
-}
+}}
 
-### IMPORTANT
-Output must start with ""{"" and end with ""}"" NOTHING else.
-"
-+
-$"* Include schedules for each subject for the next 5 months from today {DateTime.UtcNow}.";
+RULE:
+- Never omit required keys.
+- Empty data → empty array [].
+
+OUTPUT JSON ONLY.
+";
 
     }
 }

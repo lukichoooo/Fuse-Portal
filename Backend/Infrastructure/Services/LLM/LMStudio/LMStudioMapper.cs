@@ -63,7 +63,7 @@ namespace Infrastructure.Services.LLM.LMStudio
         public LMStudioRequest ToRequest(ExamDto examDto, string? rulesPrompt = null)
             => new()
             {
-                Model = _settingsChooser.GetSettings(_keySettings.ExamService).Model,
+                Model = _settingsChooser.GetSettings(_keySettings.Exam).Model,
                 Input = _inputGenerator.GenerateInput(examDto, rulesPrompt),
             };
     }

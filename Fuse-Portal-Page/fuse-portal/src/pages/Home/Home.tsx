@@ -34,6 +34,19 @@ export default function Home() {
                 </div>
             </Link>
 
+            <Link to="/calendar" className="big-box">
+                <img src="/mascot/reading-book.png" alt="Featured" />
+                <div className="big-box-text">
+                    <span>Calendar</span>
+                </div>
+            </Link>
+
+            <Link to="/mockexams" className="big-box">
+                <img src="/mascot/reading-book.png" alt="Featured" />
+                <div className="big-box-text">
+                    <span>Mock Exams</span>
+                </div>
+            </Link>
 
             <div className="grid">
                 {boxes.map((box) => (

@@ -64,10 +64,12 @@ builder.Services.Configure<RedisSettings>(builder.Configuration.GetSection("Redi
 // LLM
 builder.Services.Configure<LLMApiSettingKeys>(builder.Configuration.GetSection("LLMApiSettingKeys"));
 
-builder.Services.Configure<LLMApiSettings>("ParserModel",
-    builder.Configuration.GetSection("LLMApiSettings:ParserModel"));
-builder.Services.Configure<LLMApiSettings>("ChatModel",
-    builder.Configuration.GetSection("LLMApiSettings:ChatModel"));
+builder.Services.Configure<LLMApiSettings>("Parser",
+    builder.Configuration.GetSection("LLMApiSettings:Chat"));
+builder.Services.Configure<LLMApiSettings>("Chat",
+    builder.Configuration.GetSection("LLMApiSettings:Chat"));
+builder.Services.Configure<LLMApiSettings>("Exam",
+    builder.Configuration.GetSection("LLMApiSettings:Exam"));
 
 builder.Services.Configure<LLMInputSettings>(builder.Configuration.GetSection("LLMInputSettings"));
 

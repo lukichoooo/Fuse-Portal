@@ -1,5 +1,6 @@
 using Core.Dtos;
 using Core.Dtos.Settings.Infrastructure;
+using Core.Exceptions;
 using Core.Interfaces.LLM.LMStudio;
 using Core.Interfaces.Portal;
 using Microsoft.Extensions.Options;
@@ -25,7 +26,7 @@ namespace Infrastructure.Services.LLM.LMStudio
 
             var response = await _api.SendMessageAsync(
                     request,
-                    _apiKeys.ExamService);
+                    _apiKeys.Exam);
 
             return _mapper.ToOutputText(response);
         }
@@ -39,10 +40,11 @@ namespace Infrastructure.Services.LLM.LMStudio
 
             var response = await _api.SendMessageAsync(
                     request,
-                    _apiKeys.ExamService);
+                    _apiKeys.Exam);
             var outputText = _mapper.ToOutputText(response);
             examDto.Results = outputText;
-            examDto.Grade = ExtractGradeFromResponse(outputText);
+            examDto.Grade = ExtractGradeFromResponseWithScore(outputText);
+            examDto.Grade ??= ExtractGradeFromResponseWithPercentage(outputText);
 
             return examDto;
         }
@@ -51,7 +53,32 @@ namespace Infrastructure.Services.LLM.LMStudio
 
         // Helper
 
-        private static int ExtractGradeFromResponse(string response)
+        private static int ExtractGradeFromResponseWithPercentage(string response)
+        {
+            if (string.IsNullOrWhiteSpace(response))
+                throw new ArgumentException("Response cannot be null or empty", nameof(response));
+
+            int percentIndex = response.LastIndexOf('%');
+            if (percentIndex == -1) throw new ExamScoreParsingException("Score not found");
+
+            int grade = 0, multiplier = 1;
+            for (int i = percentIndex - 1; i >= 0; i--)
+            {
+                if (char.IsDigit(response[i]))
+                {
+                    grade += (response[i] - '0') * multiplier;
+                    multiplier *= 10;
+                }
+                else if (grade > 0)
+                {
+                    break; // stop if digits ended
+                }
+            }
+
+            return grade;
+        }
+
+        private static int? ExtractGradeFromResponseWithScore(string response)
         {
             if (string.IsNullOrWhiteSpace(response))
                 throw new ArgumentException("Response cannot be null or empty", nameof(response));
@@ -59,20 +86,14 @@ namespace Infrastructure.Services.LLM.LMStudio
             var scoreIndex = response.LastIndexOf("Score:", StringComparison.OrdinalIgnoreCase);
 
             if (scoreIndex == -1)
-                throw new InvalidOperationException("Score not found in response");
+                throw new ExamScoreParsingException("Score not found in response");
 
-            var scoreText = response.Substring(scoreIndex + 6).Trim();
+            var scoreText = response[(scoreIndex + 6)..].Trim();
 
             scoreText = new string(scoreText.TakeWhile(char.IsDigit).ToArray());
 
-            if (string.IsNullOrWhiteSpace(scoreText))
-                throw new InvalidOperationException("Could not parse score value");
-
-            if (!int.TryParse(scoreText, out int grade))
-                throw new InvalidOperationException($"Invalid score format: {scoreText}");
-
-            if (grade < 0 || grade > 100)
-                throw new InvalidOperationException($"Score must be between 0 and 100, got: {grade}");
+            if (string.IsNullOrWhiteSpace(scoreText) || !int.TryParse(scoreText, out int grade))
+                return null;
 
             return grade;
         }
@@ -205,7 +226,7 @@ Areas for Improvement:
 Overall Comments:
 [Provide constructive overall assessment]
 
-Score: [Z]
+Score: [Z]%
 ";
     }
 }

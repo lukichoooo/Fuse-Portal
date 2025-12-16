@@ -23,7 +23,7 @@ namespace InfrastructureTests.LLM.LMStudio
         {
             Chat = "chatyy",
             Parser = "parserr",
-            ExamService = "exam-gen-key"
+            Exam = "exam-gen-key"
         };
 
         private LMStudioMockExamService CreateSut(
@@ -45,7 +45,7 @@ namespace InfrastructureTests.LLM.LMStudio
             var apiMock = new Mock<ILMStudioApi>();
             apiMock.Setup(a => a.SendMessageAsync(
                         It.IsAny<LMStudioRequest>(),
-                        _settingKeys.ExamService))
+                        _settingKeys.Exam))
                     .ReturnsAsync(apiResponse);
 
             var mapperMock = new Mock<ILMStudioMapper>();
@@ -84,7 +84,7 @@ namespace InfrastructureTests.LLM.LMStudio
             var apiMock = new Mock<ILMStudioApi>();
             apiMock.Setup(a => a.SendMessageAsync(
                         It.IsAny<LMStudioRequest>(),
-                        _settingKeys.ExamService))
+                        _settingKeys.Exam))
                     .ReturnsAsync(apiResponse);
 
             var lmsRequest = _fix.Create<LMStudioRequest>();
@@ -115,7 +115,7 @@ namespace InfrastructureTests.LLM.LMStudio
             var apiMock = new Mock<ILMStudioApi>();
             apiMock.Setup(a => a.SendMessageAsync(
                         It.IsAny<LMStudioRequest>(),
-                        _settingKeys.ExamService))
+                        _settingKeys.Exam))
                     .ReturnsAsync(apiResponse);
 
             var mapperMock = new Mock<ILMStudioMapper>();
@@ -136,7 +136,7 @@ namespace InfrastructureTests.LLM.LMStudio
             // Assert
             apiMock.Verify(a => a.SendMessageAsync(
                 It.IsAny<LMStudioRequest>(),
-                _settingKeys.ExamService), Times.Once);
+                _settingKeys.Exam), Times.Once);
         }
 
 

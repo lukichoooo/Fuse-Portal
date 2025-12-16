@@ -62,6 +62,7 @@ public static class DependencyInjection
         services.AddScoped<IPortalService, PortalService>();
         services.AddScoped<IPortalParser, LMStudioPortalParser>();
         services.AddScoped<IHtmlCleaner, HtmlCleaner>();
+        services.AddScoped<IValidJsonExtractor, ValidJsonExtractor>();
 
         // LLM
         services.AddScoped<ILLMMessageService, LMStudioMessageService>();

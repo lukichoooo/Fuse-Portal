@@ -43,9 +43,9 @@ namespace Infrastructure.Services.Portal
         }
 
 
-        public async Task<PortalParserResponseDto> ParseAndSavePortalAsync(string HtmlPage)
+        public async Task<PortalParserResponseDto> ParseAndSavePortalAsync(string page)
         {
-            PortalParserResponseDto portal = await _portalParser.ParsePortalHtml(HtmlPage);
+            PortalParserResponseDto portal = await _portalParser.ParsePortalHtml(page);
 
             foreach (var subjectFullRequest in portal.Subjects)
             {
