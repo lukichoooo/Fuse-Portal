@@ -117,6 +117,12 @@
     white-space: nowrap;
     cursor: pointer;
     transition: transform 0.1s;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .calendar-schedule:hover {

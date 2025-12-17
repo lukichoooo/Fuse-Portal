@@ -6,6 +6,7 @@ import type {
     ChatDto,
     ChatFullDto,
     CreateChatRequest,
+    FileDto,
     MessageDto,
     MessageRequest,
     SendMessageResponseDto,
@@ -59,6 +60,11 @@ export default class ChatService {
             await this.connection.start();
         }
         return this.connection;
+    }
+
+    static async getFile(fileId: number): Promise<FileDto> {
+        const { data } = await api.get<FileDto>(`/chat/messages/file/${fileId}`);
+        return data;
     }
 
     static async sendMessageWithStream(

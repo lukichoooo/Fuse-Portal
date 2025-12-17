@@ -81,6 +81,13 @@ public class ChatController(
         => Ok(await _service.UploadFilesAsync(await Files.ToFileUpload()));
 
 
+    [HttpGet("messages/file/{fileId}")]
+    public async Task<ActionResult<FileDto>> GetFileByIdAsync(
+            [FromRoute] int fileId
+            )
+        => Ok(await _service.GetFileByIdAsync(fileId));
+
+
 }
 
 // Helper

@@ -16,5 +16,6 @@ namespace Core.Interfaces.Convo
         Task<List<int>> UploadFilesAsync(List<FileUpload> files);
         Task<FileDto> RemoveFileAsync(int fileId);
         Task<MessageDto> DeleteMessageByIdAsync(int msgId);
+        Task<FileDto> GetFileByIdAsync(int fileId);
     }
 }

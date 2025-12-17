@@ -88,6 +88,14 @@ namespace Infrastructure.Services
                         fileId,
                         _currentContext.GetCurrentUserId()));
 
+
+        public async Task<FileDto> GetFileByIdAsync(int fileId)
+        {
+            int userId = _currentContext.GetCurrentUserId();
+            return _mapper.ToFileDto(await _repo.GetFileByIdAsync(fileId, userId)
+                    ?? throw new FileNotFoundException($"File not found With Id={fileId}"));
+        }
+
         public async Task<List<int>> UploadFilesAsync(List<FileUpload> fileUploads)
         {
             int userId = _currentContext.GetCurrentUserId();
@@ -108,6 +116,5 @@ namespace Infrastructure.Services
                 .Select(f => _mapper.ToFileDto(f!))
                 .ToList();
         }
-
     }
 }

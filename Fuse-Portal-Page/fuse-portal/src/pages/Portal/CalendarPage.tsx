@@ -125,12 +125,13 @@ export default function CalendarPage() {
         <div className="portal-page">
 
             {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="calendar-header-bar">
                 <h2>Calendar</h2>
-                <button onClick={goToToday} className="goto-today-button">
-                    Go to Today
+                <button onClick={goToToday} className="btn-primary">
+                    Today
                 </button>
             </div>
+
 
             {/* Calendar */}
             <div className="calendar-container" ref={containerRef}>
@@ -160,24 +161,26 @@ export default function CalendarPage() {
                                     >
                                         <span className="calendar-day">{day.date.getDate()}</span>
 
-                                        {day.schedules.map(sc => {
-                                            const subj = subjects.find(s => s.id === sc.subjectId);
-                                            if (!subj) return null;
+                                        {/* wrap the list so we can scroll it independently */}
+                                        <div className="calendar-cell-inner">
+                                            {day.schedules.map(sc => {
+                                                const subj = subjects.find(s => s.id === sc.subjectId);
+                                                if (!subj) return null;
 
-                                            return (
-                                                <div
-                                                    key={sc.id}
-                                                    className="calendar-schedule"
-                                                    style={{ backgroundColor: getSubjectColor(subj.id) }}
-                                                    title={subj.name}
-                                                    onClick={() => onScheduleClick(subj.id)}
-                                                >
-                                                    {subj.name}
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                ))}
+                                                return (
+                                                    <div
+                                                        key={sc.id}
+                                                        className="calendar-schedule"
+                                                        style={{ backgroundColor: getSubjectColor(subj.id) }}
+                                                        title={subj.name}
+                                                        onClick={() => onScheduleClick(subj.id)}
+                                                    >
+                                                        {subj.name}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>))}
                             </div>
                         </div>
                     );

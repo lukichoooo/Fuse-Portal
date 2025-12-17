@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import PortalService from '../../services/PortalService';
+import ChatService from '../../services/ChatService';
 import type {
     SubjectDto,
     SubjectFullDto,
     SyllabusDto,
-    ExamDto
+    ExamDto,
+    SyllabusRequestDto
 } from '../../types/Portal';
-
 import './MockExamPage.css'
 
 // ==========================================
@@ -22,6 +23,11 @@ export default function MockExamPage() {
     const [subjects, setSubjects] = useState<SubjectDto[]>([]);
     const [selectedSubject, setSelectedSubject] = useState<SubjectFullDto | null>(null);
     const [selectedSyllabus, setSelectedSyllabus] = useState<SyllabusDto | null>(null);
+
+    // File Upload
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+    const [isUploading, setIsUploading] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Exam Session
     const [examData, setExamData] = useState<ExamDto | null>(null);
@@ -61,7 +67,72 @@ export default function MockExamPage() {
 
     const handleSyllabusSelect = async (syllabus: SyllabusDto) => {
         setSelectedSyllabus(syllabus);
-        // Do not generate yet, wait for user confirmation
+    };
+
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            const filesArray = Array.from(e.target.files);
+            setSelectedFiles(prev => [...prev, ...filesArray]);
+        }
+    };
+
+    const handleRemoveFile = (index: number) => {
+        setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const handleUploadFiles = async () => {
+        if (selectedFiles.length === 0 || !selectedSubject) return;
+
+        setIsUploading(true);
+        try {
+            // Upload files and get file IDs
+            const fileIds = await ChatService.uploadFiles(selectedFiles);
+
+            // For each file, fetch its content and create a syllabus
+            for (let i = 0; i < fileIds.length; i++) {
+                const fileId = fileIds[i];
+                const fileName = selectedFiles[i].name;
+
+                try {
+                    // Get file content
+                    const fileDto = await ChatService.getFile(fileId);
+
+                    // Create syllabus from file
+                    const syllabusRequest: SyllabusRequestDto = {
+                        name: fileName.replace(/\.[^/.]+$/, ''), // Remove file extension
+                        content: fileDto.text,
+                        subjectId: selectedSubject.id
+                    };
+
+                    const newSyllabus = await PortalService.addSyllabus(syllabusRequest);
+
+                    // Update selected subject with new syllabus
+                    setSelectedSubject(prev => {
+                        if (!prev) return prev;
+                        return {
+                            ...prev,
+                            syllabuses: [...prev.syllabuses, newSyllabus]
+                        };
+                    });
+                } catch (err) {
+                    console.error(`Failed to process file ${fileName}:`, err);
+                    alert(`Failed to upload syllabus from ${fileName}`);
+                }
+            }
+
+            // Clear selected files
+            setSelectedFiles([]);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+
+            alert('Syllabus files uploaded successfully!');
+        } catch (err) {
+            console.error('Failed to upload files:', err);
+            alert('Failed to upload files. Please try again.');
+        } finally {
+            setIsUploading(false);
+        }
     };
 
     const startExam = async () => {
@@ -108,6 +179,10 @@ export default function MockExamPage() {
         setSelectedSyllabus(null);
         setExamData(null);
         setUserAnswer("");
+        setSelectedFiles([]);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
     };
 
     // --- Render Helpers ---
@@ -133,12 +208,65 @@ export default function MockExamPage() {
 
     const renderStep2 = () => (
         <div className="animate-fade">
-            <div className="exam-header" style={{ border: 'none', padding: 0, marginBottom: '1rem' }}>
-                <div className="step-indicator" style={{ marginBottom: 0 }}>Step 2: Choose Syllabus</div>
-                <button className="btn btn-text" onClick={() => setStep(1)} style={{ color: '#666' }}>Change Subject</button>
+            <div className="exam-header-no-border">
+                <div className="step-indicator-inline">Step 2: Choose Syllabus</div>
+                <button className="btn btn-text" onClick={() => setStep(1)}>Change Subject</button>
             </div>
 
-            <h2 style={{ marginBottom: '2rem' }}>Subject: {selectedSubject?.name}</h2>
+            <h2 className="subject-title">Subject: {selectedSubject?.name}</h2>
+
+            {/* File Upload Section */}
+            <div className="file-upload-section">
+                <h3 className="upload-heading">Upload New Syllabus Files</h3>
+                <p className="upload-description">
+                    Upload PDF, Word documents, or text files containing syllabus content
+                </p>
+
+                <div className="file-upload-controls">
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        multiple
+                        accept=".pdf,.doc,.docx,.txt"
+                        onChange={handleFileSelect}
+                        className="file-input-hidden"
+                        id="file-upload"
+                    />
+                    <label htmlFor="file-upload" className="btn btn-secondary">
+                        📎 Choose Files
+                    </label>
+
+                    {selectedFiles.length > 0 && (
+                        <button
+                            className={`btn btn-primary ${isUploading ? 'btn-disabled' : ''}`}
+                            onClick={handleUploadFiles}
+                            disabled={isUploading}
+                        >
+                            {isUploading ? 'Uploading...' : `⬆️ Upload ${selectedFiles.length} File${selectedFiles.length > 1 ? 's' : ''}`}
+                        </button>
+                    )}
+                </div>
+
+                {selectedFiles.length > 0 && (
+                    <div className="selected-files-list">
+                        {selectedFiles.map((file, index) => (
+                            <div key={index} className="file-item">
+                                <span className="file-name">📄 {file.name}</span>
+                                <button
+                                    className="btn-remove-file"
+                                    onClick={() => handleRemoveFile(index)}
+                                    title="Remove file"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* Existing Syllabuses */}
+            <h3 className="existing-syllabuses-heading">Select Existing Syllabus</h3>
 
             <div className="selection-grid">
                 {selectedSubject?.syllabuses.length === 0 && <p>No syllabus found for this subject.</p>}
@@ -150,12 +278,12 @@ export default function MockExamPage() {
                         onClick={() => handleSyllabusSelect(syl)}
                     >
                         <h3>{syl.name}</h3>
-                        <p style={{ marginTop: '0.5rem', fontSize: '0.85rem' }}>Click to select this topic for your exam.</p>
+                        <p className="syllabus-card-description">Click to select this topic for your exam.</p>
                     </div>
                 ))}
             </div>
 
-            <div style={{ marginTop: '3rem', textAlign: 'center' }}>
+            <div className="start-exam-container">
                 <button
                     className={`btn btn-primary ${!selectedSyllabus || isLoading ? 'btn-disabled' : ''}`}
                     onClick={startExam}
@@ -169,14 +297,14 @@ export default function MockExamPage() {
 
     const renderStep3 = () => (
         <div className="animate-fade">
-            <div className="exam-header" style={{ border: 'none', padding: 0, marginBottom: '1rem' }}>
-                <div className="step-indicator" style={{ marginBottom: 0 }}>Step 3: Examination</div>
-                <span style={{ fontWeight: 600, color: 'var(--primary-color)' }}>Time: Unlimited</span>
+            <div className="exam-header-no-border">
+                <div className="step-indicator-inline">Step 3: Examination</div>
+                <span className="exam-time-label">Time: Unlimited</span>
             </div>
 
             <div className="paper">
-                <h2 style={{ marginTop: 0 }}>Mock Exam: {selectedSyllabus?.name}</h2>
-                <p style={{ color: '#666', marginBottom: '2rem' }}>Read the questions carefully and type your answers below.</p>
+                <h2 className="paper-title">Mock Exam: {selectedSyllabus?.name}</h2>
+                <p className="paper-description">Read the questions carefully and type your answers below.</p>
 
                 {/* Question Display */}
                 <div className="question-block">
@@ -184,7 +312,7 @@ export default function MockExamPage() {
                 </div>
 
                 {/* Answer Input */}
-                <h4 style={{ marginBottom: '0.5rem' }}>Your Answer:</h4>
+                <h4 className="answer-label">Your Answer:</h4>
                 <textarea
                     className="answer-area"
                     value={userAnswer}
@@ -193,7 +321,7 @@ export default function MockExamPage() {
                     spellCheck={false}
                 />
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <div className="submit-button-container">
                     <button
                         className={`btn btn-primary ${isLoading ? 'btn-disabled' : ''}`}
                         onClick={submitExam}
@@ -222,12 +350,12 @@ export default function MockExamPage() {
 
             <div className="paper">
                 <h3>Detailed Feedback</h3>
-                <div className="question-block" style={{ borderLeftColor: '#999', background: '#eee' }}>
+                <div className="question-block question-block-gray">
                     <strong>Original Questions:</strong><br />
                     {examData?.questions}
                 </div>
 
-                <div className="question-block" style={{ borderLeftColor: '#333' }}>
+                <div className="question-block">
                     <strong>Your Answer:</strong><br />
                     {examData?.answers}
                 </div>
@@ -237,7 +365,7 @@ export default function MockExamPage() {
                     {examData?.results}
                 </div>
 
-                <div style={{ marginTop: '3rem', textAlign: 'center' }}>
+                <div className="reset-button-container">
                     <button className="btn btn-primary" onClick={resetFlow}>
                         🔄 Take Another Exam
                     </button>

@@ -378,5 +378,36 @@ namespace InfrastructureTests.Convo
             Assert.ThrowsAsync<FileNotFoundException>(async () =>
                     await service.RemoveFileAsync(fileId));
         }
+
+
+        [Test]
+        public async Task GetFileByIdAsync_Success()
+        {
+            var fileReponse = _fix.Create<ChatFile>();
+            fileReponse.UserId = DEFAULT_CONTEXT_ID;
+            var fileId = _fix.Create<int>();
+            var repoMock = new Mock<IChatRepo>();
+            repoMock.Setup(r => r.GetFileByIdAsync(fileId, DEFAULT_CONTEXT_ID))
+                .ReturnsAsync(fileReponse);
+            var service = CreateService(repoMock.Object);
+
+            var res = await service.GetFileByIdAsync(fileId);
+
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res.Name, Is.EqualTo(fileReponse.Name));
+        }
+
+        [Test]
+        public async Task GetFileByIdAsync_NotFound_Throws()
+        {
+            var fileId = _fix.Create<int>();
+            var repoMock = new Mock<IChatRepo>();
+            repoMock.Setup(r => r.GetFileByIdAsync(fileId, DEFAULT_CONTEXT_ID))
+                .ReturnsAsync(() => null);
+            var service = CreateService(repoMock.Object);
+
+            Assert.ThrowsAsync<FileNotFoundException>(async () =>
+                    await service.GetFileByIdAsync(fileId));
+        }
     }
 }
