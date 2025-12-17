@@ -34,6 +34,13 @@ export default function Home() {
                 </div>
             </Link>
 
+            <Link to="/parser" className="big-box">
+                <img src="/mascot/reading-book.png" alt="Featured" />
+                <div className="big-box-text">
+                    <span>Portal Parser</span>
+                </div>
+            </Link>
+
             <Link to="/calendar" className="big-box">
                 <img src="/mascot/reading-book.png" alt="Featured" />
                 <div className="big-box-text">

@@ -33,13 +33,7 @@ namespace InfrastructureTests.LLM.LMStudio
             ILMStudioMapper mapper
                 )
         {
-            JsonSerializerOptions jsonSerializerOptions = new()
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-                PropertyNameCaseInsensitive = true
-            };
             HtmlCleaner cleaner = new();
-
             var jsonExtractorMock = new Mock<IValidJsonExtractor>();
             jsonExtractorMock.Setup(e => e.ExtractJsonObject(It.IsAny<string>()))
                 .Returns((string s) => s);
@@ -50,8 +44,7 @@ namespace InfrastructureTests.LLM.LMStudio
                     mapper,
                     cleaner,
                     jsonExtractorMock.Object,
-                    keyOptions,
-                    jsonSerializerOptions);
+                    keyOptions);
         }
 
 
@@ -86,8 +79,100 @@ namespace InfrastructureTests.LLM.LMStudio
             var res = await sut.ParsePortalHtml(request);
 
             Assert.That(res, Is.Not.Null);
+            Assert.That(res.Metadata, Is.EqualTo(parserResponseDto.Metadata));
         }
 
+
+        [Test]
+        public async Task ParsePortalHtml_EmptyGrade_DoesNotThrow()
+        {
+            var apiResponse = _fix.Create<LMStudioResponse>();
+
+            var brokenJson = @"{
+            ""subjects"": [
+                { ""name"": ""Test Subject"", ""grade"": """", ""metadata"": ""meta"", ""schedules"": [], ""lecturers"": [], ""syllabuses"": [] }
+            ],
+            ""metadata"": ""meta""
+        }";
+
+            var apiMock = new Mock<ILMStudioApi>();
+            apiMock.Setup(a => a.SendMessageAsync(It.IsAny<LMStudioRequest>(), It.IsAny<string>()))
+                   .ReturnsAsync(apiResponse);
+
+            var mapperMock = new Mock<ILMStudioMapper>();
+            mapperMock.Setup(m => m.ToOutputText(apiResponse)).Returns(brokenJson);
+
+            var lmsRequest = _fix.Create<LMStudioRequest>();
+            mapperMock.Setup(m => m.ToRequest(It.IsAny<MessageDto>(), It.IsAny<string>(), It.IsAny<string>()))
+                      .Returns(lmsRequest);
+
+            var request = _fix.Create<string>();
+            var sut = CreateSut(apiMock.Object, mapperMock.Object);
+
+            Assert.DoesNotThrowAsync(async () => await sut.ParsePortalHtml(request));
+        }
+
+        [Test]
+        public async Task ParsePortalHtml_ExtraFields_IgnoresExtras()
+        {
+            var apiResponse = _fix.Create<LMStudioResponse>();
+
+            var extraJson = @"{
+            ""subjects"": [
+                { ""name"": ""Extra"", ""grade"": 5, ""metadata"": ""meta"", ""foo"": ""bar"", ""schedules"": [], ""lecturers"": [], ""syllabuses"": [] }
+            ],
+            ""metadata"": ""meta"",
+            ""extraField"": ""ignoreMe""
+        }";
+
+            var apiMock = new Mock<ILMStudioApi>();
+            apiMock.Setup(a => a.SendMessageAsync(It.IsAny<LMStudioRequest>(), It.IsAny<string>()))
+                   .ReturnsAsync(apiResponse);
+
+            var mapperMock = new Mock<ILMStudioMapper>();
+            mapperMock.Setup(m => m.ToOutputText(apiResponse)).Returns(extraJson);
+
+            var lmsRequest = _fix.Create<LMStudioRequest>();
+            mapperMock.Setup(m => m.ToRequest(It.IsAny<MessageDto>(), It.IsAny<string>(), It.IsAny<string>()))
+                      .Returns(lmsRequest);
+
+            var request = _fix.Create<string>();
+            var sut = CreateSut(apiMock.Object, mapperMock.Object);
+
+            var res = await sut.ParsePortalHtml(request);
+
+            Assert.That(res, Is.Not.Null);
+            Assert.That(res.Subjects[0].Name, Is.EqualTo("Extra"));
+        }
+
+        [Test]
+        public async Task ParsePortalHtml_MissingOptionalFields_DoesNotThrow()
+        {
+            var apiResponse = _fix.Create<LMStudioResponse>();
+
+            var missingFieldsJson = @"{
+            ""subjects"": [
+                { ""name"": ""NoSchedules"", ""grade"": 0, ""metadata"": ""meta"" }
+            ],
+            ""metadata"": ""meta""
+        }";
+
+            var apiMock = new Mock<ILMStudioApi>();
+            apiMock.Setup(a => a.SendMessageAsync(It.IsAny<LMStudioRequest>(), It.IsAny<string>()))
+                   .ReturnsAsync(apiResponse);
+
+            var mapperMock = new Mock<ILMStudioMapper>();
+            mapperMock.Setup(m => m.ToOutputText(apiResponse)).Returns(missingFieldsJson);
+
+            var lmsRequest = _fix.Create<LMStudioRequest>();
+            mapperMock.Setup(m => m.ToRequest(It.IsAny<MessageDto>(), It.IsAny<string>(), It.IsAny<string>()))
+                      .Returns(lmsRequest);
+
+            var request = _fix.Create<string>();
+            var sut = CreateSut(apiMock.Object, mapperMock.Object);
+
+            Assert.DoesNotThrowAsync(async () => await sut.ParsePortalHtml(request));
+        }
 
     }
 }

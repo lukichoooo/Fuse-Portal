@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Core.Dtos;
 using Core.Dtos.Settings.Infrastructure;
 using Core.Exceptions;
@@ -13,17 +14,27 @@ namespace Infrastructure.Services.LLM.LMStudio
             ILMStudioMapper mapper,
             IHtmlCleaner htmlCleaner,
             IValidJsonExtractor jsonExtractor,
-            IOptions<LLMApiSettingKeys> keyOptions,
-            JsonSerializerOptions serializerOptions
+            IOptions<LLMApiSettingKeys> keyOptions
             ) : IPortalParser
     {
         private readonly ILMStudioApi _api = api;
         private readonly ILMStudioMapper _mapper = mapper;
         private readonly LLMApiSettingKeys _keySettings = keyOptions.Value;
-        private readonly JsonSerializerOptions _serializerOptions = serializerOptions;
         private readonly IHtmlCleaner _htmlCleaner = htmlCleaner;
         private readonly IValidJsonExtractor _jsonExtractor = jsonExtractor;
 
+        private readonly JsonSerializerOptions _serializerOptions = new()
+        {
+            PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+            PropertyNameCaseInsensitive = true,
+            AllowTrailingCommas = true,
+            ReadCommentHandling = JsonCommentHandling.Skip,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            Converters =
+            {
+                new NullableIntConverter(),
+            },
+        };
 
         public async Task<PortalParserResponseDto> ParsePortalHtml(string page)
         {
@@ -47,6 +58,29 @@ namespace Infrastructure.Services.LLM.LMStudio
         }
 
 
+        public class NullableIntConverter : JsonConverter<int?>
+        {
+            public override int? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            {
+                if (reader.TokenType == JsonTokenType.Number)
+                    return reader.GetInt32();
+                if (reader.TokenType == JsonTokenType.String)
+                {
+                    var s = reader.GetString();
+                    if (string.IsNullOrWhiteSpace(s)) return null;
+                    if (int.TryParse(s, out var val)) return val;
+                }
+                return null;
+            }
+
+            public override void Write(Utf8JsonWriter writer, int? value, JsonSerializerOptions options)
+            {
+                if (value.HasValue)
+                    writer.WriteNumberValue(value.Value);
+                else
+                    writer.WriteNullValue();
+            }
+        }
 
 
         readonly string rulesPrompt = $@"
@@ -67,6 +101,7 @@ DATES:
 - Valid day for month.
 - If a date is unclear or invalid → REMOVE that schedule.
 - Include schedules for each subject for the next 3 months from today {DateTime.UtcNow}.
+- Ensure that all fields match the schema exactly. 'grade' should always be a number. If the grade is missing, use 0.
 
 SCHEMA (EXACT, ALL KEYS REQUIRED):
 {{

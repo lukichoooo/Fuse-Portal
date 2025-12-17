@@ -120,12 +120,12 @@ public record SubjectRequestDto
 public record SubjectFullRequestDto
 {
     public required string Name { get; init; } = null!;
-    public required int? Grade { get; init; }
+    public int? Grade { get; init; }
     public string? Metadata { get; init; }
 
-    public required List<ScheduleRequestDtoNoSubjectId> Schedules { get; init; } = [];
-    public required List<LecturerRequestDtoNoSubjectId> Lecturers { get; init; } = [];
-    public required List<SyllabusRequestDtoNoSubjectId> Syllabuses { get; init; } = [];
+    public List<ScheduleRequestDtoNoSubjectId> Schedules { get; init; } = [];
+    public List<LecturerRequestDtoNoSubjectId> Lecturers { get; init; } = [];
+    public List<SyllabusRequestDtoNoSubjectId> Syllabuses { get; init; } = [];
 }
 
 public record PortalParserResponseDto

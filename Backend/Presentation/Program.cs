@@ -1,6 +1,4 @@
 
-using System.Configuration;
-using System.Diagnostics;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
@@ -16,6 +14,7 @@ using Infrastructure;
 using Infrastructure.Contexts;
 using Infrastructure.Services.LLM.LMStudio;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Presentation.Filters;
@@ -89,6 +88,20 @@ builder.Services.AddValidatorsFromAssemblyContaining<LecturerRequestDtoValidator
 builder.Services.AddValidatorsFromAssemblyContaining<SyllabiRequestDtoValidator>();
 builder.Services.AddFluentValidationAutoValidation();
 
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var errors = context.ModelState
+            .Where(x => x.Value?.Errors.Count > 0)
+            .SelectMany(x => x.Value!.Errors)
+            .Select(e => e.ErrorMessage)
+            .ToArray();
+
+        return new BadRequestObjectResult(new { Error = errors });
+    };
+});
+
 
 // configure Auth Middleware
 builder.Services.AddAuthentication(options =>
@@ -133,6 +146,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("AllowFrontend");
 
 app.UseRouting();
 
@@ -142,7 +156,6 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapHub<ChatHub>("/hub/chat");
 
-app.UseCors("AllowFrontend");
 app.Run();
 
 

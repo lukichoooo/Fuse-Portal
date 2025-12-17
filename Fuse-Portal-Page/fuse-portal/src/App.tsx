@@ -8,6 +8,7 @@ import ProtectedRoute from './pages/Auth/ProtectedRoute'
 import CalendarPage from './pages/Portal/CalendarPage'
 import StudentPortal from './pages/Portal/StudentPortal'
 import MockExamPage from './pages/Portal/MockExamPage'
+import PortalParserPage from './pages/Portal/PortalParserPage'
 
 function App() {
     return (
@@ -48,6 +49,14 @@ function App() {
                         element={
                             <ProtectedRoute>
                                 <MockExamPage />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/parser"
+                        element={
+                            <ProtectedRoute>
+                                <PortalParserPage />
                             </ProtectedRoute>
                         }
                     />

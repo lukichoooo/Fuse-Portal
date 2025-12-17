@@ -79,15 +79,12 @@ export default function ChatDashboard() {
             const request: MessageRequest = { message: { text: trimmed, chatId: currentChatId }, fileIds };
             const response = await ChatService.sendMessageWithStream(request, onReceived);
 
-            // Replace pending bot message with final messages
+            // Replace the pending message with the completed one
             setCurrChatMessages(prev => {
-                const lastBotIndex = prev.findIndex(m => m.fromUser === false && m.text === "");
-                const newMessages = [...prev];
-
-                if (lastBotIndex !== -1) newMessages[lastBotIndex] = response.userMessage ?? botPending;
-                if (response.response) newMessages.splice(lastBotIndex + 1, 0, response.response);
-
-                return newMessages;
+                const copy = [...prev];
+                const pendingIdx = copy.findIndex(m => !m.fromUser && m.text === '');
+                if (pendingIdx !== -1) copy[pendingIdx] = response.response; // only once
+                return copy;
             });
 
         } catch (err: BackendError | any) {
