@@ -15,3 +15,6 @@ This C# / React application powers a university portal and chat system, providin
 - Supports AI-driven chat using LLMs, including real-time message streaming.
 
 - Connects seamlessly with a React front-end for interactive and dynamic user experiences.
+
+[▶️ Watch demo video](./Site-Demos/MVP-Demo-Video.mp4)
+
