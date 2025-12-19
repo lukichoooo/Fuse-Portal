@@ -16,5 +16,7 @@ This C# / React application powers a university portal and chat system, providin
 
 - Connects seamlessly with a React front-end for interactive and dynamic user experiences.
 
+here is a demo video made by my friend:
+
 [▶️ Watch demo video](./Site-Demos/MVP-Demo-Video.mp4)
 
